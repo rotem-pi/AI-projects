@@ -1,8 +1,7 @@
-# Export is ~480MB — exceeds GitHub single-file limit; keep locally or use Git LFS.
-test_runs_base.csv
-
+.DS_Store
 .pytest_cache/
 __pycache__/
 *.pyc
-.DS_Store
-Untitled
+
+# Large local export (also ignored inside incidents-test-analysis/)
+test_runs_base.csv

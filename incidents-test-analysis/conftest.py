@@ -1,6 +1,6 @@
 """
-Flat ``incidents-test-analysis/`` layout: this directory is on ``sys.path`` first
-(for ``legacy_analytical_model_pre_8f5e1c0``), then ``definity-app/backend`` (for ``app``).
+This directory is on ``sys.path`` first (legacy fixture + test module), then
+``definity-app/backend`` (for ``import app``).
 """
 
 from __future__ import annotations
@@ -35,7 +35,7 @@ def _definity_backend_root() -> Path:
             return cand.resolve()
     raise RuntimeError(
         "Could not find definity-app/backend. Set DEFINITY_BACKEND_ROOT or place "
-        "definity-app next to a parent of incidents-test-analysis (e.g. GitCode/)."
+        "definity-app next to a parent of this folder (e.g. GitCode/)."
     )
 
 

@@ -20,7 +20,7 @@ Requires ``test_runs_base.csv`` in **this directory** (flat copy), or under
 ``alerts-tests-analysis/test_runs_base.csv`` when walking parents (monorepo layout).
 If the file is missing, tests skip.
 
-Run from ``alert-incidents-analysis/`` using ``./run_impact_tests.sh`` (see README).
+Run from this directory using ``./run_impact_tests.sh`` (see README).
 Use **definity-app/backend/.venv** so sklearn and other backend deps resolve.
 
 Eligible test_ids approximate the regeneration queue from `get_candidates.sql`
