@@ -1,6 +1,5 @@
 # Alert incidents analysis — 8f5e1c0 test generation regression
 
-In **[rotem-pi/AI-projects](https://github.com/rotem-pi/AI-projects)** this content lives under **`incidents-test-analysis/`** (not at the repo root).
 
 ## Links
 
