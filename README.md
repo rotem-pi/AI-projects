@@ -1,6 +1,5 @@
 # AI-projects
 
-Personal / experimental projects.
 
 ## Contents
 
