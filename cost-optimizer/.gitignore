@@ -1,0 +1,18 @@
+# Local secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Generated data exports (reproduce via notebooks; see README)
+data/*.csv
+data/fetch_checkpoints/
+data/xgboost_fetch_checkpoints/
+experiments/xgboost/data/
+/*.csv
+
+# Keep committed case-study snapshots
+!data/case_studies/
+!data/case_studies/*.csv

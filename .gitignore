@@ -5,3 +5,9 @@ __pycache__/
 
 # Large local export (also ignored inside incidents-test-analysis/)
 test_runs_base.csv
+
+# cost-optimizer generated data (see cost-optimizer/.gitignore)
+cost-optimizer/data/*.csv
+cost-optimizer/data/fetch_checkpoints/
+cost-optimizer/data/xgboost_fetch_checkpoints/
+cost-optimizer/experiments/xgboost/data/
