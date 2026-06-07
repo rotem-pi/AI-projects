@@ -58,7 +58,7 @@ python add_recommendations.py
 | Variable | Required for | Default |
 |----------|--------------|---------|
 | `DATABASE_URL` | Data-fetch notebooks | — (set in `.env` locally) |
-| `DEFINITY_BACKEND_ROOT` | Framework validation notebooks | `../definity-app/backend` |
+| `DEFINITY_BACKEND_ROOT` | Framework validation notebooks | Auto-detect `../../definity-app/backend` from cost-optimizer root |
 
 ## Production implementation
 
