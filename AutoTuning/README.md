@@ -1,6 +1,6 @@
 # Spark Auto-Tuning — Research & Validation
 
-Offline research, validation notebooks, and design docs for the Spark/Databricks **auto-tuning policy** implemented in [definity-app](https://github.com/definity-ai/definity-app) at `app/brain/insights/tuning/` (branch: `cost-optimization-auto-tuning`).
+Offline research, validation notebooks, and design docs for the Spark/Databricks **auto-tuning policy** implemented in [definity-app](https://github.com/definity-ai/definity-app) at `app/brain/insights/tuning/`.
 
 This folder does **not** contain the production tuning engine — it mirrors and tests it against real task-run data.
 
@@ -24,7 +24,7 @@ This folder does **not** contain the production tuning engine — it mirrors and
 ## Setup
 
 ```bash
-cd cost-optimizer
+cd AutoTuning
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # set DATABASE_URL locally; never commit .env
@@ -58,11 +58,11 @@ python add_recommendations.py
 | Variable | Required for | Default |
 |----------|--------------|---------|
 | `DATABASE_URL` | Data-fetch notebooks | — (set in `.env` locally) |
-| `DEFINITY_BACKEND_ROOT` | Framework validation notebooks | Auto-detect `../../definity-app/backend` from cost-optimizer root |
+| `DEFINITY_BACKEND_ROOT` | Framework validation notebooks | Auto-detect `../../definity-app/backend` from AutoTuning root |
 
 ## Production implementation
 
 Canonical code and unit tests live in **definity-app**:
 
-- `app/brain/insights/tuning/` — `build_tuning_plan`, blocking rules, autonomous loop
+- `app/brain/insights/tuning/` — `build_plan`, `update_plan`, blocking rules, autonomous loop
 - Design documented in `docs/tuning_hld.md` (kept in sync with production reviews)
