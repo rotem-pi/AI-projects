@@ -16,3 +16,6 @@ experiments/xgboost/data/
 # Keep committed case-study snapshots
 !data/case_studies/
 !data/case_studies/*.csv
+
+# Claude Code session data
+.claude/
