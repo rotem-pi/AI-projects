@@ -1,0 +1,491 @@
+{
+  "saved_at": "2026-07-08T13:13:27.840514+00:00",
+  "source": "athena",
+  "task_id": 2001837,
+  "task_name": "compute",
+  "input": {
+    "task_id": 2001837,
+    "task_name": "compute",
+    "env_id": 13696,
+    "app_id": 13749,
+    "app_pit": "2026-04-22 11:03:39.000",
+    "executor__memory__allocated": 7.82421875,
+    "executor__memory_heap__allocated": 7.11328125,
+    "executor__memory_heap__max_used": 3.19899737089872,
+    "executor__memory_off_heap__allocated": 0.7109375,
+    "executor__memory_off_heap__max_used": 3.76473999023438,
+    "driver__heap_memory__allocated": 6.06884765625,
+    "driver__heap_memory__max_used": 2.52151892334223,
+    "executors__jvm_gc_time": 255.341,
+    "executors__run_time__used": null,
+    "executors__vcore_time__used": 22840.033,
+    "executors__vcore_time__allocated": 156179.0,
+    "executors__cpu_time__used": 12190.52,
+    "task__vcore_time__used": 278086.033,
+    "task__vcore_time__allocated": 411426.0,
+    "task__idle_time": 547.517999887466,
+    "task__duration": 63804.622,
+    "task__skew_time": 0.0,
+    "task__disk_bytes_spilled": 0.0,
+    "task__total_io_bytes": 16368880810.0,
+    "task__memory_time__allocated": 716688.391320801,
+    "executors__memory_time__used": 69929.40939256352,
+    "executors__used_vcore_time_of_retried_tasks": 8.131,
+    "driver__cpu_utilization": null,
+    "task__dynamic_is_allocation_enabled__param": false,
+    "task__executors_dynamic_allocation_min_executors__param": null,
+    "task__executors_dynamic_allocation_max_executors__param": null,
+    "task__executor_instances__param": null,
+    "executor__cores": 4.0,
+    "task__task_cpus__param": 1.0,
+    "task__shuffle_partitions__param": "200",
+    "dbx_autooptimizeshuffle": null,
+    "driver_type": "Standard_DS3_v2",
+    "worker_type": "Standard_DS3_v2",
+    "cloud_provider": "Azure",
+    "cluster_min_workers": 1,
+    "cluster_max_workers": 4,
+    "cluster_workers": 1,
+    "workers_availability": "ON_DEMAND_AZURE",
+    "task_sub_type": "Databricks"
+  },
+  "plan": {
+    "task_id": 2001837,
+    "recommendations": [
+      {
+        "config_key": "clusterMinWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 4,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=0: Databricks autoscaling with dynamic allocation disabled caused 8,718 executor additions and 17,541 forced removals (all via HTTP kill), 127 stage failures and 67 task retries over 17.7 h. Disabling autoscaling by pinning min==max workers eliminates the autoscaler\u2013Spark scheduling mismatch.",
+        "confidence": 0.95,
+        "priority": 1,
+        "rationale": "The core health crisis is a mismatch between Databricks autoscaling (min=1, max=4) and Spark running with spark.dynamicAllocation.enabled=false. Databricks autoscaling continuously adds and kills workers that Spark cannot properly retain, producing ~26k executor lifecycle events and a 7.5% stage failure rate. The correct Databricks fix is to eliminate autoscaling entirely by setting clusterMinWorkers=clusterMaxWorkers=4 (a fixed cluster), rather than fighting the platform by enabling spark.dynamicAllocation.* (which Databricks overrides). Peak demand was observed at 4 workers; fixing at 4 adds zero capacity cost while eliminating all churn. This is set as priority 1 alongside the paired max-workers change (priority 2). Note: annual saving fraction is not set \u2014 this is a stability/correctness fix; eliminating retried_task_waste (0.036%) is marginal but the primary value is preventing stage failures and executor kills.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "With spark.dynamicAllocation.enabled=false, Spark expects a fixed executor fleet, yet the cluster is configured with clusterMinWorkers=1 and clusterMaxWorkers=4, leaving the Databricks autoscaler free to continuously add and remove workers that Spark cannot properly track. This produced 8,718 SparkListenerExecutorAdded and 17,541 SparkListenerExecutorRemoved events across 8,729 total executor registrations \u2014 the executor churn is constant. The 127 stage failures and 67 task retries recorded in this run are a direct consequence: Databricks kills a worker mid-stage and Spark, with no dynamic allocation awareness, cannot recover gracefully. Setting clusterMinWorkers=4 pins the minimum footprint to the same value that was already being used at peak demand, removing the autoscaler's incentive to tear workers down.",
+        "expected_impact": "Eliminating the min/max gap will stop the autoscaler from issuing kill requests, reducing executor-removed events from ~17,500 to near zero and driving the 7.5% stage failure rate (127/1,700 stages) to zero.",
+        "risk_note": "Locking the minimum to 4 workers increases the baseline idle cost during low-activity periods; this is acceptable given the current 14.6% vCore utilisation but should be revisited if run frequency drops significantly."
+      },
+      {
+        "config_key": "clusterMaxWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 4,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=0: Paired with clusterMinWorkers=4 to disable autoscaling. Setting min==max produces a fixed-size cluster, removing the autoscaler's ability to kill executors mid-job.",
+        "confidence": 0.95,
+        "priority": 2,
+        "rationale": "Setting clusterMaxWorkers=4 (unchanged from current ceiling) while raising clusterMinWorkers to 4 locks the cluster at a fixed 4-worker footprint. The autoscaler has nothing to do when min==max, so it stops issuing executor kills. The max is intentionally kept at 4 \u2014 the task was already provisioned for this ceiling and peak vCore demand reached 16 (4 workers \u00d7 4 cores each). This change is the required companion to priority-1 clusterMinWorkers change and must be applied together.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "When clusterMinWorkers equals clusterMaxWorkers the Databricks autoscaler has no scaling range to operate within, so it stops issuing HTTP-endpoint kill requests entirely. The events data confirms that every one of the 17,541 executor removals in this run was caused by \"kill request from HTTP endpoint\" \u2014 none were natural Spark-initiated releases. Keeping the max at 4 is the correct choice because peak vCore demand already reached 16 (4 workers \u00d7 4 cores each at executor_cores=4), meaning no additional capacity was ever needed; the ceiling does not need to rise, only the floor needs to meet it.",
+        "expected_impact": "Combined with the clusterMinWorkers=4 change, setting clusterMaxWorkers=4 completes the fixed-cluster configuration, after which the autoscaler becomes a no-op and the 127 stage failures caused by mid-stage executor kills should be fully eliminated.",
+        "risk_note": "These two changes must be applied together in the same cluster edit; applying only one of them leaves the min/max gap open and the autoscaler active."
+      },
+      {
+        "config_key": "spark.executor.memoryOverhead",
+        "action": "set_spark_config",
+        "suggested_value": "2g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=1: executor_max_off_heap_memory_utilization=1.0 (100% saturated), executor_max_off_heap_used_memory=3.76GB vs configured default overhead of ~712MB. PySpark/Arrow workload consuming native memory. Off-heap headroom metric=0.0.",
+        "confidence": 0.92,
+        "priority": 3,
+        "rationale": "Off-heap memory is fully saturated (utilization=1.0, headroom=0.0). The default memoryOverhead of ~712MB (10% of 7.11GB heap) is completely insufficient for a workload with 1,630s of Python CPU time on executors, indicating active PySpark UDFs or Arrow-based serialization. Observed off-heap usage peaked at 3.76GB \u2014 nearly 5\u00d7 the default overhead \u2014 meaning the OS can silently kill executor processes without a JVM OOM, which is consistent with and mutually reinforcing of the executor churn in insight 0. Setting memoryOverhead=2g is a conservative first step (the insight recommends 2g as the initial target, with 3g as a follow-up if usage still saturates). This will increase per-executor memory allocation so verify total cluster RAM budget: 4 executors \u00d7 (7.11g heap + 2g overhead) = ~37GB, which should fit on 4 workers of the current instance type. The estimated_saving_fraction is not set \u2014 this is a stability fix; the cost model shows a modest increase in memory-time, not a saving, which is acceptable to prevent executor kills.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "explanation": "executor_max_off_heap_memory_utilization is 1.0 (fully saturated) and executor_max_off_heap_used_memory peaked at 3.76 GB, yet the default memoryOverhead is only ~710 MB (10% of the 7.11 GB heap) \u2014 meaning actual off-heap usage is running at 5.3\u00d7 the allocated budget. The workload spent 1,630 s of Python CPU time on executors, confirming active PySpark UDFs or Arrow serialization that live entirely in off-heap native memory. When the OS-level memory ceiling is breached the kernel silently kills the executor process, which is the most likely trigger for the \"kill request from HTTP endpoint\" removals seen in the executor lifecycle events and is mutually reinforcing with the autoscaler churn.",
+        "expected_impact": "Raising memoryOverhead to 2 g gives each executor roughly 2.8\u00d7 more off-heap headroom than the current default, reducing the probability of OS-level executor kills caused by native memory exhaustion.",
+        "risk_note": "Adding 2 g of overhead per executor increases total cluster memory consumption to approximately 4 \u00d7 (7.11 g heap + 2 g overhead) \u2248 37 GB; verify that the Standard_DS3_v2 worker instances have sufficient RAM to accommodate this without swapping before applying."
+      },
+      {
+        "config_key": "clusterWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 4,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=3: Sequential micro-job workload averages only 0.55 active vCores out of 16 available (5.2% utilisation). Until the driver orchestration is refactored, a fixed 4-worker cluster eliminates autoscaler spin-up latency between the 1,707 sequential jobs. This is a complementary config change supporting the architectural recommendation.",
+        "confidence": 0.75,
+        "priority": 4,
+        "rationale": "The sequential micro-job pattern (1,707 Spark jobs over 17.7h, avg active vCores=0.55/16) is the architectural root cause of overall underutilisation. The primary fix is a code-level refactor to batch-process entities in a single partitioned job rather than one job per entity \u2014 this is not a config change and cannot be expressed as a recommendation here. However, as an interim config measure, ensuring the cluster runs at a stable 4-worker fixed size (coordinated with priorities 1 and 2) eliminates the per-job spin-up/spin-down latency that currently adds overhead between each of the 1,707 sequential jobs. The vcore_utilization of 14.6% reflects the sequential driver loop rather than insufficient cluster capacity, so this change addresses latency overhead, not raw compute. Long-term refactoring to reduce job count by ~100\u00d7 is the only path to the 50\u201370% wall-clock reduction described in the insight.",
+        "estimated_saving_fraction": 0.05,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 3,
+        "explanation": "This run processed 1,707 Spark jobs over 17.7 hours with an average active vCore utilisation of only 14.6% (vcore_utilization metric = 0.146) \u2014 the cluster spent the vast majority of its time idle between the sequential single-entity jobs fired from the driver loop, confirmed by executors_idle_time of 63,767 s versus the total 63,804 s run duration. The sequential micro-job architecture means each of the 1,707 jobs incurs its own scheduling, planning, and (with the current autoscaling config) potential spin-up latency before any compute work begins. While the only true fix is a code-level refactor to batch entities into a single partitioned job, stabilising the cluster at a fixed 4-worker size as an interim measure ensures there is no per-job cold-start delay from workers being absent at job submission time.",
+        "expected_impact": "A stable fixed-size cluster eliminates per-job executor acquisition latency across all 1,707 sequential jobs, providing an incremental wall-clock reduction; the 50\u201370% duration improvement described in the rationale requires the code-level batching refactor.",
+        "risk_note": "This config change alone will not materially reduce the 17.7-hour runtime; teams should treat it as a safety net while the architectural refactoring to eliminate the sequential job pattern is planned and implemented."
+      }
+    ],
+    "blocked_recommendations": [],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMinWorkers",
+            "current_value": null,
+            "suggested_value": 4,
+            "rationale": "The core health crisis is a mismatch between Databricks autoscaling (min=1, max=4) and Spark running with spark.dynamicAllocation.enabled=false. Databricks autoscaling continuously adds and kills workers that Spark cannot properly retain, producing ~26k executor lifecycle events and a 7.5% stage failure rate. The correct Databricks fix is to eliminate autoscaling entirely by setting clusterMinWorkers=clusterMaxWorkers=4 (a fixed cluster), rather than fighting the platform by enabling spark.dynamicAllocation.* (which Databricks overrides). Peak demand was observed at 4 workers; fixing at 4 adds zero capacity cost while eliminating all churn. This is set as priority 1 alongside the paired max-workers change (priority 2). Note: annual saving fraction is not set \u2014 this is a stability/correctness fix; eliminating retried_task_waste (0.036%) is marginal but the primary value is preventing stage failures and executor kills.",
+            "confidence": 0.95
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMaxWorkers",
+            "current_value": null,
+            "suggested_value": 4,
+            "rationale": "Setting clusterMaxWorkers=4 (unchanged from current ceiling) while raising clusterMinWorkers to 4 locks the cluster at a fixed 4-worker footprint. The autoscaler has nothing to do when min==max, so it stops issuing executor kills. The max is intentionally kept at 4 \u2014 the task was already provisioned for this ceiling and peak vCore demand reached 16 (4 workers \u00d7 4 cores each). This change is the required companion to priority-1 clusterMinWorkers change and must be applied together.",
+            "confidence": 0.95
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memoryOverhead",
+            "current_value": null,
+            "suggested_value": "2g",
+            "rationale": "Off-heap memory is fully saturated (utilization=1.0, headroom=0.0). The default memoryOverhead of ~712MB (10% of 7.11GB heap) is completely insufficient for a workload with 1,630s of Python CPU time on executors, indicating active PySpark UDFs or Arrow-based serialization. Observed off-heap usage peaked at 3.76GB \u2014 nearly 5\u00d7 the default overhead \u2014 meaning the OS can silently kill executor processes without a JVM OOM, which is consistent with and mutually reinforcing of the executor churn in insight 0. Setting memoryOverhead=2g is a conservative first step (the insight recommends 2g as the initial target, with 3g as a follow-up if usage still saturates). This will increase per-executor memory allocation so verify total cluster RAM budget: 4 executors \u00d7 (7.11g heap + 2g overhead) = ~37GB, which should fit on 4 workers of the current instance type. The estimated_saving_fraction is not set \u2014 this is a stability fix; the cost model shows a modest increase in memory-time, not a saving, which is acceptable to prevent executor kills.",
+            "confidence": 0.92
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterWorkers",
+            "current_value": null,
+            "suggested_value": 4,
+            "rationale": "The sequential micro-job pattern (1,707 Spark jobs over 17.7h, avg active vCores=0.55/16) is the architectural root cause of overall underutilisation. The primary fix is a code-level refactor to batch-process entities in a single partitioned job rather than one job per entity \u2014 this is not a config change and cannot be expressed as a recommendation here. However, as an interim config measure, ensuring the cluster runs at a stable 4-worker fixed size (coordinated with priorities 1 and 2) eliminates the per-job spin-up/spin-down latency that currently adds overhead between each of the 1,707 sequential jobs. The vcore_utilization of 14.6% reflects the sequential driver loop rather than insufficient cluster capacity, so this change addresses latency overhead, not raw compute. Long-term refactoring to reduce job count by ~100\u00d7 is the only path to the 50\u201370% wall-clock reduction described in the insight.",
+            "confidence": 0.75
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.5502782389071541,
+        "gc_pressure": 0.011179537262489945,
+        "off_heap_headroom": 0.0,
+        "vcore_utilization": 0.14624266386646093,
+        "idle_ratio": 0.00858116516837081,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 0.53373478050579,
+        "spill_ratio": null,
+        "has_spill": false,
+        "retried_task_waste": 0.0003559977343290178
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "200",
+        "cluster_autoscaling": true,
+        "cluster_min_workers": 1,
+        "cluster_max_workers": 4,
+        "cluster_workers": 1,
+        "dynamic_allocation_enabled": false,
+        "is_databricks": true,
+        "max_executors_param": null,
+        "min_executors_param": null,
+        "executor_instances_param": null,
+        "executor_cores": 4
+      },
+      "pre_tuning_durations_ms": [
+        63774.694,
+        23695.694,
+        63776.033,
+        20762.881,
+        63768.211
+      ],
+      "pre_tuning_cost_usd": 7.330586577961969,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+        "description": "executors__jvm_gc_time has increased 17.1% from first to latest run (631s \u2192 739s) with an increasing trend direction. All executors are using PS MarkSweep + PS Scavenge (Parallel GC), a stop-the-world collector. With ~7.1GB executor heaps the full-GC pause times will grow as the heap fill rate increases with data volume. This is an early warning: the current trajectory will push GC into the range that triggers task timeouts and cascading stage failures.",
+        "reason": "The suggested action requires setting spark.executor.extraJavaOptions (and spark.driver.extraJavaOptions), which are not present in the approved valid config keys list. The GC collector change cannot be expressed as a valid recommendation config_key. The trend is early-warning (gc_pressure=0.011, Tier 4) and the Tier 1 fixes (executor churn, off-heap saturation) take precedence; the G1GC change should be applied manually by the operator following this plan."
+      }
+    ],
+    "health_breach_unactioned": false,
+    "plan_degraded": false,
+    "summary": "4 recommendation(s), ordered health-first. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "00447d9b397e"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.5502782389071541,
+    "gc_pressure": 0.011179537262489945,
+    "off_heap_headroom": 0.0,
+    "vcore_utilization": 0.14624266386646093,
+    "idle_ratio": 0.00858116516837081,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 0.53373478050579,
+    "spill_ratio": null,
+    "has_spill": false,
+    "retried_task_waste": 0.0003559977343290178
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 6.7097,
+    "cluster_workers": 1,
+    "workers_availability": "ON_DEMAND_AZURE"
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMinWorkers",
+      "current_value": null,
+      "suggested_value": 4,
+      "action": "set_cluster_config",
+      "explanation": "With spark.dynamicAllocation.enabled=false, Spark expects a fixed executor fleet, yet the cluster is configured with clusterMinWorkers=1 and clusterMaxWorkers=4, leaving the Databricks autoscaler free to continuously add and remove workers that Spark cannot properly track. This produced 8,718 SparkListenerExecutorAdded and 17,541 SparkListenerExecutorRemoved events across 8,729 total executor registrations \u2014 the executor churn is constant. The 127 stage failures and 67 task retries recorded in this run are a direct consequence: Databricks kills a worker mid-stage and Spark, with no dynamic allocation awareness, cannot recover gracefully. Setting clusterMinWorkers=4 pins the minimum footprint to the same value that was already being used at peak demand, removing the autoscaler's incentive to tear workers down.",
+      "expected_impact": "Eliminating the min/max gap will stop the autoscaler from issuing kill requests, reducing executor-removed events from ~17,500 to near zero and driving the 7.5% stage failure rate (127/1,700 stages) to zero.",
+      "risk_note": "Locking the minimum to 4 workers increases the baseline idle cost during low-activity periods; this is acceptable given the current 14.6% vCore utilisation but should be revisited if run frequency drops significantly."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMaxWorkers",
+      "current_value": null,
+      "suggested_value": 4,
+      "action": "set_cluster_config",
+      "explanation": "When clusterMinWorkers equals clusterMaxWorkers the Databricks autoscaler has no scaling range to operate within, so it stops issuing HTTP-endpoint kill requests entirely. The events data confirms that every one of the 17,541 executor removals in this run was caused by \"kill request from HTTP endpoint\" \u2014 none were natural Spark-initiated releases. Keeping the max at 4 is the correct choice because peak vCore demand already reached 16 (4 workers \u00d7 4 cores each at executor_cores=4), meaning no additional capacity was ever needed; the ceiling does not need to rise, only the floor needs to meet it.",
+      "expected_impact": "Combined with the clusterMinWorkers=4 change, setting clusterMaxWorkers=4 completes the fixed-cluster configuration, after which the autoscaler becomes a no-op and the 127 stage failures caused by mid-stage executor kills should be fully eliminated.",
+      "risk_note": "These two changes must be applied together in the same cluster edit; applying only one of them leaves the min/max gap open and the autoscaler active."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memoryOverhead",
+      "current_value": null,
+      "suggested_value": "2g",
+      "action": "set_spark_config",
+      "explanation": "executor_max_off_heap_memory_utilization is 1.0 (fully saturated) and executor_max_off_heap_used_memory peaked at 3.76 GB, yet the default memoryOverhead is only ~710 MB (10% of the 7.11 GB heap) \u2014 meaning actual off-heap usage is running at 5.3\u00d7 the allocated budget. The workload spent 1,630 s of Python CPU time on executors, confirming active PySpark UDFs or Arrow serialization that live entirely in off-heap native memory. When the OS-level memory ceiling is breached the kernel silently kills the executor process, which is the most likely trigger for the \"kill request from HTTP endpoint\" removals seen in the executor lifecycle events and is mutually reinforcing with the autoscaler churn.",
+      "expected_impact": "Raising memoryOverhead to 2 g gives each executor roughly 2.8\u00d7 more off-heap headroom than the current default, reducing the probability of OS-level executor kills caused by native memory exhaustion.",
+      "risk_note": "Adding 2 g of overhead per executor increases total cluster memory consumption to approximately 4 \u00d7 (7.11 g heap + 2 g overhead) \u2248 37 GB; verify that the Standard_DS3_v2 worker instances have sufficient RAM to accommodate this without swapping before applying."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterWorkers",
+      "current_value": null,
+      "suggested_value": 4,
+      "action": "set_cluster_config",
+      "explanation": "This run processed 1,707 Spark jobs over 17.7 hours with an average active vCore utilisation of only 14.6% (vcore_utilization metric = 0.146) \u2014 the cluster spent the vast majority of its time idle between the sequential single-entity jobs fired from the driver loop, confirmed by executors_idle_time of 63,767 s versus the total 63,804 s run duration. The sequential micro-job architecture means each of the 1,707 jobs incurs its own scheduling, planning, and (with the current autoscaling config) potential spin-up latency before any compute work begins. While the only true fix is a code-level refactor to batch entities into a single partitioned job, stabilising the cluster at a fixed 4-worker size as an interim measure ensures there is no per-job cold-start delay from workers being absent at job submission time.",
+      "expected_impact": "A stable fixed-size cluster eliminates per-job executor acquisition latency across all 1,707 sequential jobs, providing an incremental wall-clock reduction; the 50\u201370% duration improvement described in the rationale requires the code-level batching refactor.",
+      "risk_note": "This config change alone will not materially reduce the 17.7-hour runtime; teams should treat it as a safety net while the architectural refactoring to eliminate the sequential job pattern is planned and implemented."
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Autoscaling cluster running with dynamic allocation disabled \u2014 causing catastrophic executor churn",
+        "title": "Autoscaling cluster running with dynamic allocation disabled \u2014 causing catastrophic executor churn",
+        "description": "The Databricks cluster has autoscaling enabled (min=1, max=4 workers) but spark.dynamicAllocation.enabled is false. This mismatch caused 8,718 executor additions and 17,541 executor removals over the 17.7-hour run \u2014 every executor was eventually killed via 'kill request from HTTP endpoint'. With 1,707 Spark jobs averaging very short durations, the autoscaler continuously cycles workers in and out that Spark cannot properly retain or schedule against, directly causing 127 stage failures (7.5% of all stages) and 67 task retries.",
+        "evidence": "events: executor_added=8718, executor_removed=17541, all removals caused='kill request from HTTP endpoint'; metrics: num_spark_stages_failures=127/1700, num_spark_tasks_retries=67; task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=4, dynamic_allocation_enabled=false; get_current_config_value('spark.dynamicAllocation.enabled')=False (source=task_profile); get_current_config_value('spark.executor.instances')=not_set.",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "On Databricks, disable cluster-level autoscaling and instead set a fixed worker count matching peak demand (e.g. 4 workers), OR keep autoscaling and enable Spark dynamic allocation by setting spark.dynamicAllocation.enabled=true with spark.dynamicAllocation.minExecutors=1 and spark.dynamicAllocation.maxExecutors=4. The two mechanisms must be aligned. Given 1,707 short sequential jobs, also investigate whether the workload can be restructured to reduce job count and cluster idle time.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor off-heap memory fully saturated \u2014 unset memoryOverhead with active Python workload",
+        "title": "Executor off-heap memory fully saturated \u2014 unset memoryOverhead with active Python workload",
+        "description": "executor_max_off_heap_memory_utilization reached 1.0 (100%) while spark.executor.memoryOverhead is not explicitly configured and defaults to roughly 712MB (10% of the ~7.1GB executor heap). The workload has significant Python activity (1,630s of Python CPU time on executors, indicating PySpark UDFs or Arrow-based operations), which allocates native memory outside the JVM heap counted against overhead. At 100% saturation the OS may kill executor processes without a Spark-visible OOM, appearing as unexplained executor loss \u2014 consistent with the executor churn observed.",
+        "evidence": "metrics: executor_max_off_heap_memory_utilization=1.0, executor_max_off_heap_used_memory=3.76GB, executor_off_heap_memory=0.71GB (configured overhead); executors_python_used_cpu_time=1630.93s; get_current_config_value('spark.executor.memoryOverhead')=not_set; executor_memory=7.82GB total, executor_heap_memory=7.11GB.",
+        "confidence": 0.9,
+        "severity": "health",
+        "suggested_action": "Explicitly set spark.executor.memoryOverhead to at least 2g (from the default ~712MB) to give Python/Arrow processes headroom. Monitor executor_max_off_heap_used_memory after the change; if it still approaches the new ceiling, increase further to 3g or consider moving Python-heavy stages to a memory-optimised instance type.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+        "title": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+        "description": "executors__jvm_gc_time has increased 17.1% from first to latest run (631s \u2192 739s) with an increasing trend direction. All executors are using PS MarkSweep + PS Scavenge (Parallel GC), a stop-the-world collector. With ~7.1GB executor heaps the full-GC pause times will grow as the heap fill rate increases with data volume. This is an early warning: the current trajectory will push GC into the range that triggers task timeouts and cascading stage failures.",
+        "evidence": "analyze_metric_trend('executors__jvm_gc_time'): values=[631,532,377,715,256,808,404,739], trend=INCREASING, percentage_change=+17.1%, run_count=8; events executor_info: gcType='PS MarkSweep,PS Scavenge' for every executor recorded; executor_heap_memory=7.11GB per executor.",
+        "confidence": 0.78,
+        "severity": "performance",
+        "suggested_action": "Switch JVM GC from Parallel GC to G1GC by adding the Spark extra JVM option: spark.executor.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+G1SummarizeRSetStats. G1GC handles large heaps with shorter, incremental pauses. Also set spark.driver.extraJavaOptions with the same flags for the driver (driver GC is also stop-the-world at 6.4GB heap). Monitor the gc_time trend over the next 3\u20135 runs to confirm improvement.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Highly sequential micro-job execution pattern causing extreme cluster underutilisation",
+        "title": "Highly sequential micro-job execution pattern causing extreme cluster underutilisation",
+        "description": "The job executed 1,707 Spark jobs across 1,700 stages over 17.7 hours, but average active vCores across the run was only 0.55 out of a potential 16 (5.2 avg available). The time-series shows sharp spikes (max 7.28 avg active tasks, max 16 vCores available) interspersed with near-zero activity windows. This is a driver-sequential workload \u2014 likely iterating over entities one at a time and submitting a Spark job per entity \u2014 where driver overhead and cluster spin-up/spin-down time between jobs accounts for the majority of the 17.7-hour wall-clock duration rather than actual Spark computation.",
+        "evidence": "metrics: num_spark_jobs=1707, num_spark_stages=1700; time_series_summary: vcores_avg_used_over_time avg=0.547 max=7.28, vcores_max_over_time avg=5.2 max=16, active_tasks_over_time avg=891 max=11052 (very bursty); pipeline_duration=63804s (~17.7h); events: definity_stats show spark_session_tracked=9,382,954 calls (extremely high driver-side overhead); vcore_utilization (get_current_metrics)=0.146 (14.6%).",
+        "confidence": 0.85,
+        "severity": "performance",
+        "suggested_action": "Profile the driver-side orchestration code to identify whether it iterates over companies/entities sequentially (consistent with the task name 'aero_search_index_company_incremental'). Refactor to batch-process entities in a single partitioned Spark job rather than one job per entity \u2014 this would collapse 1,707 jobs into O(10) jobs, eliminate autoscaler churn, and reduce wall-clock time by an estimated 50\u201370%. If sequential processing is unavoidable, use a persistent fixed-size cluster (4 workers, no autoscaling) to eliminate spin-up latency per job.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Autoscaling cluster running with dynamic allocation disabled \u2014 causing catastrophic executor churn",
+        "title": "Autoscaling cluster running with dynamic allocation disabled \u2014 causing catastrophic executor churn",
+        "description": "The Databricks cluster has autoscaling enabled (min=1, max=4 workers) but spark.dynamicAllocation.enabled is false. This mismatch caused 8,718 executor additions and 17,541 executor removals over the 17.7-hour run \u2014 every executor was eventually killed via 'kill request from HTTP endpoint'. With 1,707 Spark jobs averaging very short durations, the autoscaler continuously cycles workers in and out that Spark cannot properly retain or schedule against, directly causing 127 stage failures (7.5% of all stages) and 67 task retries.",
+        "evidence": "events: executor_added=8718, executor_removed=17541, all removals caused='kill request from HTTP endpoint'; metrics: num_spark_stages_failures=127/1700, num_spark_tasks_retries=67; task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=4, dynamic_allocation_enabled=false; get_current_config_value('spark.dynamicAllocation.enabled')=False (source=task_profile); get_current_config_value('spark.executor.instances')=not_set.",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "On Databricks, disable cluster-level autoscaling and instead set a fixed worker count matching peak demand (e.g. 4 workers), OR keep autoscaling and enable Spark dynamic allocation by setting spark.dynamicAllocation.enabled=true with spark.dynamicAllocation.minExecutors=1 and spark.dynamicAllocation.maxExecutors=4. The two mechanisms must be aligned. Given 1,707 short sequential jobs, also investigate whether the workload can be restructured to reduce job count and cluster idle time.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor off-heap memory fully saturated \u2014 unset memoryOverhead with active Python workload",
+        "title": "Executor off-heap memory fully saturated \u2014 unset memoryOverhead with active Python workload",
+        "description": "executor_max_off_heap_memory_utilization reached 1.0 (100%) while spark.executor.memoryOverhead is not explicitly configured and defaults to roughly 712MB (10% of the ~7.1GB executor heap). The workload has significant Python activity (1,630s of Python CPU time on executors, indicating PySpark UDFs or Arrow-based operations), which allocates native memory outside the JVM heap counted against overhead. At 100% saturation the OS may kill executor processes without a Spark-visible OOM, appearing as unexplained executor loss \u2014 consistent with the executor churn observed.",
+        "evidence": "metrics: executor_max_off_heap_memory_utilization=1.0, executor_max_off_heap_used_memory=3.76GB, executor_off_heap_memory=0.71GB (configured overhead); executors_python_used_cpu_time=1630.93s; get_current_config_value('spark.executor.memoryOverhead')=not_set; executor_memory=7.82GB total, executor_heap_memory=7.11GB.",
+        "confidence": 0.9,
+        "severity": "health",
+        "suggested_action": "Explicitly set spark.executor.memoryOverhead to at least 2g (from the default ~712MB) to give Python/Arrow processes headroom. Monitor executor_max_off_heap_used_memory after the change; if it still approaches the new ceiling, increase further to 3g or consider moving Python-heavy stages to a memory-optimised instance type.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+        "title": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+        "description": "executors__jvm_gc_time has increased 17.1% from first to latest run (631s \u2192 739s) with an increasing trend direction. All executors are using PS MarkSweep + PS Scavenge (Parallel GC), a stop-the-world collector. With ~7.1GB executor heaps the full-GC pause times will grow as the heap fill rate increases with data volume. This is an early warning: the current trajectory will push GC into the range that triggers task timeouts and cascading stage failures.",
+        "evidence": "analyze_metric_trend('executors__jvm_gc_time'): values=[631,532,377,715,256,808,404,739], trend=INCREASING, percentage_change=+17.1%, run_count=8; events executor_info: gcType='PS MarkSweep,PS Scavenge' for every executor recorded; executor_heap_memory=7.11GB per executor.",
+        "confidence": 0.78,
+        "severity": "performance",
+        "suggested_action": "Switch JVM GC from Parallel GC to G1GC by adding the Spark extra JVM option: spark.executor.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+G1SummarizeRSetStats. G1GC handles large heaps with shorter, incremental pauses. Also set spark.driver.extraJavaOptions with the same flags for the driver (driver GC is also stop-the-world at 6.4GB heap). Monitor the gc_time trend over the next 3\u20135 runs to confirm improvement.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Highly sequential micro-job execution pattern causing extreme cluster underutilisation",
+        "title": "Highly sequential micro-job execution pattern causing extreme cluster underutilisation",
+        "description": "The job executed 1,707 Spark jobs across 1,700 stages over 17.7 hours, but average active vCores across the run was only 0.55 out of a potential 16 (5.2 avg available). The time-series shows sharp spikes (max 7.28 avg active tasks, max 16 vCores available) interspersed with near-zero activity windows. This is a driver-sequential workload \u2014 likely iterating over entities one at a time and submitting a Spark job per entity \u2014 where driver overhead and cluster spin-up/spin-down time between jobs accounts for the majority of the 17.7-hour wall-clock duration rather than actual Spark computation.",
+        "evidence": "metrics: num_spark_jobs=1707, num_spark_stages=1700; time_series_summary: vcores_avg_used_over_time avg=0.547 max=7.28, vcores_max_over_time avg=5.2 max=16, active_tasks_over_time avg=891 max=11052 (very bursty); pipeline_duration=63804s (~17.7h); events: definity_stats show spark_session_tracked=9,382,954 calls (extremely high driver-side overhead); vcore_utilization (get_current_metrics)=0.146 (14.6%).",
+        "confidence": 0.85,
+        "severity": "performance",
+        "suggested_action": "Profile the driver-side orchestration code to identify whether it iterates over companies/entities sequentially (consistent with the task name 'aero_search_index_company_incremental'). Refactor to batch-process entities in a single partitioned Spark job rather than one job per entity \u2014 this would collapse 1,707 jobs into O(10) jobs, eliminate autoscaler churn, and reduce wall-clock time by an estimated 50\u201370%. If sequential processing is unavoidable, use a persistent fixed-size cluster (4 workers, no autoscaling) to eliminate spin-up latency per job.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        0,
+        1
+      ],
+      "tier2_cluster": [
+        3
+      ],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        2
+      ],
+      "active_conflicts": [
+        "Insights 0 and 1 are causally linked: the autoscaler-induced executor cycling (insight 0) and the silent OS-level executor kills from off-heap saturation (insight 1) are mutually reinforcing \u2014 both must be fixed together in Tier 1, but neither fix undermines the other.",
+        "Insight 3 (sequential micro-job pattern) is the architectural root cause behind the autoscaler churn in insight 0 \u2014 fixing the dynamic allocation mismatch alone (insight 0) will reduce stage failures but will not eliminate the underutilisation pattern until the driver-sequential loop is parallelised; these are complementary, not conflicting, fixes ordered by tier."
+      ],
+      "reasoning": "Examining all four insights against the triage rules and the evidence gathered:\n\n**Insight 0 (autoscaling/dynamic-allocation mismatch):** The cluster has autoscaling enabled (min=1, max=4) but `spark.dynamicAllocation.enabled=false`. This is confirmed by the task profile and events data showing 8,718 executor additions and 17,541 removals, with all executors killed via \"kill request from HTTP endpoint\". This directly caused 127 stage failures (7.5% of all stages) and 67 task retries. While the aggregate `retried_task_waste` metric is 0.036% (below the 0.05 threshold), the 127 stage failures and 67 task retries plus the massive executor churn represent a clear reliability/health crisis \u2014 the job is fundamentally unstable due to this misconfiguration. This is Tier 1.\n\n**Insight 1 (off-heap memory fully saturated / memoryOverhead unset):** `executor_max_off_heap_memory_utilization = 1.0` (100%) is confirmed in the metrics, and `spark.executor.memoryOverhead` is genuinely not set (source=not_set). With 1,630s of Python CPU time on executors, native memory pressure is real and the OS can silently kill executors \u2014 which is consistent with the observed executor churn. This is an active memory headroom crisis (`off_heap_headroom = 0.0`), qualifying as a Tier 1 health issue (tight heap/overhead headroom leading to potential OOM/process kills).\n\n**Insight 2 (gradual GC time increase / legacy GC collector):** Current run's GC time (255s) is actually at the lowest percentile (0th) of historical runs \u2014 this run is not exhibiting severe GC. The `gc_pressure` metric is 0.011 (1.1%), well below the 0.20 threshold. The trend is increasing over 8 runs (631s\u2192739s, +17%), but the current run is anomalously low. This is a forward-looking warning about a trajectory, not an active health crisis. The legacy GC collector (PS MarkSweep) is worth addressing but as a fine-tuning/proactive optimization \u2014 Tier 4.\n\n**Insight 3 (sequential micro-job execution / cluster underutilization):** `vcore_utilization=0.146` (14.6%) confirms severe underutilization, with avg active vCores of 0.55 out of 16 available. `idle_ratio=0.0086` is technically low, but the `executors_idle_time=63,767s` vs run duration of 63,804s shows executors are idle for essentially the entire run. This is a driver-sequential workload pattern causing extreme cluster waste. Per triage rules, `vcore_utilization < 0.30` maps to Tier 2 (cluster right-sizing / under-utilised CPU). However, this is also the root architectural cause of why the autoscaler keeps spinning workers in and out \u2014 but since the actual fix is a code architecture change (parallelizing entity iteration), not a config change, it fits best in Tier 2 as a cluster sizing concern. There is no conflict with Tier 1 fixes here.\n\n**Conflicts:** Insight 0 and Insight 1 are related \u2014 the autoscaler-induced executor churn is exacerbated by (and may partially explain) the off-heap saturation killing executors. Fixing the dynamic allocation mismatch (insight 0) should be done first; adding explicit memoryOverhead (insight 1) is also a Tier 1 fix but independent. No conflict between the two Tier 1 insights \u2014 both should be fixed. No conflict with Tier 2 (insight 3): reducing cluster size could be considered after fixing the autoscaler mismatch, but the sequential workload pattern means executor count doesn't help until the parallelism is fixed architecturally. No memory reduction recommendation is present, so no compound risk rule fires. AQE status was not confirmed as active, so no shuffle partition conflict. GC improvement (insight 2) as Tier 4 doesn't conflict with any Tier 1 fix."
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 0,
+          "kind": "discovery",
+          "identifier": "Autoscaling cluster running with dynamic allocation disabled \u2014 causing catastrophic executor churn",
+          "title": "Autoscaling cluster running with dynamic allocation disabled \u2014 causing catastrophic executor churn",
+          "description": "The Databricks cluster has autoscaling enabled (min=1, max=4 workers) but spark.dynamicAllocation.enabled is false. This mismatch caused 8,718 executor additions and 17,541 executor removals over the 17.7-hour run \u2014 every executor was eventually killed via 'kill request from HTTP endpoint'. With 1,707 Spark jobs averaging very short durations, the autoscaler continuously cycles workers in and out that Spark cannot properly retain or schedule against, directly causing 127 stage failures (7.5% of all stages) and 67 task retries.",
+          "evidence": "events: executor_added=8718, executor_removed=17541, all removals caused='kill request from HTTP endpoint'; metrics: num_spark_stages_failures=127/1700, num_spark_tasks_retries=67; task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=4, dynamic_allocation_enabled=false; get_current_config_value('spark.dynamicAllocation.enabled')=False (source=task_profile); get_current_config_value('spark.executor.instances')=not_set.",
+          "confidence": 0.95,
+          "severity": "health",
+          "suggested_action": "On Databricks, disable cluster-level autoscaling and instead set a fixed worker count matching peak demand (e.g. 4 workers), OR keep autoscaling and enable Spark dynamic allocation by setting spark.dynamicAllocation.enabled=true with spark.dynamicAllocation.minExecutors=1 and spark.dynamicAllocation.maxExecutors=4. The two mechanisms must be aligned. Given 1,707 short sequential jobs, also investigate whether the workload can be restructured to reduce job count and cluster idle time.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 1,
+          "kind": "discovery",
+          "identifier": "Executor off-heap memory fully saturated \u2014 unset memoryOverhead with active Python workload",
+          "title": "Executor off-heap memory fully saturated \u2014 unset memoryOverhead with active Python workload",
+          "description": "executor_max_off_heap_memory_utilization reached 1.0 (100%) while spark.executor.memoryOverhead is not explicitly configured and defaults to roughly 712MB (10% of the ~7.1GB executor heap). The workload has significant Python activity (1,630s of Python CPU time on executors, indicating PySpark UDFs or Arrow-based operations), which allocates native memory outside the JVM heap counted against overhead. At 100% saturation the OS may kill executor processes without a Spark-visible OOM, appearing as unexplained executor loss \u2014 consistent with the executor churn observed.",
+          "evidence": "metrics: executor_max_off_heap_memory_utilization=1.0, executor_max_off_heap_used_memory=3.76GB, executor_off_heap_memory=0.71GB (configured overhead); executors_python_used_cpu_time=1630.93s; get_current_config_value('spark.executor.memoryOverhead')=not_set; executor_memory=7.82GB total, executor_heap_memory=7.11GB.",
+          "confidence": 0.9,
+          "severity": "health",
+          "suggested_action": "Explicitly set spark.executor.memoryOverhead to at least 2g (from the default ~712MB) to give Python/Arrow processes headroom. Monitor executor_max_off_heap_used_memory after the change; if it still approaches the new ceiling, increase further to 3g or consider moving Python-heavy stages to a memory-optimised instance type.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "Highly sequential micro-job execution pattern causing extreme cluster underutilisation",
+          "title": "Highly sequential micro-job execution pattern causing extreme cluster underutilisation",
+          "description": "The job executed 1,707 Spark jobs across 1,700 stages over 17.7 hours, but average active vCores across the run was only 0.55 out of a potential 16 (5.2 avg available). The time-series shows sharp spikes (max 7.28 avg active tasks, max 16 vCores available) interspersed with near-zero activity windows. This is a driver-sequential workload \u2014 likely iterating over entities one at a time and submitting a Spark job per entity \u2014 where driver overhead and cluster spin-up/spin-down time between jobs accounts for the majority of the 17.7-hour wall-clock duration rather than actual Spark computation.",
+          "evidence": "metrics: num_spark_jobs=1707, num_spark_stages=1700; time_series_summary: vcores_avg_used_over_time avg=0.547 max=7.28, vcores_max_over_time avg=5.2 max=16, active_tasks_over_time avg=891 max=11052 (very bursty); pipeline_duration=63804s (~17.7h); events: definity_stats show spark_session_tracked=9,382,954 calls (extremely high driver-side overhead); vcore_utilization (get_current_metrics)=0.146 (14.6%).",
+          "confidence": 0.85,
+          "severity": "performance",
+          "suggested_action": "Profile the driver-side orchestration code to identify whether it iterates over companies/entities sequentially (consistent with the task name 'aero_search_index_company_incremental'). Refactor to batch-process entities in a single partitioned Spark job rather than one job per entity \u2014 this would collapse 1,707 jobs into O(10) jobs, eliminate autoscaler churn, and reduce wall-clock time by an estimated 50\u201370%. If sequential processing is unavoidable, use a persistent fixed-size cluster (4 workers, no autoscaling) to eliminate spin-up latency per job.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+          "title": "Gradual executor GC time increase across 8 runs \u2014 legacy stop-the-world collector on large heap",
+          "description": "executors__jvm_gc_time has increased 17.1% from first to latest run (631s \u2192 739s) with an increasing trend direction. All executors are using PS MarkSweep + PS Scavenge (Parallel GC), a stop-the-world collector. With ~7.1GB executor heaps the full-GC pause times will grow as the heap fill rate increases with data volume. This is an early warning: the current trajectory will push GC into the range that triggers task timeouts and cascading stage failures.",
+          "evidence": "analyze_metric_trend('executors__jvm_gc_time'): values=[631,532,377,715,256,808,404,739], trend=INCREASING, percentage_change=+17.1%, run_count=8; events executor_info: gcType='PS MarkSweep,PS Scavenge' for every executor recorded; executor_heap_memory=7.11GB per executor.",
+          "confidence": 0.78,
+          "severity": "performance",
+          "suggested_action": "Switch JVM GC from Parallel GC to G1GC by adding the Spark extra JVM option: spark.executor.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+G1SummarizeRSetStats. G1GC handles large heaps with shorter, incremental pauses. Also set spark.driver.extraJavaOptions with the same flags for the driver (driver GC is also stop-the-world at 6.4GB heap). Monitor the gc_time trend over the next 3\u20135 runs to confirm improvement.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "00447d9b397e",
+    "historical_runs_count": 8,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": []
+  }
+}
