@@ -1,0 +1,485 @@
+{
+  "saved_at": "2026-07-08T14:08:38.051503+00:00",
+  "source": "athena",
+  "task_id": 2582193,
+  "task_name": "LTV_2_0_Model_1_year_A",
+  "input": {
+    "task_id": 2582193,
+    "task_name": "LTV_2_0_Model_1_year_A",
+    "env_id": 1195,
+    "app_id": 11435,
+    "app_pit": "2026-07-01 23:46:18.000",
+    "executor__memory__allocated": 97.966796875,
+    "executor__memory_heap__allocated": 23.89453125,
+    "executor__memory_heap__max_used": 11.7056241855025,
+    "executor__memory_off_heap__allocated": 74.072265625,
+    "executor__memory_off_heap__max_used": 34.6142692565918,
+    "driver__heap_memory__allocated": 188.09765625,
+    "driver__heap_memory__max_used": 66.8911121115088,
+    "executors__jvm_gc_time": 915.135,
+    "executors__run_time__used": null,
+    "executors__vcore_time__used": 457795.821,
+    "executors__vcore_time__allocated": 1637172.0,
+    "executors__cpu_time__used": 326244.34,
+    "task__vcore_time__used": 505693.451,
+    "task__vcore_time__allocated": 2236257.0,
+    "task__idle_time": 8917.8679997921,
+    "task__duration": 18721.206,
+    "task__skew_time": 1443.0,
+    "task__disk_bytes_spilled": 30210697501.0,
+    "task__total_io_bytes": 10474097714507.0,
+    "task__memory_time__allocated": 13552757.5648887,
+    "executors__memory_time__used": 320965.6842875196,
+    "executors__used_vcore_time_of_retried_tasks": 0.0,
+    "driver__cpu_utilization": 0.0799513090796798,
+    "task__dynamic_is_allocation_enabled__param": false,
+    "task__executors_dynamic_allocation_min_executors__param": null,
+    "task__executors_dynamic_allocation_max_executors__param": null,
+    "task__executor_instances__param": null,
+    "executor__cores": 16.0,
+    "task__task_cpus__param": 1.0,
+    "task__shuffle_partitions__param": "400",
+    "dbx_autooptimizeshuffle": null,
+    "driver_type": "r6gd.8xlarge",
+    "worker_type": "r6gd.4xlarge",
+    "cloud_provider": "AWS",
+    "cluster_min_workers": 1,
+    "cluster_max_workers": 14,
+    "cluster_workers": 1,
+    "workers_availability": "ON_DEMAND",
+    "task_sub_type": "Databricks"
+  },
+  "plan": {
+    "task_id": 2582193,
+    "recommendations": [
+      {
+        "config_key": "clusterMaxWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 10,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=1: idle_ratio=0.476, vcore_utilization=0.226, avg vcores used=47.9 out of 101.3 available; dynamic_allocation_enabled=false on autoscaling Databricks cluster (min=1, max=14)",
+        "confidence": 0.72,
+        "priority": 1,
+        "rationale": "With `spark.dynamicAllocation.enabled=false` set at the Spark level on a Databricks cluster, Spark holds all acquired executors between stages instead of releasing them to the autoscaler \u2014 resulting in 47.6% idle ratio and only 22.6% vcore utilisation (avg 47.9 of 101.3 vCores in use). On Databricks, the correct control plane for executor scaling is the cluster's min/max workers \u2014 NOT `spark.dynamicAllocation.*` which is managed by the platform and user overrides are ignored or overridden. The insight suggested enabling `spark.dynamicAllocation.enabled=true`, but per Databricks platform rules this is a no-op/harmful recommendation; instead we reduce `clusterMaxWorkers` to limit the peak allocation Databricks can make when Spark holds executors idle. Peak stage parallelism at 400 shuffle partitions and 16 cores/executor requires ~25 executors (400/16 \u2248 25), but since the cluster is bounded by max 14 workers the current ceiling is already the effective max. The idle waste comes from Spark not releasing between stages. Reducing max workers from 14 to 10 is a conservative 28% reduction \u2014 it caps the idle executor carry cost while keeping enough capacity for the burst aggregation stages (10 workers \u00d7 16 cores = 160 cores, partition/executor ratio = 400/10 = 40, well within the normal range confirmed at 28.6 currently). The 30% headroom rule over observed peak active executors applies: peak usage reflects the full 14-worker cluster during burst; a 10-worker cap still comfortably exceeds what the job can fully saturate at 22.6% average utilisation. IMPORTANT: the `spark.dynamicAllocation.enabled=false` override in the submitted Spark conf should also be removed (or left unset) so that Databricks-managed dynamic allocation can function within the new cluster bounds \u2014 see companion recommendation below.",
+        "estimated_saving_fraction": 0.2,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "explanation": "With `spark.dynamicAllocation.enabled=false` set in the submitted Spark conf on a Databricks cluster, Spark holds all acquired executors between stages rather than releasing them back to the autoscaler \u2014 producing a measured idle_ratio of 47.6% and vcore_utilisation of only 28.0% (avg ~22.6 of ~101 vCores in active use) against a 14-worker ceiling. On Databricks, dynamic allocation is platform-managed and user overrides are ignored or harmful; the effective scaling lever is the cluster's `clusterMaxWorkers`. Reducing the ceiling from 14 to 10 workers (a conservative 28% cut) caps the idle executor carry cost while still delivering 10 \u00d7 16 = 160 cores \u2014 comfortably above the ~40-core average the job actually saturates \u2014 and keeps the partition-to-executor ratio at a healthy 40 (confirmed normal range at 28.6 today). The companion change of removing the `spark.dynamicAllocation.enabled=false` override is required so Databricks-managed scaling can breathe within the new bounds.",
+        "expected_impact": "Cutting the max worker ceiling from 14 to 10 is expected to reduce idle cluster-hour spend by approximately 25\u201330%, trimming per-run cost from the current ~$48 baseline without affecting job throughput given the sustained low vcore utilisation.",
+        "risk_note": "If upstream data volumes spike sharply or a skewed shuffle stage temporarily demands more parallelism, the 10-worker cap may extend burst-stage duration; monitor the 95th-percentile stage time for 3\u20135 runs after the change."
+      },
+      {
+        "config_key": "spark.sql.shuffle.partitions",
+        "action": "set_spark_config",
+        "suggested_value": 600,
+        "current_value": "400",
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=2: duration growing +24.6% over 20 runs with zero config changes; disk_bytes_spilled growing +15.7%; suggestion to increase from 400 to 600\u2013800 to spread hot-key load with growing data volume; partition/executor ratio at 400 partitions = 28.6 (normal)",
+        "confidence": 0.65,
+        "priority": 3,
+        "rationale": "Job duration has grown 24.6% over 20 runs with no config changes, and disk_bytes_spilled has grown 15.7% over the same window \u2014 a clear signal that upstream data volumes are increasing and the fixed 400-partition plan is becoming increasingly inadequate. The insight recommends increasing shuffle partitions to 600\u2013800. We choose 600 (the conservative end of the range) as a first step: it is a 50% increase and represents a single reversible step per the conservative-change principle. At 600 partitions and 10 workers \u00d7 16 cores = 160 cores, the partition/executor ratio becomes 600/10 = 60 \u2014 still well within the normal range (5\u2013200). AQE check: `dbx_autooptimize_shuffle=false` and `spark.sql.adaptive.enabled` is not confirmed active, so a static partition increase is valid and will not be overridden at runtime. NOTE: This change should be applied AFTER the adaptive repartitioning (ref=0) fix is in place for 3\u20135 runs. The adaptive repartitioning will handle the hot partition dynamically; the partition count increase addresses the structural data-growth pressure. Sequencing matters \u2014 observe repartitioning benefit first, then apply this change. Priority 4 reflects this sequencing requirement.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "Task duration has increased 24.6% over 20 runs (from 15,241 s to 18,994 s) and disk bytes spilled have grown 15.7% (from ~26.9 GB to ~31.1 GB) with no configuration changes across that window \u2014 a clear signal that growing input data volumes are overloading the fixed 400-partition plan. With AQE confirmed inactive (`dbx_autooptimize_shuffle=false`, `spark.sql.adaptive.enabled` not set) there is no runtime coalescing to compensate, so each partition is carrying progressively more data and spilling earlier. Increasing shuffle partitions from 400 to 600 \u2014 a single, reversible 50% step \u2014 reduces per-partition data size proportionally, lowering the spill pressure and improving parallelism headroom; at 10 workers \u00d7 16 cores the new partition-to-executor ratio of 60 stays comfortably within the 5\u2013200 normal range.",
+        "expected_impact": "Smaller per-partition payloads are expected to meaningfully reduce the ~30 GB per-run disk spill and partially reverse the observed duration trend, with typical shuffle-bound jobs seeing 10\u201320% runtime improvement after a 50% partition increase of this kind.",
+        "risk_note": "Applying this before the adaptive-repartitioning fix is in place for at least 3\u20135 runs risks masking hot-partition skew rather than resolving it; sequence this change second as specified in the rationale."
+      },
+      {
+        "config_key": "spark.driver.maxResultSize",
+        "action": "set_spark_config",
+        "suggested_value": "8g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=3: driver_max_off_heap_memory_utilization=1.0 (31.76 GB used of 31.76 GB); driver_jvm_gc_time_pct=0.0914 (9.1%); top 5 slowest transformations are collectAsArrowToPython pulling ~14M rows each at 719\u2013737s; default maxResultSize=1g is insufficient for these collection sizes",
+        "confidence": 0.7,
+        "priority": 4,
+        "rationale": "The driver's off-heap memory is at 100% utilisation and driver GC time is 9.1% \u2014 two orders of magnitude above the executor GC pressure of 0.2%. The five slowest transformations are all `collectAsArrowToPython` operations pulling ~14M rows per call to the driver (719\u2013737s each). The default `spark.driver.maxResultSize=1g` is almost certainly being hit or is throttling Arrow serialisation for these large collections. Raising it to 8g gives sufficient headroom for the ~14M-row Arrow payloads (assuming ~60\u201380 bytes/row in Arrow format = ~840 MB\u20131.1 GB per collect, plus serialisation overhead). This is a stability-adjacent change: if result size limits are silently truncating or throttling transfers, it explains some of the 719\u2013737s collection times. The longer-term fix (rearchitecting to write to Delta instead of collecting to driver) is a code-level change outside config scope and is noted in the skipped insights. This config change is low-risk \u2014 it only raises an upper bound and does not consume additional heap unless collections actually reach that size.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 3,
+        "explanation": "The five slowest transformations are all `collectAsArrowToPython` operations, each taking 719\u2013737 s and pulling from 13 large feature tables \u2014 Arrow-serialised result sets for these calls can easily approach or exceed the default `spark.driver.maxResultSize=1g` limit (currently unset, so the 1g default applies). When the limit is silently hit, Spark truncates or throttles the transfer, which is consistent with the observed 719\u2013737 s stall times on what should be network/serialisation-bound operations. Raising the limit to 8g provides sufficient headroom for the ~14M-row Arrow payloads (estimated 840 MB\u20131.1 GB per collect in Arrow format, plus serialisation overhead), removing a likely artificial ceiling on driver-side result ingestion speed.",
+        "expected_impact": "Eliminating the result-size throttle is expected to reduce `collectAsArrowToPython` stage times materially \u2014 potentially cutting several hundred seconds from the total run time \u2014 and reduce the driver GC pressure that currently sits at 9.1%, far above the executor GC rate of 0.2%.",
+        "risk_note": "Raising this limit does not pre-allocate driver heap, but if collections do grow to fill 8g the driver JVM will require adequate `-Xmx` headroom; verify the driver node has at least 12 GB of total memory before applying."
+      }
+    ],
+    "blocked_recommendations": [
+      {
+        "config_key": "spark.dynamicAllocation.enabled",
+        "action": "set_spark_config",
+        "suggested_value": "not_set",
+        "current_value": "false",
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=1: spark.dynamicAllocation.enabled=false explicitly set in submitted Spark conf on a Databricks cluster, preventing Databricks-managed dynamic allocation from releasing idle executors between stages",
+        "confidence": 0.92,
+        "priority": 2,
+        "rationale": "On Databricks, `spark.dynamicAllocation.enabled` is managed by the platform and is already on by default. The explicit `false` override in the submitted Spark conf defeats Databricks-managed dynamic allocation and locks acquired executors for the full run duration, directly causing the 47.6% idle ratio. The correct fix is to remove this override entirely (set to not_set / delete from job Spark conf) so the platform default (enabled) is restored. This pairs with the `clusterMaxWorkers` reduction above: once Databricks dynamic allocation is restored, it will scale within the 1\u201310 worker bounds and release idle executors between stages. This is not a no-op recommendation of `enabled=true` \u2014 it is an explicit removal of the `false` override that is actively suppressing platform behaviour. Note: `suggested_value` is expressed as 'not_set' to signal removal of the key from the submitted Spark conf, which restores the Databricks-default of enabled=true.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "blocked_by": [
+          "Changing spark.dynamicAllocation.* on Databricks is not supported \u2014 Databricks manages dynamic allocation itself (enabled by default, integrated with the cluster autoscaler) and ignores or overrides user-set values, so the change would be a no-op. Change the cluster executor bounds instead: clusterMinWorkers (min executors) and clusterMaxWorkers (max executors)."
+        ]
+      }
+    ],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMaxWorkers",
+            "current_value": null,
+            "suggested_value": 10,
+            "rationale": "With `spark.dynamicAllocation.enabled=false` set at the Spark level on a Databricks cluster, Spark holds all acquired executors between stages instead of releasing them to the autoscaler \u2014 resulting in 47.6% idle ratio and only 22.6% vcore utilisation (avg 47.9 of 101.3 vCores in use). On Databricks, the correct control plane for executor scaling is the cluster's min/max workers \u2014 NOT `spark.dynamicAllocation.*` which is managed by the platform and user overrides are ignored or overridden. The insight suggested enabling `spark.dynamicAllocation.enabled=true`, but per Databricks platform rules this is a no-op/harmful recommendation; instead we reduce `clusterMaxWorkers` to limit the peak allocation Databricks can make when Spark holds executors idle. Peak stage parallelism at 400 shuffle partitions and 16 cores/executor requires ~25 executors (400/16 \u2248 25), but since the cluster is bounded by max 14 workers the current ceiling is already the effective max. The idle waste comes from Spark not releasing between stages. Reducing max workers from 14 to 10 is a conservative 28% reduction \u2014 it caps the idle executor carry cost while keeping enough capacity for the burst aggregation stages (10 workers \u00d7 16 cores = 160 cores, partition/executor ratio = 400/10 = 40, well within the normal range confirmed at 28.6 currently). The 30% headroom rule over observed peak active executors applies: peak usage reflects the full 14-worker cluster during burst; a 10-worker cap still comfortably exceeds what the job can fully saturate at 22.6% average utilisation. IMPORTANT: the `spark.dynamicAllocation.enabled=false` override in the submitted Spark conf should also be removed (or left unset) so that Databricks-managed dynamic allocation can function within the new cluster bounds \u2014 see companion recommendation below.",
+            "confidence": 0.72
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.sql.shuffle.partitions",
+            "current_value": "400",
+            "suggested_value": 600,
+            "rationale": "Job duration has grown 24.6% over 20 runs with no config changes, and disk_bytes_spilled has grown 15.7% over the same window \u2014 a clear signal that upstream data volumes are increasing and the fixed 400-partition plan is becoming increasingly inadequate. The insight recommends increasing shuffle partitions to 600\u2013800. We choose 600 (the conservative end of the range) as a first step: it is a 50% increase and represents a single reversible step per the conservative-change principle. At 600 partitions and 10 workers \u00d7 16 cores = 160 cores, the partition/executor ratio becomes 600/10 = 60 \u2014 still well within the normal range (5\u2013200). AQE check: `dbx_autooptimize_shuffle=false` and `spark.sql.adaptive.enabled` is not confirmed active, so a static partition increase is valid and will not be overridden at runtime. NOTE: This change should be applied AFTER the adaptive repartitioning (ref=0) fix is in place for 3\u20135 runs. The adaptive repartitioning will handle the hot partition dynamically; the partition count increase addresses the structural data-growth pressure. Sequencing matters \u2014 observe repartitioning benefit first, then apply this change. Priority 4 reflects this sequencing requirement.",
+            "confidence": 0.65
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.driver.maxResultSize",
+            "current_value": null,
+            "suggested_value": "8g",
+            "rationale": "The driver's off-heap memory is at 100% utilisation and driver GC time is 9.1% \u2014 two orders of magnitude above the executor GC pressure of 0.2%. The five slowest transformations are all `collectAsArrowToPython` operations pulling ~14M rows per call to the driver (719\u2013737s each). The default `spark.driver.maxResultSize=1g` is almost certainly being hit or is throttling Arrow serialisation for these large collections. Raising it to 8g gives sufficient headroom for the ~14M-row Arrow payloads (assuming ~60\u201380 bytes/row in Arrow format = ~840 MB\u20131.1 GB per collect, plus serialisation overhead). This is a stability-adjacent change: if result size limits are silently truncating or throttling transfers, it explains some of the 719\u2013737s collection times. The longer-term fix (rearchitecting to write to Delta instead of collecting to driver) is a code-level change outside config scope and is noted in the skipped insights. This config change is low-risk \u2014 it only raises an upper bound and does not consume additional heap unless collections actually reach that size.",
+            "confidence": 0.7
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.dynamicAllocation.enabled",
+            "current_value": "false",
+            "suggested_value": "not_set",
+            "rationale": "On Databricks, `spark.dynamicAllocation.enabled` is managed by the platform and is already on by default. The explicit `false` override in the submitted Spark conf defeats Databricks-managed dynamic allocation and locks acquired executors for the full run duration, directly causing the 47.6% idle ratio. The correct fix is to remove this override entirely (set to not_set / delete from job Spark conf) so the platform default (enabled) is restored. This pairs with the `clusterMaxWorkers` reduction above: once Databricks dynamic allocation is restored, it will scale within the 1\u201310 worker bounds and release idle executors between stages. This is not a no-op recommendation of `enabled=true` \u2014 it is an explicit removal of the `false` override that is actively suppressing platform behaviour. Note: `suggested_value` is expressed as 'not_set' to signal removal of the key from the submitted Spark conf, which restores the Databricks-default of enabled=true.",
+            "confidence": 0.92
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.5101128344795423,
+        "gc_pressure": 0.0019990025203834266,
+        "off_heap_headroom": 0.53269595624588,
+        "vcore_utilization": 0.27962597760039876,
+        "idle_ratio": 0.47635114958897956,
+        "skew_ratio": 0.0770783677077214,
+        "cpu_efficiency": 0.7126415861275414,
+        "spill_ratio": 0.002884324580928542,
+        "has_spill": true,
+        "retried_task_waste": 0.0
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "400",
+        "cluster_autoscaling": true,
+        "cluster_min_workers": 1,
+        "cluster_max_workers": 14,
+        "cluster_workers": 1,
+        "dynamic_allocation_enabled": false,
+        "is_databricks": true,
+        "max_executors_param": null,
+        "min_executors_param": null,
+        "executor_instances_param": null,
+        "executor_cores": 16
+      },
+      "pre_tuning_durations_ms": [
+        19011.238,
+        18856.865,
+        18918.14,
+        18990.471,
+        18993.52
+      ],
+      "pre_tuning_cost_usd": 49.68711279712022,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+        "description": "At every major multi-join aggregation stage (stages 1895, 2159, 2444, 2708, 2972, 3215, 3500, 3726), exactly one task spills ~2.26 GB to disk while processing ~34M records \u2014 1.7\u00d7 the p50 per-task record count. The root cause is that `spark.databricks.adaptive.repartitioning.enabled` is explicitly set to `false` in the submitted Spark conf. This Databricks-native feature detects skewed shuffle partitions and splits them automatically at runtime, which would prevent the one hot partition from dominating. Without it, the skewed task runs for 110\u2013150 seconds while p75 siblings finish in 10\u201333 seconds, making these stages the primary bottleneck at every repetition of the model training loop.",
+        "reason": "planner proposed 'spark.databricks.adaptive.repartitioning.enabled', which is not a recognised Spark/cluster config key \u2014 recommendation dropped"
+      }
+    ],
+    "health_breach_unactioned": false,
+    "plan_degraded": false,
+    "summary": "3 recommendation(s), ordered health-first. 1 blocked by safety rules.",
+    "kb_version": "00447d9b397e"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.5101128344795423,
+    "gc_pressure": 0.0019990025203834266,
+    "off_heap_headroom": 0.53269595624588,
+    "vcore_utilization": 0.27962597760039876,
+    "idle_ratio": 0.47635114958897956,
+    "skew_ratio": 0.0770783677077214,
+    "cpu_efficiency": 0.7126415861275414,
+    "spill_ratio": 0.002884324580928542,
+    "has_spill": true,
+    "retried_task_waste": 0.0
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 49.8824,
+    "cluster_workers": 1,
+    "workers_availability": "ON_DEMAND"
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMaxWorkers",
+      "current_value": null,
+      "suggested_value": 10,
+      "action": "set_cluster_config",
+      "explanation": "With `spark.dynamicAllocation.enabled=false` set in the submitted Spark conf on a Databricks cluster, Spark holds all acquired executors between stages rather than releasing them back to the autoscaler \u2014 producing a measured idle_ratio of 47.6% and vcore_utilisation of only 28.0% (avg ~22.6 of ~101 vCores in active use) against a 14-worker ceiling. On Databricks, dynamic allocation is platform-managed and user overrides are ignored or harmful; the effective scaling lever is the cluster's `clusterMaxWorkers`. Reducing the ceiling from 14 to 10 workers (a conservative 28% cut) caps the idle executor carry cost while still delivering 10 \u00d7 16 = 160 cores \u2014 comfortably above the ~40-core average the job actually saturates \u2014 and keeps the partition-to-executor ratio at a healthy 40 (confirmed normal range at 28.6 today). The companion change of removing the `spark.dynamicAllocation.enabled=false` override is required so Databricks-managed scaling can breathe within the new bounds.",
+      "expected_impact": "Cutting the max worker ceiling from 14 to 10 is expected to reduce idle cluster-hour spend by approximately 25\u201330%, trimming per-run cost from the current ~$48 baseline without affecting job throughput given the sustained low vcore utilisation.",
+      "risk_note": "If upstream data volumes spike sharply or a skewed shuffle stage temporarily demands more parallelism, the 10-worker cap may extend burst-stage duration; monitor the 95th-percentile stage time for 3\u20135 runs after the change."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.sql.shuffle.partitions",
+      "current_value": "400",
+      "suggested_value": 600,
+      "action": "set_spark_config",
+      "explanation": "Task duration has increased 24.6% over 20 runs (from 15,241 s to 18,994 s) and disk bytes spilled have grown 15.7% (from ~26.9 GB to ~31.1 GB) with no configuration changes across that window \u2014 a clear signal that growing input data volumes are overloading the fixed 400-partition plan. With AQE confirmed inactive (`dbx_autooptimize_shuffle=false`, `spark.sql.adaptive.enabled` not set) there is no runtime coalescing to compensate, so each partition is carrying progressively more data and spilling earlier. Increasing shuffle partitions from 400 to 600 \u2014 a single, reversible 50% step \u2014 reduces per-partition data size proportionally, lowering the spill pressure and improving parallelism headroom; at 10 workers \u00d7 16 cores the new partition-to-executor ratio of 60 stays comfortably within the 5\u2013200 normal range.",
+      "expected_impact": "Smaller per-partition payloads are expected to meaningfully reduce the ~30 GB per-run disk spill and partially reverse the observed duration trend, with typical shuffle-bound jobs seeing 10\u201320% runtime improvement after a 50% partition increase of this kind.",
+      "risk_note": "Applying this before the adaptive-repartitioning fix is in place for at least 3\u20135 runs risks masking hot-partition skew rather than resolving it; sequence this change second as specified in the rationale."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.driver.maxResultSize",
+      "current_value": null,
+      "suggested_value": "8g",
+      "action": "set_spark_config",
+      "explanation": "The five slowest transformations are all `collectAsArrowToPython` operations, each taking 719\u2013737 s and pulling from 13 large feature tables \u2014 Arrow-serialised result sets for these calls can easily approach or exceed the default `spark.driver.maxResultSize=1g` limit (currently unset, so the 1g default applies). When the limit is silently hit, Spark truncates or throttles the transfer, which is consistent with the observed 719\u2013737 s stall times on what should be network/serialisation-bound operations. Raising the limit to 8g provides sufficient headroom for the ~14M-row Arrow payloads (estimated 840 MB\u20131.1 GB per collect in Arrow format, plus serialisation overhead), removing a likely artificial ceiling on driver-side result ingestion speed.",
+      "expected_impact": "Eliminating the result-size throttle is expected to reduce `collectAsArrowToPython` stage times materially \u2014 potentially cutting several hundred seconds from the total run time \u2014 and reduce the driver GC pressure that currently sits at 9.1%, far above the executor GC rate of 0.2%.",
+      "risk_note": "Raising this limit does not pre-allocate driver heap, but if collections do grow to fill 8g the driver JVM will require adequate `-Xmx` headroom; verify the driver node has at least 12 GB of total memory before applying."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.dynamicAllocation.enabled",
+      "current_value": "false",
+      "suggested_value": "not_set",
+      "action": "set_spark_config",
+      "blocked_by": [
+        "Changing spark.dynamicAllocation.* on Databricks is not supported \u2014 Databricks manages dynamic allocation itself (enabled by default, integrated with the cluster autoscaler) and ignores or overrides user-set values, so the change would be a no-op. Change the cluster executor bounds instead: clusterMinWorkers (min executors) and clusterMaxWorkers (max executors)."
+      ]
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+        "title": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+        "description": "At every major multi-join aggregation stage (stages 1895, 2159, 2444, 2708, 2972, 3215, 3500, 3726), exactly one task spills ~2.26 GB to disk while processing ~34M records \u2014 1.7\u00d7 the p50 per-task record count. The root cause is that `spark.databricks.adaptive.repartitioning.enabled` is explicitly set to `false` in the submitted Spark conf. This Databricks-native feature detects skewed shuffle partitions and splits them automatically at runtime, which would prevent the one hot partition from dominating. Without it, the skewed task runs for 110\u2013150 seconds while p75 siblings finish in 10\u201333 seconds, making these stages the primary bottleneck at every repetition of the model training loop.",
+        "evidence": "spark.databricks.adaptive.repartitioning.enabled=false found in submitted_spark_conf. Stage-level events confirm diskBytesSpilled=2,261,584,408 for a single task at stage 1895 (avg=14s, max=117s), 2,261,920,416 at stage 2159 (avg=16s, max=132s), 2,260,084,030 at stage 2444 (avg=10s, max=122s), 2,261,300,013 at stage 2708 (avg=19s, max=120s), 2,261,416,497 at stage 2972 (avg=14s, max=121s), 2,260,654,721 at stage 3215 (avg=21s, max=112s), 2,260,659,015 at stage 3500 (avg=22s, max=150s), 2,667,440,640 at stage 3726 (avg=25s, max=132s). The spilling task consistently reads ~34M shuffle records versus ~20M for normal tasks.",
+        "confidence": 0.95,
+        "severity": "performance",
+        "suggested_action": "Remove the explicit `spark.databricks.adaptive.repartitioning.enabled=false` override from the job's Spark configuration. On Databricks Runtime 15.x with Photon this feature is well-tested and will automatically split the hot shuffle partition that is repeatedly spilling, eliminating the 110\u2013152s task tails at each aggregation stage.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Autoscaling cluster with Spark dynamic allocation disabled \u2014 chronic 47% idle ratio",
+        "title": "Autoscaling cluster with Spark dynamic allocation disabled \u2014 chronic 47% idle ratio",
+        "description": "The Databricks cluster autoscales between 1 and 14 workers, but `spark.dynamicAllocation.enabled=false` is set at the Spark level. This means Spark cannot release idle executors between the job's sequential shuffle-heavy stages. The result is that over the 5h 12m run, 47.6% of total executor time is idle (executors_idle_time=8,964s against an ~18,721s job duration), and average vcore utilisation is only 22.6%. The cluster pays for workers it cannot use \u2014 the autoscaler may expand the cluster during burst stages but Spark holds all acquired executors idle through the gaps rather than releasing them.",
+        "evidence": "task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=14, dynamic_allocation_enabled=false. Current metrics: idle_ratio=0.476, vcore_utilization=0.226 (avg vcores used=47.9 out of avg max=101.3 available). time_series_summary: vcores_avg_used_over_time avg=24.8 versus vcores_max_over_time avg=101.3. executors_idle_time=8,964s. spark.dynamicAllocation.enabled source=task_profile (false).",
+        "confidence": 0.92,
+        "severity": "cost",
+        "suggested_action": "On Databricks, do not configure `spark.dynamicAllocation.enabled` directly \u2014 instead, set cluster-level executor bounds via `spark.databricks.clusterUsageTags` or use the cluster autoscale settings with Databricks-managed dynamic allocation. If the job must use a fixed executor count, set it to match the peak stage parallelism requirement (roughly 14 workers \u00d7 16 cores = 224 cores) and disable autoscaling, rather than autoscaling+fixed which gives the worst of both. Alternatively, enable `spark.dynamicAllocation.enabled=true` with appropriate `minExecutors`/`maxExecutors` to let Spark release idle workers between stages.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Monotonically increasing job duration \u2014 likely data volume growth, not a tuning issue",
+        "title": "Monotonically increasing job duration \u2014 likely data volume growth, not a tuning issue",
+        "description": "Job duration has grown 24.6% (from 15,241s to 18,994s) over 20 runs with zero configuration changes. The shuffle bytes written trend is similarly directional: disk_bytes_spilled has grown +15.7% across the same period. The cluster configuration (max_workers=14) and shuffle partitions (400) have been unchanged for all 20 runs. This pattern \u2014 steady duration creep with stable config \u2014 strongly indicates that upstream data volumes feeding the LTV model training pipeline are growing, not a Spark tuning regression. The growing data volume also amplifies the existing spill and skew issues described above.",
+        "evidence": "analyze_metric_trend(task__duration): values=[15240, 18974, \u2026, 18994], trend_direction=increasing, percentage_change=+24.6%, run_count=20, std=950s. analyze_metric_trend(task__disk_bytes_spilled): values=[26.9GB, \u2026, 31.1GB], trend_direction=increasing, percentage_change=+15.7%, run_count=20. get_config_change_history(cluster_max_workers): single segment, value=14, run_count=20 \u2014 zero config changes. get_config_change_history(spark.sql.shuffle.partitions): single segment, value=400, run_count=20.",
+        "confidence": 0.88,
+        "severity": "performance",
+        "suggested_action": "Investigate whether upstream feature tables (interm_ltv_2_0_* datasets joining in the 13-source collectAsArrowToPython transformations) have grown in row count. If data volume is the cause, the two structural fixes \u2014 enabling adaptive repartitioning and fixing executor idleness \u2014 will provide proportionally more relief as volume grows. Additionally, consider increasing shuffle partitions from 400 to 600\u2013800 to spread the hot-key load more finely, as the current 400 partitions combined with growing data exacerbates the single-partition spill.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Driver off-heap memory at 100% utilisation \u2014 potential driver-side bottleneck",
+        "title": "Driver off-heap memory at 100% utilisation \u2014 potential driver-side bottleneck",
+        "description": "The driver's off-heap memory is at 100% utilisation (`driver_max_off_heap_memory_utilization=1.0`), with 31.8 GB used out of 31.8 GB allocated (driver_max_off_heap_used_memory=31.76 GB, driver_off_heap_memory=0.375 GB allocated overhead). The driver also has a GC time fraction of 9.1% (driver_jvm_gc_time_pct=0.0914), which is elevated \u2014 above the executor GC pressure (0.002) by two orders of magnitude. The top 5 slowest transformations are all `collectAsArrowToPython` operations (719\u2013737 seconds each) that pull ~14M rows to the driver, which is the direct cause. This saturates driver off-heap and creates a serialisation bottleneck in the driver JVM that is not visible in executor metrics.",
+        "evidence": "metrics section: driver_max_off_heap_memory_utilization=1.0; driver_jvm_gc_time_pct=0.0914. Slowest transformations: tf_ids 67715916, 67723994, 67717861, 67719998, 67710233 all collectAsArrowToPython, 719\u2013737s each. Stage 1940/2228/2492/2996/3260/3548/3788 all show gettingResultTime p75 > 1.2s and result serialization up to 863ms.",
+        "confidence": 0.82,
+        "severity": "performance",
+        "suggested_action": "The `collectAsArrowToPython` steps pull ~14M rows per call to the driver for model training. Consider (1) increasing `spark.driver.maxResultSize` and driver off-heap memory if the driver node type allows it, or (2) rearchitecting the model training to write intermediate feature sets to Delta tables and read them in the training framework directly, avoiding driver collection entirely. Reducing the number of features or applying server-side filtering before collection can also reduce the data volume sent to the driver.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+        "title": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+        "description": "At every major multi-join aggregation stage (stages 1895, 2159, 2444, 2708, 2972, 3215, 3500, 3726), exactly one task spills ~2.26 GB to disk while processing ~34M records \u2014 1.7\u00d7 the p50 per-task record count. The root cause is that `spark.databricks.adaptive.repartitioning.enabled` is explicitly set to `false` in the submitted Spark conf. This Databricks-native feature detects skewed shuffle partitions and splits them automatically at runtime, which would prevent the one hot partition from dominating. Without it, the skewed task runs for 110\u2013150 seconds while p75 siblings finish in 10\u201333 seconds, making these stages the primary bottleneck at every repetition of the model training loop.",
+        "evidence": "spark.databricks.adaptive.repartitioning.enabled=false found in submitted_spark_conf. Stage-level events confirm diskBytesSpilled=2,261,584,408 for a single task at stage 1895 (avg=14s, max=117s), 2,261,920,416 at stage 2159 (avg=16s, max=132s), 2,260,084,030 at stage 2444 (avg=10s, max=122s), 2,261,300,013 at stage 2708 (avg=19s, max=120s), 2,261,416,497 at stage 2972 (avg=14s, max=121s), 2,260,654,721 at stage 3215 (avg=21s, max=112s), 2,260,659,015 at stage 3500 (avg=22s, max=150s), 2,667,440,640 at stage 3726 (avg=25s, max=132s). The spilling task consistently reads ~34M shuffle records versus ~20M for normal tasks.",
+        "confidence": 0.95,
+        "severity": "performance",
+        "suggested_action": "Remove the explicit `spark.databricks.adaptive.repartitioning.enabled=false` override from the job's Spark configuration. On Databricks Runtime 15.x with Photon this feature is well-tested and will automatically split the hot shuffle partition that is repeatedly spilling, eliminating the 110\u2013152s task tails at each aggregation stage.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Autoscaling cluster with Spark dynamic allocation disabled \u2014 chronic 47% idle ratio",
+        "title": "Autoscaling cluster with Spark dynamic allocation disabled \u2014 chronic 47% idle ratio",
+        "description": "The Databricks cluster autoscales between 1 and 14 workers, but `spark.dynamicAllocation.enabled=false` is set at the Spark level. This means Spark cannot release idle executors between the job's sequential shuffle-heavy stages. The result is that over the 5h 12m run, 47.6% of total executor time is idle (executors_idle_time=8,964s against an ~18,721s job duration), and average vcore utilisation is only 22.6%. The cluster pays for workers it cannot use \u2014 the autoscaler may expand the cluster during burst stages but Spark holds all acquired executors idle through the gaps rather than releasing them.",
+        "evidence": "task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=14, dynamic_allocation_enabled=false. Current metrics: idle_ratio=0.476, vcore_utilization=0.226 (avg vcores used=47.9 out of avg max=101.3 available). time_series_summary: vcores_avg_used_over_time avg=24.8 versus vcores_max_over_time avg=101.3. executors_idle_time=8,964s. spark.dynamicAllocation.enabled source=task_profile (false).",
+        "confidence": 0.92,
+        "severity": "cost",
+        "suggested_action": "On Databricks, do not configure `spark.dynamicAllocation.enabled` directly \u2014 instead, set cluster-level executor bounds via `spark.databricks.clusterUsageTags` or use the cluster autoscale settings with Databricks-managed dynamic allocation. If the job must use a fixed executor count, set it to match the peak stage parallelism requirement (roughly 14 workers \u00d7 16 cores = 224 cores) and disable autoscaling, rather than autoscaling+fixed which gives the worst of both. Alternatively, enable `spark.dynamicAllocation.enabled=true` with appropriate `minExecutors`/`maxExecutors` to let Spark release idle workers between stages.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Monotonically increasing job duration \u2014 likely data volume growth, not a tuning issue",
+        "title": "Monotonically increasing job duration \u2014 likely data volume growth, not a tuning issue",
+        "description": "Job duration has grown 24.6% (from 15,241s to 18,994s) over 20 runs with zero configuration changes. The shuffle bytes written trend is similarly directional: disk_bytes_spilled has grown +15.7% across the same period. The cluster configuration (max_workers=14) and shuffle partitions (400) have been unchanged for all 20 runs. This pattern \u2014 steady duration creep with stable config \u2014 strongly indicates that upstream data volumes feeding the LTV model training pipeline are growing, not a Spark tuning regression. The growing data volume also amplifies the existing spill and skew issues described above.",
+        "evidence": "analyze_metric_trend(task__duration): values=[15240, 18974, \u2026, 18994], trend_direction=increasing, percentage_change=+24.6%, run_count=20, std=950s. analyze_metric_trend(task__disk_bytes_spilled): values=[26.9GB, \u2026, 31.1GB], trend_direction=increasing, percentage_change=+15.7%, run_count=20. get_config_change_history(cluster_max_workers): single segment, value=14, run_count=20 \u2014 zero config changes. get_config_change_history(spark.sql.shuffle.partitions): single segment, value=400, run_count=20.",
+        "confidence": 0.88,
+        "severity": "performance",
+        "suggested_action": "Investigate whether upstream feature tables (interm_ltv_2_0_* datasets joining in the 13-source collectAsArrowToPython transformations) have grown in row count. If data volume is the cause, the two structural fixes \u2014 enabling adaptive repartitioning and fixing executor idleness \u2014 will provide proportionally more relief as volume grows. Additionally, consider increasing shuffle partitions from 400 to 600\u2013800 to spread the hot-key load more finely, as the current 400 partitions combined with growing data exacerbates the single-partition spill.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Driver off-heap memory at 100% utilisation \u2014 potential driver-side bottleneck",
+        "title": "Driver off-heap memory at 100% utilisation \u2014 potential driver-side bottleneck",
+        "description": "The driver's off-heap memory is at 100% utilisation (`driver_max_off_heap_memory_utilization=1.0`), with 31.8 GB used out of 31.8 GB allocated (driver_max_off_heap_used_memory=31.76 GB, driver_off_heap_memory=0.375 GB allocated overhead). The driver also has a GC time fraction of 9.1% (driver_jvm_gc_time_pct=0.0914), which is elevated \u2014 above the executor GC pressure (0.002) by two orders of magnitude. The top 5 slowest transformations are all `collectAsArrowToPython` operations (719\u2013737 seconds each) that pull ~14M rows to the driver, which is the direct cause. This saturates driver off-heap and creates a serialisation bottleneck in the driver JVM that is not visible in executor metrics.",
+        "evidence": "metrics section: driver_max_off_heap_memory_utilization=1.0; driver_jvm_gc_time_pct=0.0914. Slowest transformations: tf_ids 67715916, 67723994, 67717861, 67719998, 67710233 all collectAsArrowToPython, 719\u2013737s each. Stage 1940/2228/2492/2996/3260/3548/3788 all show gettingResultTime p75 > 1.2s and result serialization up to 863ms.",
+        "confidence": 0.82,
+        "severity": "performance",
+        "suggested_action": "The `collectAsArrowToPython` steps pull ~14M rows per call to the driver for model training. Consider (1) increasing `spark.driver.maxResultSize` and driver off-heap memory if the driver node type allows it, or (2) rearchitecting the model training to write intermediate feature sets to Delta tables and read them in the training framework directly, avoiding driver collection entirely. Reducing the number of features or applying server-side filtering before collection can also reduce the data volume sent to the driver.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [],
+      "tier2_cluster": [],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "active_conflicts": [],
+      "reasoning": "Triage agent exhausted its iteration budget; all insights defaulted to tier 4 without LLM classification."
+    },
+    "tiered_insights": {
+      "tier1": [],
+      "tier2": [],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 0,
+          "kind": "discovery",
+          "identifier": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+          "title": "Recurring single-partition spill from unskewed shuffle \u2014 adaptive repartitioning explicitly disabled",
+          "description": "At every major multi-join aggregation stage (stages 1895, 2159, 2444, 2708, 2972, 3215, 3500, 3726), exactly one task spills ~2.26 GB to disk while processing ~34M records \u2014 1.7\u00d7 the p50 per-task record count. The root cause is that `spark.databricks.adaptive.repartitioning.enabled` is explicitly set to `false` in the submitted Spark conf. This Databricks-native feature detects skewed shuffle partitions and splits them automatically at runtime, which would prevent the one hot partition from dominating. Without it, the skewed task runs for 110\u2013150 seconds while p75 siblings finish in 10\u201333 seconds, making these stages the primary bottleneck at every repetition of the model training loop.",
+          "evidence": "spark.databricks.adaptive.repartitioning.enabled=false found in submitted_spark_conf. Stage-level events confirm diskBytesSpilled=2,261,584,408 for a single task at stage 1895 (avg=14s, max=117s), 2,261,920,416 at stage 2159 (avg=16s, max=132s), 2,260,084,030 at stage 2444 (avg=10s, max=122s), 2,261,300,013 at stage 2708 (avg=19s, max=120s), 2,261,416,497 at stage 2972 (avg=14s, max=121s), 2,260,654,721 at stage 3215 (avg=21s, max=112s), 2,260,659,015 at stage 3500 (avg=22s, max=150s), 2,667,440,640 at stage 3726 (avg=25s, max=132s). The spilling task consistently reads ~34M shuffle records versus ~20M for normal tasks.",
+          "confidence": 0.95,
+          "severity": "performance",
+          "suggested_action": "Remove the explicit `spark.databricks.adaptive.repartitioning.enabled=false` override from the job's Spark configuration. On Databricks Runtime 15.x with Photon this feature is well-tested and will automatically split the hot shuffle partition that is repeatedly spilling, eliminating the 110\u2013152s task tails at each aggregation stage.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 1,
+          "kind": "discovery",
+          "identifier": "Autoscaling cluster with Spark dynamic allocation disabled \u2014 chronic 47% idle ratio",
+          "title": "Autoscaling cluster with Spark dynamic allocation disabled \u2014 chronic 47% idle ratio",
+          "description": "The Databricks cluster autoscales between 1 and 14 workers, but `spark.dynamicAllocation.enabled=false` is set at the Spark level. This means Spark cannot release idle executors between the job's sequential shuffle-heavy stages. The result is that over the 5h 12m run, 47.6% of total executor time is idle (executors_idle_time=8,964s against an ~18,721s job duration), and average vcore utilisation is only 22.6%. The cluster pays for workers it cannot use \u2014 the autoscaler may expand the cluster during burst stages but Spark holds all acquired executors idle through the gaps rather than releasing them.",
+          "evidence": "task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=14, dynamic_allocation_enabled=false. Current metrics: idle_ratio=0.476, vcore_utilization=0.226 (avg vcores used=47.9 out of avg max=101.3 available). time_series_summary: vcores_avg_used_over_time avg=24.8 versus vcores_max_over_time avg=101.3. executors_idle_time=8,964s. spark.dynamicAllocation.enabled source=task_profile (false).",
+          "confidence": 0.92,
+          "severity": "cost",
+          "suggested_action": "On Databricks, do not configure `spark.dynamicAllocation.enabled` directly \u2014 instead, set cluster-level executor bounds via `spark.databricks.clusterUsageTags` or use the cluster autoscale settings with Databricks-managed dynamic allocation. If the job must use a fixed executor count, set it to match the peak stage parallelism requirement (roughly 14 workers \u00d7 16 cores = 224 cores) and disable autoscaling, rather than autoscaling+fixed which gives the worst of both. Alternatively, enable `spark.dynamicAllocation.enabled=true` with appropriate `minExecutors`/`maxExecutors` to let Spark release idle workers between stages.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "Monotonically increasing job duration \u2014 likely data volume growth, not a tuning issue",
+          "title": "Monotonically increasing job duration \u2014 likely data volume growth, not a tuning issue",
+          "description": "Job duration has grown 24.6% (from 15,241s to 18,994s) over 20 runs with zero configuration changes. The shuffle bytes written trend is similarly directional: disk_bytes_spilled has grown +15.7% across the same period. The cluster configuration (max_workers=14) and shuffle partitions (400) have been unchanged for all 20 runs. This pattern \u2014 steady duration creep with stable config \u2014 strongly indicates that upstream data volumes feeding the LTV model training pipeline are growing, not a Spark tuning regression. The growing data volume also amplifies the existing spill and skew issues described above.",
+          "evidence": "analyze_metric_trend(task__duration): values=[15240, 18974, \u2026, 18994], trend_direction=increasing, percentage_change=+24.6%, run_count=20, std=950s. analyze_metric_trend(task__disk_bytes_spilled): values=[26.9GB, \u2026, 31.1GB], trend_direction=increasing, percentage_change=+15.7%, run_count=20. get_config_change_history(cluster_max_workers): single segment, value=14, run_count=20 \u2014 zero config changes. get_config_change_history(spark.sql.shuffle.partitions): single segment, value=400, run_count=20.",
+          "confidence": 0.88,
+          "severity": "performance",
+          "suggested_action": "Investigate whether upstream feature tables (interm_ltv_2_0_* datasets joining in the 13-source collectAsArrowToPython transformations) have grown in row count. If data volume is the cause, the two structural fixes \u2014 enabling adaptive repartitioning and fixing executor idleness \u2014 will provide proportionally more relief as volume grows. Additionally, consider increasing shuffle partitions from 400 to 600\u2013800 to spread the hot-key load more finely, as the current 400 partitions combined with growing data exacerbates the single-partition spill.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "Driver off-heap memory at 100% utilisation \u2014 potential driver-side bottleneck",
+          "title": "Driver off-heap memory at 100% utilisation \u2014 potential driver-side bottleneck",
+          "description": "The driver's off-heap memory is at 100% utilisation (`driver_max_off_heap_memory_utilization=1.0`), with 31.8 GB used out of 31.8 GB allocated (driver_max_off_heap_used_memory=31.76 GB, driver_off_heap_memory=0.375 GB allocated overhead). The driver also has a GC time fraction of 9.1% (driver_jvm_gc_time_pct=0.0914), which is elevated \u2014 above the executor GC pressure (0.002) by two orders of magnitude. The top 5 slowest transformations are all `collectAsArrowToPython` operations (719\u2013737 seconds each) that pull ~14M rows to the driver, which is the direct cause. This saturates driver off-heap and creates a serialisation bottleneck in the driver JVM that is not visible in executor metrics.",
+          "evidence": "metrics section: driver_max_off_heap_memory_utilization=1.0; driver_jvm_gc_time_pct=0.0914. Slowest transformations: tf_ids 67715916, 67723994, 67717861, 67719998, 67710233 all collectAsArrowToPython, 719\u2013737s each. Stage 1940/2228/2492/2996/3260/3548/3788 all show gettingResultTime p75 > 1.2s and result serialization up to 863ms.",
+          "confidence": 0.82,
+          "severity": "performance",
+          "suggested_action": "The `collectAsArrowToPython` steps pull ~14M rows per call to the driver for model training. Consider (1) increasing `spark.driver.maxResultSize` and driver off-heap memory if the driver node type allows it, or (2) rearchitecting the model training to write intermediate feature sets to Delta tables and read them in the training framework directly, avoiding driver collection entirely. Reducing the number of features or applying server-side filtering before collection can also reduce the data volume sent to the driver.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "00447d9b397e",
+    "historical_runs_count": 20,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": []
+  }
+}

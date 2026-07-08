@@ -1,0 +1,400 @@
+{
+  "saved_at": "2026-07-08T14:19:09.554149+00:00",
+  "source": "athena",
+  "task_id": 2507268,
+  "task_name": "editor_silver_demultiplex_prod_raw_tick",
+  "input": {
+    "task_id": 2507268,
+    "task_name": "editor_silver_demultiplex_prod_raw_tick",
+    "env_id": 1195,
+    "app_id": 11614,
+    "app_pit": "2026-06-22 03:13:43.000",
+    "executor__memory__allocated": 97.966796875,
+    "executor__memory_heap__allocated": 23.89453125,
+    "executor__memory_heap__max_used": 21.8733960986137,
+    "executor__memory_off_heap__allocated": 74.072265625,
+    "executor__memory_off_heap__max_used": 9.00031661987305,
+    "driver__heap_memory__allocated": 93.591796875,
+    "driver__heap_memory__max_used": 91.2467677593231,
+    "executors__jvm_gc_time": 24679.532,
+    "executors__run_time__used": null,
+    "executors__vcore_time__used": 736004.064,
+    "executors__vcore_time__allocated": 3675134.0,
+    "executors__cpu_time__used": 360596.87,
+    "task__vcore_time__used": 869968.674,
+    "task__vcore_time__allocated": 4287663.0,
+    "task__idle_time": 0.970999956130981,
+    "task__duration": 38280.971,
+    "task__skew_time": 0.0,
+    "task__disk_bytes_spilled": 0.0,
+    "task__total_io_bytes": 365553108476.0,
+    "task__memory_time__allocated": 26099906.4117246,
+    "executors__memory_time__used": 4265638.105398829,
+    "executors__used_vcore_time_of_retried_tasks": 0.0,
+    "driver__cpu_utilization": 0.218707732544472,
+    "task__dynamic_is_allocation_enabled__param": false,
+    "task__executors_dynamic_allocation_min_executors__param": null,
+    "task__executors_dynamic_allocation_max_executors__param": null,
+    "task__executor_instances__param": null,
+    "executor__cores": 16.0,
+    "task__task_cpus__param": 1.0,
+    "task__shuffle_partitions__param": "200",
+    "dbx_autooptimizeshuffle": null,
+    "driver_type": "r6gd.4xlarge",
+    "worker_type": "r6gd.4xlarge",
+    "cloud_provider": "AWS",
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": 6,
+    "workers_availability": "SPOT_WITH_FALLBACK",
+    "task_sub_type": "Databricks"
+  },
+  "plan": {
+    "task_id": 2507268,
+    "recommendations": [
+      {
+        "config_key": "spark.executor.memory",
+        "action": "set_spark_config",
+        "suggested_value": "28g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Executor GC time trending +28.8% over 20 runs with stable config; current memory_headroom=0.0846 (8.5%), below the 15% caution threshold. Time-series shows executor_heap_memory_over_time=23.9 GB constant (executor heap allocated), with used-heap avg 19.1 GB max \u2014 only ~4.8 GB free per executor.",
+        "confidence": 0.82,
+        "priority": 2,
+        "rationale": "The GC trend analysis shows a 28.8% increase in executor JVM GC time across 20 runs (from ~26,545s to ~34,183s) with no configuration changes. Current memory headroom is 8.5% \u2014 below the 15% proactive warning threshold in the sizing rules. The executor heap is fixed at ~23.9 GB (executor_heap_memory_over_time constant at 23.89 GB), with max used heap averaging 19.1 GB and peaking at 21.9 GB \u2014 leaving only ~2\u20134 GB headroom per executor under peak load.\n\nThe 25% step-size rule (max 4g per step) from the sizing guidelines gives: 23.9 GB \u00d7 1.25 \u2248 29.9 GB, capped at a 4g increment = ~27.9 GB \u2192 rounded to 28g as a safe conservative step. This directly addresses the memory pressure driving the GC trend. Note: this recommendation is placed at priority 2 (health tier) rather than after the executor.cores change (priority 3), because the GC trend is a growing reliability risk regardless of whether executor cores are changed. If executor.cores is reduced to 8 first (creating 2 executors per node), per-executor heap will approximately double \u2014 which may resolve the memory headroom concern without this change. The operator should validate after the executor.cores change before applying this. No cost saving fraction is set as this is a stability fix.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "explanation": "JVM GC time has increased 28.8% over 20 runs \u2014 climbing from ~26,545s to ~34,183s \u2014 with no configuration change to explain the drift, making memory pressure the primary suspect. The current memory headroom sits at just 8.5% (well below the 15% proactive warning threshold), while the executor heap is fixed at ~23.9 GB with max used heap averaging 19.1 GB and peaking at 21.9 GB, leaving only ~2\u20134 GB of headroom per executor under peak load. Raising executor memory to 28g \u2014 a ~4 GB step consistent with the 25% step-size rule \u2014 provides that additional buffer directly at the heap layer, reducing the frequency of full GC cycles that are eroding cluster reliability. Note: because reducing executor.cores from 16\u21928 (Recommendation 2) would double the number of executors per node and roughly halve per-executor heap contention, the operator should apply that change first across 3\u20135 runs to reassess whether this memory increase is still required.",
+        "expected_impact": "Expanding the executor heap from ~23.9 GB to 28 GB is expected to halt the upward GC time trend and restore memory headroom above the 15% safety threshold, improving run stability; note this change carries a modest ~22% increase in memory-billed cost, so it should only be applied if memory pressure persists after the executor.cores change.",
+        "risk_note": "Allocating more heap per executor on r6gd.4xlarge nodes with 6 workers and 16-core executors (one executor per node) increases the memory bill by an estimated 22%; if the executor.cores reduction is applied first and resolves the headroom issue, this change may be unnecessary and should be skipped."
+      },
+      {
+        "config_key": "spark.executor.cores",
+        "action": "set_spark_config",
+        "suggested_value": 8,
+        "current_value": 16,
+        "source": "agent_discovery",
+        "source_detail": "executor_cores=16 on r6gd.4xlarge yields 6 executors \u00d7 16 cores = 96 vCores; only avg 24.3 vCores used (25.3% utilisation). Fat 16-core executors amplify GC pressure through heap contention. Structured Streaming microbatch workload with avg 66s batch duration and 200 shuffle partitions has far lower natural parallelism.",
+        "confidence": 0.88,
+        "priority": 3,
+        "rationale": "The task profile confirms executor_cores=16 and cluster_workers=6, giving 96 total vCores. vcore_utilization=0.203 and cpu_efficiency=0.49 show the cluster is dramatically over-provisioned for this streaming workload. Time-series data shows vcores_avg_used_over_time avg=24.3 and app_vcores_max_used avg=29.7, with even the max time-series reading rarely exceeding ~60 vCores.\n\nReducing executor.cores from 16 to 8 on r6gd.4xlarge (16 physical cores per node) creates 2 executors per node rather than 1. Each executor gets approximately half the heap contention (8 tasks contending for the same heap vs. 16), which directly reduces GC frequency \u2014 addressing both insight 2 (GC trend) and insight 3 (fat executor misfit). The 200-partition shuffle stages complete in p50=21ms to p100=477ms; 8 cores per executor is more than adequate for these small fast tasks.\n\nImportant sequencing note: this change (executor.cores 16\u21928) will double the number of executors per node, which approximately doubles per-executor heap allocation. This may fully resolve the memory_headroom concern raised in the executor.memory recommendation (priority 2). The operator should apply executor.cores first, observe 3\u20135 runs, and then determine whether the executor.memory increase (priority 2) is still needed. However, both are kept in the plan because the GC trend is long-running and the memory headroom is tight.\n\nThe estimate_saving_for_change tool returned saving_fraction=0.5 assuming linear vCore scaling, but this overstates the real saving (memory cost is unchanged; fewer but larger executors may not reduce billed capacity linearly on Databricks). A conservative 0.15 is used to reflect indirect efficiency gains from better CPU packing and reduced GC overhead.",
+        "estimated_saving_fraction": 0.15,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "With executor_cores=16 and cluster_workers=6, the cluster provisions 96 vCores, yet vcore_utilization is only 0.200 and cpu_efficiency is 0.490 \u2014 meaning the cluster is running at roughly 20% utilisation and tasks are spending nearly half their scheduled CPU time idle or waiting. Time-series data confirms vcores_avg_used_over_time averages just 24.3 vCores, and even peak usage rarely exceeds ~60 vCores, so 96 provisioned cores represent severe over-provisioning. Halving executor.cores from 16 to 8 on the 16-physical-core r6gd.4xlarge nodes creates 2 executors per node (12 total), reducing the number of concurrent tasks contending for each executor's heap from 16 to 8 \u2014 directly cutting GC frequency and addressing the 28.8% GC time trend \u2014 while also improving task-slot packing for the 200-partition shuffle stages (p50 completion 21ms, p100 477ms) that clearly do not need 16 cores per executor.",
+        "expected_impact": "Halving executor cores is expected to roughly double packing efficiency, reduce per-executor GC pressure by cutting concurrent heap contention in half, and deliver an estimated 15% cost reduction through better vCore utilisation (conservative vs. the tool's linear 50% estimate, since memory cost is unchanged).",
+        "risk_note": "Doubling the executor count per node doubles the memory footprint per node; if total node memory is insufficient to accommodate two full executor JVMs simultaneously, tasks may spill to disk or fail with OOM errors \u2014 the operator should verify node memory capacity before deploying."
+      }
+    ],
+    "blocked_recommendations": [
+      {
+        "config_key": "spark.driver.memory",
+        "action": "set_spark_config",
+        "suggested_value": "110g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Driver heap reached 97.5% JVM utilisation (driver_max_heap_memory_utilization=0.9746) and 100% total memory (driver_max_memory_utilization=1.0) on an r6gd.4xlarge node with ~93.97 GB heap. Zero headroom means any data volume spike triggers driver OOM.",
+        "confidence": 0.92,
+        "priority": 1,
+        "rationale": "The driver JVM heap is at 97.5% utilisation with used-heap oscillating between 30.7 GB and 91.2 GB (time_series_summary: driver_used_heap_memory_over_time min=30.7, max=91.2 GB). The current effective heap is ~93.97 GB, leaving essentially zero headroom. The driver is accumulating state from 23,429 broadcasts (~1.81 TB cumulative data size), 166,844 stage listener entries, and 12.3M task result accumulators across a 10.6-hour run. \n\nThe r6gd.4xlarge instance has 128 GB total RAM. The driver process also consumes non-heap memory (JVM internals, off-heap, OS overhead) which is reflected in driver_max_memory_utilization=1.0. Upgrading the driver node to a larger instance type is the safest fix (e.g. r6gd.8xlarge with 256 GB), but since spark.driver.memory is a directly configurable knob, raising it from the implicit default (~93g after Databricks overhead) to 110g is a safe first step that reclaims headroom within the same instance boundary \u2014 the remaining ~18 GB provides OS/off-heap breathing room on r6gd.4xlarge. This is a stability-only change; no cost saving fraction is set because the change does not reduce resource consumption.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "blocked_by": [
+          "llm safety review: Setting spark.driver.memory=110g on an r6gd.4xlarge instance (128 GB total RAM) is unsafe: the current run already shows driver_max_memory_utilization=1.0 and driver_max_used_memory=98.6 GB (heap 91.2 GB + off-heap 8.8 GB), meaning the OS + JVM overhead already consumes the ~30 GB gap between heap and total RAM; raising the heap ceiling to 110g leaves only ~18 GB for off-heap, OS, and JVM internals \u2014 well below the ~30 GB already being consumed \u2014 making an OS-level OOM kill of the driver process highly probable on this same instance type."
+        ]
+      }
+    ],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memory",
+            "current_value": null,
+            "suggested_value": "28g",
+            "rationale": "The GC trend analysis shows a 28.8% increase in executor JVM GC time across 20 runs (from ~26,545s to ~34,183s) with no configuration changes. Current memory headroom is 8.5% \u2014 below the 15% proactive warning threshold in the sizing rules. The executor heap is fixed at ~23.9 GB (executor_heap_memory_over_time constant at 23.89 GB), with max used heap averaging 19.1 GB and peaking at 21.9 GB \u2014 leaving only ~2\u20134 GB headroom per executor under peak load.\n\nThe 25% step-size rule (max 4g per step) from the sizing guidelines gives: 23.9 GB \u00d7 1.25 \u2248 29.9 GB, capped at a 4g increment = ~27.9 GB \u2192 rounded to 28g as a safe conservative step. This directly addresses the memory pressure driving the GC trend. Note: this recommendation is placed at priority 2 (health tier) rather than after the executor.cores change (priority 3), because the GC trend is a growing reliability risk regardless of whether executor cores are changed. If executor.cores is reduced to 8 first (creating 2 executors per node), per-executor heap will approximately double \u2014 which may resolve the memory headroom concern without this change. The operator should validate after the executor.cores change before applying this. No cost saving fraction is set as this is a stability fix.",
+            "confidence": 0.82
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.cores",
+            "current_value": 16,
+            "suggested_value": 8,
+            "rationale": "The task profile confirms executor_cores=16 and cluster_workers=6, giving 96 total vCores. vcore_utilization=0.203 and cpu_efficiency=0.49 show the cluster is dramatically over-provisioned for this streaming workload. Time-series data shows vcores_avg_used_over_time avg=24.3 and app_vcores_max_used avg=29.7, with even the max time-series reading rarely exceeding ~60 vCores.\n\nReducing executor.cores from 16 to 8 on r6gd.4xlarge (16 physical cores per node) creates 2 executors per node rather than 1. Each executor gets approximately half the heap contention (8 tasks contending for the same heap vs. 16), which directly reduces GC frequency \u2014 addressing both insight 2 (GC trend) and insight 3 (fat executor misfit). The 200-partition shuffle stages complete in p50=21ms to p100=477ms; 8 cores per executor is more than adequate for these small fast tasks.\n\nImportant sequencing note: this change (executor.cores 16\u21928) will double the number of executors per node, which approximately doubles per-executor heap allocation. This may fully resolve the memory_headroom concern raised in the executor.memory recommendation (priority 2). The operator should apply executor.cores first, observe 3\u20135 runs, and then determine whether the executor.memory increase (priority 2) is still needed. However, both are kept in the plan because the GC trend is long-running and the memory headroom is tight.\n\nThe estimate_saving_for_change tool returned saving_fraction=0.5 assuming linear vCore scaling, but this overstates the real saving (memory cost is unchanged; fewer but larger executors may not reduce billed capacity linearly on Databricks). A conservative 0.15 is used to reflect indirect efficiency gains from better CPU packing and reduced GC overhead.",
+            "confidence": 0.88
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.driver.memory",
+            "current_value": null,
+            "suggested_value": "110g",
+            "rationale": "The driver JVM heap is at 97.5% utilisation with used-heap oscillating between 30.7 GB and 91.2 GB (time_series_summary: driver_used_heap_memory_over_time min=30.7, max=91.2 GB). The current effective heap is ~93.97 GB, leaving essentially zero headroom. The driver is accumulating state from 23,429 broadcasts (~1.81 TB cumulative data size), 166,844 stage listener entries, and 12.3M task result accumulators across a 10.6-hour run. \n\nThe r6gd.4xlarge instance has 128 GB total RAM. The driver process also consumes non-heap memory (JVM internals, off-heap, OS overhead) which is reflected in driver_max_memory_utilization=1.0. Upgrading the driver node to a larger instance type is the safest fix (e.g. r6gd.8xlarge with 256 GB), but since spark.driver.memory is a directly configurable knob, raising it from the implicit default (~93g after Databricks overhead) to 110g is a safe first step that reclaims headroom within the same instance boundary \u2014 the remaining ~18 GB provides OS/off-heap breathing room on r6gd.4xlarge. This is a stability-only change; no cost saving fraction is set because the change does not reduce resource consumption.",
+            "confidence": 0.92
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.0845856790509879,
+        "gc_pressure": 0.03353178767230285,
+        "off_heap_headroom": 0.8784927591463414,
+        "vcore_utilization": 0.2002659124810143,
+        "idle_ratio": 2.536508167807397e-05,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 0.4899386941428628,
+        "spill_ratio": null,
+        "has_spill": false,
+        "retried_task_waste": 0.0
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "200",
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": 6,
+        "dynamic_allocation_enabled": false,
+        "is_databricks": true,
+        "max_executors_param": null,
+        "min_executors_param": null,
+        "executor_instances_param": null,
+        "executor_cores": 16
+      },
+      "pre_tuning_durations_ms": [
+        43203.411,
+        43230.063,
+        43207.733,
+        43204.867,
+        43205.263
+      ],
+      "pre_tuning_cost_usd": 108.13217505671994,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [],
+    "health_breach_unactioned": false,
+    "plan_degraded": false,
+    "summary": "2 recommendation(s), ordered health-first. 1 blocked by safety rules. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "00447d9b397e"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.0845856790509879,
+    "gc_pressure": 0.03353178767230285,
+    "off_heap_headroom": 0.8784927591463414,
+    "vcore_utilization": 0.2002659124810143,
+    "idle_ratio": 2.536508167807397e-05,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 0.4899386941428628,
+    "spill_ratio": null,
+    "has_spill": false,
+    "retried_task_waste": 0.0
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 95.8007,
+    "cluster_workers": 6,
+    "workers_availability": "SPOT_WITH_FALLBACK"
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memory",
+      "current_value": null,
+      "suggested_value": "28g",
+      "action": "set_spark_config",
+      "explanation": "JVM GC time has increased 28.8% over 20 runs \u2014 climbing from ~26,545s to ~34,183s \u2014 with no configuration change to explain the drift, making memory pressure the primary suspect. The current memory headroom sits at just 8.5% (well below the 15% proactive warning threshold), while the executor heap is fixed at ~23.9 GB with max used heap averaging 19.1 GB and peaking at 21.9 GB, leaving only ~2\u20134 GB of headroom per executor under peak load. Raising executor memory to 28g \u2014 a ~4 GB step consistent with the 25% step-size rule \u2014 provides that additional buffer directly at the heap layer, reducing the frequency of full GC cycles that are eroding cluster reliability. Note: because reducing executor.cores from 16\u21928 (Recommendation 2) would double the number of executors per node and roughly halve per-executor heap contention, the operator should apply that change first across 3\u20135 runs to reassess whether this memory increase is still required.",
+      "expected_impact": "Expanding the executor heap from ~23.9 GB to 28 GB is expected to halt the upward GC time trend and restore memory headroom above the 15% safety threshold, improving run stability; note this change carries a modest ~22% increase in memory-billed cost, so it should only be applied if memory pressure persists after the executor.cores change.",
+      "risk_note": "Allocating more heap per executor on r6gd.4xlarge nodes with 6 workers and 16-core executors (one executor per node) increases the memory bill by an estimated 22%; if the executor.cores reduction is applied first and resolves the headroom issue, this change may be unnecessary and should be skipped."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.cores",
+      "current_value": 16,
+      "suggested_value": 8,
+      "action": "set_spark_config",
+      "explanation": "With executor_cores=16 and cluster_workers=6, the cluster provisions 96 vCores, yet vcore_utilization is only 0.200 and cpu_efficiency is 0.490 \u2014 meaning the cluster is running at roughly 20% utilisation and tasks are spending nearly half their scheduled CPU time idle or waiting. Time-series data confirms vcores_avg_used_over_time averages just 24.3 vCores, and even peak usage rarely exceeds ~60 vCores, so 96 provisioned cores represent severe over-provisioning. Halving executor.cores from 16 to 8 on the 16-physical-core r6gd.4xlarge nodes creates 2 executors per node (12 total), reducing the number of concurrent tasks contending for each executor's heap from 16 to 8 \u2014 directly cutting GC frequency and addressing the 28.8% GC time trend \u2014 while also improving task-slot packing for the 200-partition shuffle stages (p50 completion 21ms, p100 477ms) that clearly do not need 16 cores per executor.",
+      "expected_impact": "Halving executor cores is expected to roughly double packing efficiency, reduce per-executor GC pressure by cutting concurrent heap contention in half, and deliver an estimated 15% cost reduction through better vCore utilisation (conservative vs. the tool's linear 50% estimate, since memory cost is unchanged).",
+      "risk_note": "Doubling the executor count per node doubles the memory footprint per node; if total node memory is insufficient to accommodate two full executor JVMs simultaneously, tasks may spill to disk or fail with OOM errors \u2014 the operator should verify node memory capacity before deploying."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.driver.memory",
+      "current_value": null,
+      "suggested_value": "110g",
+      "action": "set_spark_config",
+      "blocked_by": [
+        "llm safety review: Setting spark.driver.memory=110g on an r6gd.4xlarge instance (128 GB total RAM) is unsafe: the current run already shows driver_max_memory_utilization=1.0 and driver_max_used_memory=98.6 GB (heap 91.2 GB + off-heap 8.8 GB), meaning the OS + JVM overhead already consumes the ~30 GB gap between heap and total RAM; raising the heap ceiling to 110g leaves only ~18 GB for off-heap, OS, and JVM internals \u2014 well below the ~30 GB already being consumed \u2014 making an OS-level OOM kill of the driver process highly probable on this same instance type."
+      ]
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Driver heap at critical saturation \u2014 risk of OOM on data volume increase",
+        "title": "Driver heap at critical saturation \u2014 risk of OOM on data volume increase",
+        "description": "The driver JVM heap reached 97.5% utilisation (driver_max_heap_memory_utilization = 0.9746) and total driver memory hit 100% (driver_max_memory_utilization = 1.0) during this run. This is a long-running Structured Streaming job (~10.6 hours, 310 batches, 140,832 Spark jobs, 166,844 stages) where driver-side state \u2014 broadcast tables (23,429 broadcasts, ~1.81 TB cumulative data size, 9.3M ms collect time), stage listener metadata, and task result accumulation \u2014 saturates the heap. The current headroom is essentially zero; any upstream data volume increase or addition of a new stream target will trigger driver OOM and job failure. This is not flagged by SQL rules because the executor metrics appear healthy \u2014 the pressure is entirely on the driver node.",
+        "evidence": "driver_max_heap_memory_utilization=0.9746; driver_max_memory_utilization=1.0; driver_heap_memory=93.97 GB (r6gd.4xlarge); driver_used_heap oscillates 30.7\u201391.2 GB (time_series_summary); broadcasts_count=23,429; broadcasts_dataSize=1,810,842,470,400 bytes; broadcasts_collectTime=9,311,879 ms; num_spark_stages=166,844; num_spark_tasks=12,304,281",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase driver JVM heap allocation via the cluster driver node type or by setting a larger `--driver-memory` value (e.g. upgrade to a node with more RAM, or split the streaming job into fewer parallel streams per cluster). Additionally, audit whether all 23,429 broadcasts are necessary \u2014 repeated broadcasting of the same lookup table within a streaming loop is a common cause of driver heap accumulation; persisting or checkpointing broadcast variables across microbatches can significantly reduce driver pressure.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor GC time trending up +28.8% across 20 runs with no config change \u2014 proactive memory warning",
+        "title": "Executor GC time trending up +28.8% across 20 runs with no config change \u2014 proactive memory warning",
+        "description": "Executor JVM GC time has increased monotonically from ~26,545s in the oldest run to ~34,183s in the most recent historical run \u2014 a 28.8% increase over 20 runs \u2014 with no configuration changes to executor count, memory, or cluster topology during that period. The current run's GC reading (24,679s) is at only the 10th percentile of the historical distribution, meaning this specific run was a relatively light GC day; the long-term trajectory is the concern. Current memory headroom is already tight at 8.5% (memory_headroom = 0.0845). This matches the 'gradual GC degradation' discovery pattern: data volume growth is slowly outpacing the current memory allocation, and the job is approaching the threshold where GC pauses will begin materially impacting streaming latency and then reliability.",
+        "evidence": "executors__jvm_gc_time trend: [26545, 26324, 29547, 27993, 29387, 27676, 28820, 28046, 35540, 26011, 26270, 22587, 26603, 25161, 27433, 23771, 35382, 39972, 32078, 34184]; trend_direction=INCREASING; percentage_change_first_to_last=+28.8%; memory_headroom=0.0846; no config changes over 20 runs (cluster_max_workers and spark.executor.instances both stable)",
+        "confidence": 0.85,
+        "severity": "health",
+        "suggested_action": "Increase executor memory headroom before the GC trend causes latency spikes. On this r6gd.4xlarge cluster (128 GB per node), consider reducing spark.executor.cores from 16 to 8, which would create 2 executors per node with more heap per executor and lower per-executor GC pressure. Alternatively, monitor the GC trend over the next 5 runs; if it continues to climb, increase the cluster's worker count by 1\u20132 nodes to spread the heap load.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Fat 16-core executors badly mismatched to a high-frequency microbatch streaming workload",
+        "title": "Fat 16-core executors badly mismatched to a high-frequency microbatch streaming workload",
+        "description": "Each executor is configured with 16 cores (spark.executor.cores=16, confirmed from task profile and executor_cores metric). The job runs as Structured Streaming with an average batch duration of ~66s and ~1.93 batches per 4-minute window, producing small shuffle stages (e.g. Stage 1289858: 200 tasks completing in 9\u2013477ms, with median 21ms). The result is a cluster of 6 executors \u00d7 16 cores = 96 vCores of which only an average of 24.3 are in use (vcores_avg_used=24.3/96 = 25.3%) and peak CPU efficiency is 49% (cpu_efficiency=0.49). Fat executors with 16 concurrent task slots contend for the same JVM heap, amplifying GC pressure \u2014 this directly contributes to the GC trend. The workload's natural parallelism is far lower than 96 vCores, and the typical Databricks recommendation for streaming workloads is 4\u20138 cores per executor.",
+        "evidence": "executor_cores=16 (task_profile + metrics); vcore_utilization=0.203; cpu_efficiency=0.49; vcores_max_over_time=96 (6 workers \u00d7 16); vcores_avg_used_over_time avg=24.3; app_vcores_max_used avg=29.7; batch stages complete in single-digit to low-hundreds of ms with 200 partition slots mostly empty (Stage 1289858 task duration p50=21ms, p75=124ms, p100=477ms); cluster_workers=6; dynamic_allocation_enabled=false",
+        "confidence": 0.88,
+        "severity": "cost",
+        "suggested_action": "Reduce spark.executor.cores from 16 to 4 or 8. With r6gd.4xlarge nodes (16 physical cores), setting executor cores to 8 would yield 2 executors per node, each with half the heap contention \u2014 reducing GC pressure while still providing sufficient parallelism for the 200-partition shuffle stages. This change is reversible and will have no impact on throughput given the current parallelism deficit, but will halve the within-executor task contention and reduce GC frequency.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Driver heap at critical saturation \u2014 risk of OOM on data volume increase",
+        "title": "Driver heap at critical saturation \u2014 risk of OOM on data volume increase",
+        "description": "The driver JVM heap reached 97.5% utilisation (driver_max_heap_memory_utilization = 0.9746) and total driver memory hit 100% (driver_max_memory_utilization = 1.0) during this run. This is a long-running Structured Streaming job (~10.6 hours, 310 batches, 140,832 Spark jobs, 166,844 stages) where driver-side state \u2014 broadcast tables (23,429 broadcasts, ~1.81 TB cumulative data size, 9.3M ms collect time), stage listener metadata, and task result accumulation \u2014 saturates the heap. The current headroom is essentially zero; any upstream data volume increase or addition of a new stream target will trigger driver OOM and job failure. This is not flagged by SQL rules because the executor metrics appear healthy \u2014 the pressure is entirely on the driver node.",
+        "evidence": "driver_max_heap_memory_utilization=0.9746; driver_max_memory_utilization=1.0; driver_heap_memory=93.97 GB (r6gd.4xlarge); driver_used_heap oscillates 30.7\u201391.2 GB (time_series_summary); broadcasts_count=23,429; broadcasts_dataSize=1,810,842,470,400 bytes; broadcasts_collectTime=9,311,879 ms; num_spark_stages=166,844; num_spark_tasks=12,304,281",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase driver JVM heap allocation via the cluster driver node type or by setting a larger `--driver-memory` value (e.g. upgrade to a node with more RAM, or split the streaming job into fewer parallel streams per cluster). Additionally, audit whether all 23,429 broadcasts are necessary \u2014 repeated broadcasting of the same lookup table within a streaming loop is a common cause of driver heap accumulation; persisting or checkpointing broadcast variables across microbatches can significantly reduce driver pressure.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor GC time trending up +28.8% across 20 runs with no config change \u2014 proactive memory warning",
+        "title": "Executor GC time trending up +28.8% across 20 runs with no config change \u2014 proactive memory warning",
+        "description": "Executor JVM GC time has increased monotonically from ~26,545s in the oldest run to ~34,183s in the most recent historical run \u2014 a 28.8% increase over 20 runs \u2014 with no configuration changes to executor count, memory, or cluster topology during that period. The current run's GC reading (24,679s) is at only the 10th percentile of the historical distribution, meaning this specific run was a relatively light GC day; the long-term trajectory is the concern. Current memory headroom is already tight at 8.5% (memory_headroom = 0.0845). This matches the 'gradual GC degradation' discovery pattern: data volume growth is slowly outpacing the current memory allocation, and the job is approaching the threshold where GC pauses will begin materially impacting streaming latency and then reliability.",
+        "evidence": "executors__jvm_gc_time trend: [26545, 26324, 29547, 27993, 29387, 27676, 28820, 28046, 35540, 26011, 26270, 22587, 26603, 25161, 27433, 23771, 35382, 39972, 32078, 34184]; trend_direction=INCREASING; percentage_change_first_to_last=+28.8%; memory_headroom=0.0846; no config changes over 20 runs (cluster_max_workers and spark.executor.instances both stable)",
+        "confidence": 0.85,
+        "severity": "health",
+        "suggested_action": "Increase executor memory headroom before the GC trend causes latency spikes. On this r6gd.4xlarge cluster (128 GB per node), consider reducing spark.executor.cores from 16 to 8, which would create 2 executors per node with more heap per executor and lower per-executor GC pressure. Alternatively, monitor the GC trend over the next 5 runs; if it continues to climb, increase the cluster's worker count by 1\u20132 nodes to spread the heap load.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Fat 16-core executors badly mismatched to a high-frequency microbatch streaming workload",
+        "title": "Fat 16-core executors badly mismatched to a high-frequency microbatch streaming workload",
+        "description": "Each executor is configured with 16 cores (spark.executor.cores=16, confirmed from task profile and executor_cores metric). The job runs as Structured Streaming with an average batch duration of ~66s and ~1.93 batches per 4-minute window, producing small shuffle stages (e.g. Stage 1289858: 200 tasks completing in 9\u2013477ms, with median 21ms). The result is a cluster of 6 executors \u00d7 16 cores = 96 vCores of which only an average of 24.3 are in use (vcores_avg_used=24.3/96 = 25.3%) and peak CPU efficiency is 49% (cpu_efficiency=0.49). Fat executors with 16 concurrent task slots contend for the same JVM heap, amplifying GC pressure \u2014 this directly contributes to the GC trend. The workload's natural parallelism is far lower than 96 vCores, and the typical Databricks recommendation for streaming workloads is 4\u20138 cores per executor.",
+        "evidence": "executor_cores=16 (task_profile + metrics); vcore_utilization=0.203; cpu_efficiency=0.49; vcores_max_over_time=96 (6 workers \u00d7 16); vcores_avg_used_over_time avg=24.3; app_vcores_max_used avg=29.7; batch stages complete in single-digit to low-hundreds of ms with 200 partition slots mostly empty (Stage 1289858 task duration p50=21ms, p75=124ms, p100=477ms); cluster_workers=6; dynamic_allocation_enabled=false",
+        "confidence": 0.88,
+        "severity": "cost",
+        "suggested_action": "Reduce spark.executor.cores from 16 to 4 or 8. With r6gd.4xlarge nodes (16 physical cores), setting executor cores to 8 would yield 2 executors per node, each with half the heap contention \u2014 reducing GC pressure while still providing sufficient parallelism for the 200-partition shuffle stages. This change is reversible and will have no impact on throughput given the current parallelism deficit, but will halve the within-executor task contention and reduce GC frequency.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        0,
+        1
+      ],
+      "tier2_cluster": [
+        2
+      ],
+      "tier3_instance": [],
+      "tier4_tuning": [],
+      "active_conflicts": [],
+      "reasoning": "Insight 0 (driver heap at 97.5\u2013100% utilisation, effectively zero headroom) is a clear Tier 1 health issue: the driver is at imminent OOM risk and the job will fail on any data volume increase. The memory_headroom metric (0.0845) reflects executor heap, not driver heap \u2014 the driver's own headroom is essentially 0, which satisfies the \"tight heap headroom\" Tier 1 criterion on the driver node. This is the most urgent fix regardless of what else is happening.\n\nInsight 1 (GC time trending +28.8% across 20 runs, executor memory_headroom at 8.5%) is also a Tier 1 health issue, though less acute than insight 0. Memory headroom at 8.5% is above the strict <5% OOM threshold, and this run's GC reading is only at the 10th percentile (gc_pressure = 0.034, well below the 0.20 severe-GC threshold). However, the long-term increasing trend with no config change means the job is on a trajectory toward the GC danger zone. The discovery insight explicitly calls this a proactive health warning about approaching reliability impact on streaming latency. Tier 1 is appropriate given the directional risk and tight headroom (near the 0.05 boundary).\n\nInsight 2 (fat 16-core executors, vcore_utilization ~20%, cpu_efficiency ~49%) is a Tier 2 cluster right-sizing issue. vcore_utilization (0.20) is well below the 0.30 threshold and idle_ratio is near zero, pointing to structural over-provisioning of cores rather than true idleness. The fix \u2014 reducing executor cores from 16 to 4\u20138 \u2014 would reduce cluster cost and also reduce per-executor JVM heap contention (helping GC). This is complementary to and does not conflict with Tier 1 fixes; in fact it supports them. No conflict with insight 1's memory recommendation exists because right-sizing cores does not reduce memory. No conflict with insight 0 (driver memory) either. skew_ratio=0 and the vcore under-utilisation rule is cleanly satisfied. No compound-reduction conflict applies because we are reducing cores, not simultaneously recommending memory reduction on executors."
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 0,
+          "kind": "discovery",
+          "identifier": "Driver heap at critical saturation \u2014 risk of OOM on data volume increase",
+          "title": "Driver heap at critical saturation \u2014 risk of OOM on data volume increase",
+          "description": "The driver JVM heap reached 97.5% utilisation (driver_max_heap_memory_utilization = 0.9746) and total driver memory hit 100% (driver_max_memory_utilization = 1.0) during this run. This is a long-running Structured Streaming job (~10.6 hours, 310 batches, 140,832 Spark jobs, 166,844 stages) where driver-side state \u2014 broadcast tables (23,429 broadcasts, ~1.81 TB cumulative data size, 9.3M ms collect time), stage listener metadata, and task result accumulation \u2014 saturates the heap. The current headroom is essentially zero; any upstream data volume increase or addition of a new stream target will trigger driver OOM and job failure. This is not flagged by SQL rules because the executor metrics appear healthy \u2014 the pressure is entirely on the driver node.",
+          "evidence": "driver_max_heap_memory_utilization=0.9746; driver_max_memory_utilization=1.0; driver_heap_memory=93.97 GB (r6gd.4xlarge); driver_used_heap oscillates 30.7\u201391.2 GB (time_series_summary); broadcasts_count=23,429; broadcasts_dataSize=1,810,842,470,400 bytes; broadcasts_collectTime=9,311,879 ms; num_spark_stages=166,844; num_spark_tasks=12,304,281",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Increase driver JVM heap allocation via the cluster driver node type or by setting a larger `--driver-memory` value (e.g. upgrade to a node with more RAM, or split the streaming job into fewer parallel streams per cluster). Additionally, audit whether all 23,429 broadcasts are necessary \u2014 repeated broadcasting of the same lookup table within a streaming loop is a common cause of driver heap accumulation; persisting or checkpointing broadcast variables across microbatches can significantly reduce driver pressure.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 1,
+          "kind": "discovery",
+          "identifier": "Executor GC time trending up +28.8% across 20 runs with no config change \u2014 proactive memory warning",
+          "title": "Executor GC time trending up +28.8% across 20 runs with no config change \u2014 proactive memory warning",
+          "description": "Executor JVM GC time has increased monotonically from ~26,545s in the oldest run to ~34,183s in the most recent historical run \u2014 a 28.8% increase over 20 runs \u2014 with no configuration changes to executor count, memory, or cluster topology during that period. The current run's GC reading (24,679s) is at only the 10th percentile of the historical distribution, meaning this specific run was a relatively light GC day; the long-term trajectory is the concern. Current memory headroom is already tight at 8.5% (memory_headroom = 0.0845). This matches the 'gradual GC degradation' discovery pattern: data volume growth is slowly outpacing the current memory allocation, and the job is approaching the threshold where GC pauses will begin materially impacting streaming latency and then reliability.",
+          "evidence": "executors__jvm_gc_time trend: [26545, 26324, 29547, 27993, 29387, 27676, 28820, 28046, 35540, 26011, 26270, 22587, 26603, 25161, 27433, 23771, 35382, 39972, 32078, 34184]; trend_direction=INCREASING; percentage_change_first_to_last=+28.8%; memory_headroom=0.0846; no config changes over 20 runs (cluster_max_workers and spark.executor.instances both stable)",
+          "confidence": 0.85,
+          "severity": "health",
+          "suggested_action": "Increase executor memory headroom before the GC trend causes latency spikes. On this r6gd.4xlarge cluster (128 GB per node), consider reducing spark.executor.cores from 16 to 8, which would create 2 executors per node with more heap per executor and lower per-executor GC pressure. Alternatively, monitor the GC trend over the next 5 runs; if it continues to climb, increase the cluster's worker count by 1\u20132 nodes to spread the heap load.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "Fat 16-core executors badly mismatched to a high-frequency microbatch streaming workload",
+          "title": "Fat 16-core executors badly mismatched to a high-frequency microbatch streaming workload",
+          "description": "Each executor is configured with 16 cores (spark.executor.cores=16, confirmed from task profile and executor_cores metric). The job runs as Structured Streaming with an average batch duration of ~66s and ~1.93 batches per 4-minute window, producing small shuffle stages (e.g. Stage 1289858: 200 tasks completing in 9\u2013477ms, with median 21ms). The result is a cluster of 6 executors \u00d7 16 cores = 96 vCores of which only an average of 24.3 are in use (vcores_avg_used=24.3/96 = 25.3%) and peak CPU efficiency is 49% (cpu_efficiency=0.49). Fat executors with 16 concurrent task slots contend for the same JVM heap, amplifying GC pressure \u2014 this directly contributes to the GC trend. The workload's natural parallelism is far lower than 96 vCores, and the typical Databricks recommendation for streaming workloads is 4\u20138 cores per executor.",
+          "evidence": "executor_cores=16 (task_profile + metrics); vcore_utilization=0.203; cpu_efficiency=0.49; vcores_max_over_time=96 (6 workers \u00d7 16); vcores_avg_used_over_time avg=24.3; app_vcores_max_used avg=29.7; batch stages complete in single-digit to low-hundreds of ms with 200 partition slots mostly empty (Stage 1289858 task duration p50=21ms, p75=124ms, p100=477ms); cluster_workers=6; dynamic_allocation_enabled=false",
+          "confidence": 0.88,
+          "severity": "cost",
+          "suggested_action": "Reduce spark.executor.cores from 16 to 4 or 8. With r6gd.4xlarge nodes (16 physical cores), setting executor cores to 8 would yield 2 executors per node, each with half the heap contention \u2014 reducing GC pressure while still providing sufficient parallelism for the 200-partition shuffle stages. This change is reversible and will have no impact on throughput given the current parallelism deficit, but will halve the within-executor task contention and reduce GC frequency.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier3": [],
+      "tier4": []
+    },
+    "kb_version": "00447d9b397e",
+    "historical_runs_count": 20,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": []
+  }
+}

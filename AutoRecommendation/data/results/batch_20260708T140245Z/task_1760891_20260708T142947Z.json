@@ -1,0 +1,564 @@
+{
+  "saved_at": "2026-07-08T14:29:47.412964+00:00",
+  "source": "athena",
+  "task_id": 1760891,
+  "task_name": "quoteengine",
+  "input": {
+    "task_id": 1760891,
+    "task_name": "quoteengine",
+    "env_id": 12919,
+    "app_id": 12932,
+    "app_pit": "2026-03-24 04:14:44.000",
+    "executor__memory__allocated": 9.5322265625,
+    "executor__memory_heap__allocated": 8.666015625,
+    "executor__memory_heap__max_used": 4.08997483551502,
+    "executor__memory_off_heap__allocated": 0.8662109375,
+    "executor__memory_off_heap__max_used": 3.30564117431641,
+    "driver__heap_memory__allocated": 18.90234375,
+    "driver__heap_memory__max_used": 18.8409238681197,
+    "executors__jvm_gc_time": 5.913,
+    "executors__run_time__used": null,
+    "executors__vcore_time__used": 30.329,
+    "executors__vcore_time__allocated": 302126.0,
+    "executors__cpu_time__used": 13338.25,
+    "task__vcore_time__used": 173020.329,
+    "task__vcore_time__allocated": 475116.0,
+    "task__idle_time": null,
+    "task__duration": 43240.966,
+    "task__skew_time": 0.0,
+    "task__disk_bytes_spilled": 0.0,
+    "task__total_io_bytes": 350815159.0,
+    "task__memory_time__allocated": 1553684.56298145,
+    "executors__memory_time__used": 203489.48127934805,
+    "executors__used_vcore_time_of_retried_tasks": 0.0,
+    "driver__cpu_utilization": null,
+    "task__dynamic_is_allocation_enabled__param": false,
+    "task__executors_dynamic_allocation_min_executors__param": null,
+    "task__executors_dynamic_allocation_max_executors__param": null,
+    "task__executor_instances__param": null,
+    "executor__cores": 4.0,
+    "task__task_cpus__param": 1.0,
+    "task__shuffle_partitions__param": "200",
+    "dbx_autooptimizeshuffle": null,
+    "driver_type": "r6id.xlarge",
+    "worker_type": "md-fleet.xlarge",
+    "cloud_provider": "AWS",
+    "cluster_min_workers": 1,
+    "cluster_max_workers": 2,
+    "cluster_workers": 1,
+    "workers_availability": "SPOT_WITH_FALLBACK",
+    "task_sub_type": "Databricks"
+  },
+  "plan": {
+    "task_id": 1760891,
+    "recommendations": [
+      {
+        "config_key": "aws_attributes.availability",
+        "action": "set_cluster_config",
+        "suggested_value": "ON_DEMAND",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Executor 141 (spot instance i-09667841f81e99fe2) was lost after 8+ hours via heartbeat timeout, causing recomputation of in-flight work. Executors 149\u2013153 were also churned via autoscaler kill requests. This is a 12-hour streaming job \u2014 spot eviction at arbitrary points during long micro-batch windows causes silent reliability risk.",
+        "confidence": 0.88,
+        "priority": 2,
+        "rationale": "Spot instance eviction of executor 141 (running for 8+ hours before eviction) forced recomputation of in-flight tasks and added latency to this 12-hour streaming job. SPOT_WITH_FALLBACK provides no eviction protection \u2014 any spot preemption mid-stream causes work loss proportional to how long the executor held uncommitted state. For a long-running streaming job (mysql_exchange, 12h duration), the cost difference between spot and on-demand is modest relative to the reliability and latency cost of a mid-run eviction cascading into driver-side recomputation pressure (which is already at 99.2% heap). Switching to ON_DEMAND eliminates the spot eviction risk entirely. This is a stability-first change consistent with the conflict resolution: health before cost. No saving_fraction is set \u2014 this change may slightly increase instance cost but eliminates the recomputation waste and potential full-job-failure risk from simultaneous driver OOM + executor eviction.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "The executor events confirm that executor 141 \u2014 a spot instance (lifecycle: 'spot', host i-09667841f81e99fe2) \u2014 ran for over 8 hours before being evicted via a heartbeat-loss mechanism ('Not receiving heartbeat for 60 seconds'), and this was not an isolated incident: executors 149, 150, 151, 153, and others on the same host were all spot instances that were later terminated. The cluster is currently configured as SPOT_WITH_FALLBACK (confirmed in the cluster_info event), meaning there is no eviction protection \u2014 any preemption mid-micro-batch forces the driver to recompute all in-flight tasks for the lost executor. The driver was already operating at 99.2% heap utilization (driver_max_heap_memory_utilization: 0.9917) and 12% GC time, meaning any recomputation pressure from executor loss could tip it into OOM. Switching to ON_DEMAND eliminates the spot eviction vector entirely, removing the compounded risk of simultaneous executor loss and driver heap exhaustion on a 12-hour streaming job (43,240-second duration).",
+        "expected_impact": "Eliminates spot eviction-driven recomputation events and removes the risk of a full-job failure caused by executor loss coinciding with driver-side heap saturation at 99.2%.",
+        "risk_note": "ON_DEMAND instances cost more per vCore-hour than spot; however, with the cluster at only 1\u20132 workers and a 12-hour runtime, the absolute cost delta is modest relative to the operational risk of losing a multi-hour streaming run."
+      },
+      {
+        "config_key": "clusterMinWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 1,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Cluster min workers is already 1. Confirming the floor remains at 1 on-demand executor after switching to ON_DEMAND availability, ensuring at least one executor survives any future scale-down. This pairs with the ON_DEMAND recommendation (ref=0) to ensure the cluster always has a baseline executor.",
+        "confidence": 0.8,
+        "priority": 3,
+        "rationale": "With the cluster switching to ON_DEMAND availability (priority 2), clusterMinWorkers=1 ensures the autoscaler always keeps at least one executor alive to absorb micro-batch tasks without cold-start latency. This is already the current value, but it is worth explicitly confirming in the job config so the on-demand floor is pinned and not subject to drift if a policy template is applied. The current value matches the suggested value; this is a config hardening action, not a change.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "The cluster_info event shows clusterMinWorkers is already set to 1 in the current cluster topology, matching the proposed value. Without explicit hardening in the job config, this floor is only enforced by the current cluster policy template \u2014 if that template is modified or a new policy is applied, the minimum could silently drift to 0, leaving micro-batches with no executor to absorb work and causing cold-start latency spikes at the start of each trigger cycle. Given the 12-hour streaming job processes 288,917 triggers across 885 jobs and 1,189 stages, even brief cold-start periods at the autoscaler floor could compound into meaningful added latency. Explicitly pinning clusterMinWorkers=1 in the job definition makes this constraint durable and policy-template-independent.",
+        "expected_impact": "Provides configuration-level guarantee that at least one executor is always available, preventing cold-start latency from autoscaler under-provisioning without any performance regression.",
+        "risk_note": null
+      },
+      {
+        "config_key": "spark.sql.adaptive.enabled",
+        "action": "set_spark_config",
+        "suggested_value": "true",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Scheduler delay dominates stage wall time (80\u201399% of task duration is scheduler overhead vs single-digit ms executor CPU time). AQE with coalescePartitions can reduce the number of post-shuffle stages and tasks, helping consolidate tiny tasks into fewer, larger ones. This is a fine-tuning action (Tier 4, insight ref=2).",
+        "confidence": 0.65,
+        "priority": 5,
+        "rationale": "Insight ref=2 documents that scheduler delay accounts for 80\u201399% of individual task wall-clock time \u2014 e.g., Stage 630575 shows median task duration 1,199ms with 1,182ms in scheduler delay and only 13ms of actual executor CPU time. AQE's coalescePartitions feature dynamically merges small shuffle partitions into larger ones, reducing the number of tasks launched per stage and thus the total scheduler overhead across the 2,878 tasks and 1,189 stages in this 12-hour run. Enabling AQE is non-breaking (it's an optimizer feature) and is the recommended Databricks approach to reducing micro-batch task proliferation without changing the streaming trigger interval (which would require application-level changes). The insight also suggests increasing the micro-batch trigger interval and reviewing streaming trigger configuration \u2014 those are application-level code changes not addressable via a config key, and are therefore captured in conflicts_resolved. AQE alone will not fully resolve the structural scheduler delay issue but reduces its magnitude by consolidating partitions. Low confidence (0.65) because AQE's effectiveness depends on shuffle being present in the hot stages; if stages are map-only, AQE coalesce has limited effect.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "AQE is not currently enabled (spark.sql.adaptive.enabled is not set, so the Databricks runtime default may or may not activate it depending on the DBR version). Stage 630575 directly illustrates the scheduler delay pathology: 8 tasks with median duration 1,199ms of which 1,182ms is scheduler delay and only 13ms is executor CPU time \u2014 a 98.9% scheduler overhead ratio. This pattern repeats across the 1,189 stages and 2,878 tasks in this run (total num_spark_stages: 1189, num_spark_tasks: 2878 confirmed in metrics), where shuffle data volumes per micro-batch are tiny (total shuffle_bytes_written: ~10MB across the entire 12-hour run). AQE's coalescePartitions feature can dynamically merge these small shuffle partitions into fewer, larger tasks per stage, reducing the number of individual task-launch events the driver must schedule and cutting the per-stage scheduler overhead that currently dominates wall-clock time.",
+        "expected_impact": "Expected to reduce per-stage scheduler delay overhead \u2014 which currently accounts for 80\u201399% of individual task wall-clock time in high-delay stages \u2014 by consolidating small shuffle partitions and lowering total task launch count per micro-batch.",
+        "risk_note": "AQE effectiveness is limited to shuffle-dependent stages; map-only stages (which are common in this streaming workload's isEmpty and call stages) will not benefit, so improvement may be partial and confidence is moderate (0.65)."
+      },
+      {
+        "config_key": "spark.sql.adaptive.coalescePartitions.minPartitionSize",
+        "action": "set_spark_config",
+        "suggested_value": "64m",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Paired with AQE enabled (priority 5). With tiny micro-batches (often 0\u201330 input rows), default AQE coalesce targets may be too small and still produce many tiny partitions. Setting a minimum partition size of 64m nudges AQE to merge more aggressively, reducing task count per stage.",
+        "confidence": 0.6,
+        "priority": 6,
+        "rationale": "This is a supporting parameter for the AQE recommendation (priority 5). The default minPartitionSize in Spark 3.x is 1MB, which is too small for this workload \u2014 it would allow AQE to leave tiny shuffle fragments as separate tasks, perpetuating the scheduler delay overhead. Setting 64m as the minimum target partition size forces AQE to coalesce more aggressively, reducing the number of tasks per stage from the current pattern (often 4\u20138 tasks with 1\u201310ms execution time). This is a fine-tuning change with moderate confidence since the actual effect depends on shuffle data volumes per micro-batch. This recommendation is contingent on AQE being enabled (priority 5). No estimated_saving_fraction as the cost impact of scheduler delay reduction is indirect.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "This parameter is not set (source: not_set), so the Spark 3.x default of 1MB applies. With per-task shuffle writes observed at 1,300\u201321,000 bytes in the hottest stages (e.g., Stage 630575 shuffle writes averaging ~2,700 bytes per task across 8 tasks, total ~21KB for the stage), the 1MB default would prevent AQE from coalescing these fragments because each is already below the coalesce threshold \u2014 AQE would leave them as separate tasks and the scheduler delay pathology would persist. Setting minPartitionSize=64m forces AQE to be far more aggressive in merging these tiny partitions into a single task per stage wherever shuffle output is sub-64MB, directly addressing the root cause of the 1,182ms median scheduler delay observed in Stage 630575.",
+        "expected_impact": "Forces AQE to coalesce the workload's characteristically tiny shuffle partitions (many stages write <50KB total) into single tasks per stage, reducing task launch count and its associated scheduler delay overhead.",
+        "risk_note": "If any individual stage has a legitimately large shuffle output that should be split across executors, an aggressive minPartitionSize of 64MB could over-consolidate and create a single oversized task; review any stage with shuffle output exceeding 64MB before applying."
+      }
+    ],
+    "blocked_recommendations": [
+      {
+        "config_key": "spark.driver.memory",
+        "action": "set_spark_config",
+        "suggested_value": "28g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Driver JVM heap at 99.2% utilization (18.84 GB used of 18.90 GB heap) with 12.08% GC time \u2014 well above the critical 10% threshold. Driver is on r6id.xlarge. Default Databricks driver heap is not explicitly set (source: not_set), meaning the platform default applies which is clearly insufficient for this workload.",
+        "confidence": 0.92,
+        "priority": 1,
+        "rationale": "The driver heap is effectively saturated: 18.84 GB used of 18.90 GB allocated = 99.2% utilization, with GC consuming 12.08% of driver wall-clock time (peaks of 25% in 4-minute windows at 60,385ms GC per bucket). This is a driver-side GC spiral \u2014 a full OOM would silently kill the entire 12-hour streaming job. Increasing driver heap to 28g provides ~48% headroom above current peak usage (18.84 GB), which allows for data volume spikes without triggering GC spirals. We cap at 28g rather than 32g as the first conservative step (staying within the r6id.xlarge memory budget of 32 GB including OS, JVM overhead, and memory overhead). The r6id.xlarge has 32 GB RAM total; a 28g heap leaves ~4 GB for OS and JVM off-heap overhead, which is tight but acceptable given the driver is not running executors co-located. If GC persists after this change, the next step is either 30g or upgrading to r6id.2xlarge. This is a stability fix \u2014 no estimated_saving_fraction is set as the primary benefit is preventing catastrophic job failure, not cost reduction.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "blocked_by": [
+          "llm safety review: The driver heap is confirmed at 99.2% utilization (18.84 GB used of 18.90 GB) with peak GC buckets of 60,385 ms, and the driver runs on an r6id.xlarge with only 32 GB total RAM; however, the driver_max_off_heap_used_memory is already 6.79 GB and driver_max_used_memory totals 24.69 GB, meaning on-heap + off-heap together already consume ~24.7 GB \u2014 setting spark.driver.memory to 28g would push the JVM reservation to 28g + mandatory off-heap + OS overhead well above the 32 GB physical limit of the r6id.xlarge, creating a near-certain host-level OOM risk."
+        ]
+      },
+      {
+        "config_key": "clusterMaxWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 1,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "Cluster autoscaling is enabled with clusterMaxWorkers=2. Average vcore utilization is 36.4% (used: 173,020s vs allocated: 475,116s). Average active tasks \u2248 1.95 vs max=99 (burst). With avg_active_tasks\u22482 and executor_cores=4, one 4-core worker is sufficient for baseline throughput. This addresses both the idle executor waste (insight ref=3) and the conflict resolution: we address spot reliability FIRST (priority 2), then reduce workers AFTER confirming ON_DEMAND stability.",
+        "confidence": 0.72,
+        "priority": 4,
+        "rationale": "This recommendation addresses insight ref=3 (idle executor capacity) while respecting the conflict resolution: spot reliability (ref=0) is addressed first at priority 2, and this executor-count reduction only takes effect after the cluster is stabilised on ON_DEMAND. The evidence for reduction is strong: vcore_utilization=36.4%, avg active tasks\u22481.95 (well below 4 cores on even 1 worker), and the workload is a streaming job with small micro-batches (often 0\u201330 input rows) where the second worker sits idle most of the time. Reducing clusterMaxWorkers from 2 to 1 eliminates the idle second worker while keeping the on-demand floor (clusterMinWorkers=1). For burst events (max tasks=99), the autoscaler can scale up to the max \u2014 but given the micro-batch workload pattern, bursts are short-lived and the scheduler delay insight (ref=2) shows the overhead is in dispatch, not executor capacity. IMPORTANT: This should be applied after 3\u20135 stable runs at ON_DEMAND (priority 2) to confirm no reliability regression. The estimated_saving_fraction reflects the idle executor cost \u2014 approximately 1 worker's worth of the compute budget (roughly 50% of executor cost, which is a significant fraction of total run cost given the 12-hour duration), but we conservatively estimate 0.30 to account for burst periods where both workers are active.",
+        "estimated_saving_fraction": 0.3,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 3,
+        "blocked_by": [
+          "llm safety review: The time-series data shows max active_tasks reaching 99 and app_vcores_max_used reaching 8.0 (both workers fully utilised at peak), and the streaming job experienced a spot eviction cascade (executors 141, 149-153) that caused repeated recomputation; reducing clusterMaxWorkers to 1 would leave the job with a single 4-core executor during these burst phases, which \u2014 given 99 concurrent tasks were observed \u2014 would cause severe task queuing, micro-batch backlog, and potential SLA breach on this latency-sensitive 12-hour streaming workload."
+        ]
+      }
+    ],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "aws_attributes.availability",
+            "current_value": null,
+            "suggested_value": "ON_DEMAND",
+            "rationale": "Spot instance eviction of executor 141 (running for 8+ hours before eviction) forced recomputation of in-flight tasks and added latency to this 12-hour streaming job. SPOT_WITH_FALLBACK provides no eviction protection \u2014 any spot preemption mid-stream causes work loss proportional to how long the executor held uncommitted state. For a long-running streaming job (mysql_exchange, 12h duration), the cost difference between spot and on-demand is modest relative to the reliability and latency cost of a mid-run eviction cascading into driver-side recomputation pressure (which is already at 99.2% heap). Switching to ON_DEMAND eliminates the spot eviction risk entirely. This is a stability-first change consistent with the conflict resolution: health before cost. No saving_fraction is set \u2014 this change may slightly increase instance cost but eliminates the recomputation waste and potential full-job-failure risk from simultaneous driver OOM + executor eviction.",
+            "confidence": 0.88
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMinWorkers",
+            "current_value": null,
+            "suggested_value": 1,
+            "rationale": "With the cluster switching to ON_DEMAND availability (priority 2), clusterMinWorkers=1 ensures the autoscaler always keeps at least one executor alive to absorb micro-batch tasks without cold-start latency. This is already the current value, but it is worth explicitly confirming in the job config so the on-demand floor is pinned and not subject to drift if a policy template is applied. The current value matches the suggested value; this is a config hardening action, not a change.",
+            "confidence": 0.8
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.sql.adaptive.enabled",
+            "current_value": null,
+            "suggested_value": "true",
+            "rationale": "Insight ref=2 documents that scheduler delay accounts for 80\u201399% of individual task wall-clock time \u2014 e.g., Stage 630575 shows median task duration 1,199ms with 1,182ms in scheduler delay and only 13ms of actual executor CPU time. AQE's coalescePartitions feature dynamically merges small shuffle partitions into larger ones, reducing the number of tasks launched per stage and thus the total scheduler overhead across the 2,878 tasks and 1,189 stages in this 12-hour run. Enabling AQE is non-breaking (it's an optimizer feature) and is the recommended Databricks approach to reducing micro-batch task proliferation without changing the streaming trigger interval (which would require application-level changes). The insight also suggests increasing the micro-batch trigger interval and reviewing streaming trigger configuration \u2014 those are application-level code changes not addressable via a config key, and are therefore captured in conflicts_resolved. AQE alone will not fully resolve the structural scheduler delay issue but reduces its magnitude by consolidating partitions. Low confidence (0.65) because AQE's effectiveness depends on shuffle being present in the hot stages; if stages are map-only, AQE coalesce has limited effect.",
+            "confidence": 0.65
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.sql.adaptive.coalescePartitions.minPartitionSize",
+            "current_value": null,
+            "suggested_value": "64m",
+            "rationale": "This is a supporting parameter for the AQE recommendation (priority 5). The default minPartitionSize in Spark 3.x is 1MB, which is too small for this workload \u2014 it would allow AQE to leave tiny shuffle fragments as separate tasks, perpetuating the scheduler delay overhead. Setting 64m as the minimum target partition size forces AQE to coalesce more aggressively, reducing the number of tasks per stage from the current pattern (often 4\u20138 tasks with 1\u201310ms execution time). This is a fine-tuning change with moderate confidence since the actual effect depends on shuffle data volumes per micro-batch. This recommendation is contingent on AQE being enabled (priority 5). No estimated_saving_fraction as the cost impact of scheduler delay reduction is indirect.",
+            "confidence": 0.6
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.driver.memory",
+            "current_value": null,
+            "suggested_value": "28g",
+            "rationale": "The driver heap is effectively saturated: 18.84 GB used of 18.90 GB allocated = 99.2% utilization, with GC consuming 12.08% of driver wall-clock time (peaks of 25% in 4-minute windows at 60,385ms GC per bucket). This is a driver-side GC spiral \u2014 a full OOM would silently kill the entire 12-hour streaming job. Increasing driver heap to 28g provides ~48% headroom above current peak usage (18.84 GB), which allows for data volume spikes without triggering GC spirals. We cap at 28g rather than 32g as the first conservative step (staying within the r6id.xlarge memory budget of 32 GB including OS, JVM overhead, and memory overhead). The r6id.xlarge has 32 GB RAM total; a 28g heap leaves ~4 GB for OS and JVM off-heap overhead, which is tight but acceptable given the driver is not running executors co-located. If GC persists after this change, the next step is either 30g or upgrading to r6id.2xlarge. This is a stability fix \u2014 no estimated_saving_fraction is set as the primary benefit is preventing catastrophic job failure, not cost reduction.",
+            "confidence": 0.92
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMaxWorkers",
+            "current_value": null,
+            "suggested_value": 1,
+            "rationale": "This recommendation addresses insight ref=3 (idle executor capacity) while respecting the conflict resolution: spot reliability (ref=0) is addressed first at priority 2, and this executor-count reduction only takes effect after the cluster is stabilised on ON_DEMAND. The evidence for reduction is strong: vcore_utilization=36.4%, avg active tasks\u22481.95 (well below 4 cores on even 1 worker), and the workload is a streaming job with small micro-batches (often 0\u201330 input rows) where the second worker sits idle most of the time. Reducing clusterMaxWorkers from 2 to 1 eliminates the idle second worker while keeping the on-demand floor (clusterMinWorkers=1). For burst events (max tasks=99), the autoscaler can scale up to the max \u2014 but given the micro-batch workload pattern, bursts are short-lived and the scheduler delay insight (ref=2) shows the overhead is in dispatch, not executor capacity. IMPORTANT: This should be applied after 3\u20135 stable runs at ON_DEMAND (priority 2) to confirm no reliability regression. The estimated_saving_fraction reflects the idle executor cost \u2014 approximately 1 worker's worth of the compute budget (roughly 50% of executor cost, which is a significant fraction of total run cost given the 12-hour duration), but we conservatively estimate 0.30 to account for burst periods where both workers are active.",
+            "confidence": 0.72
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.5280443732739035,
+        "gc_pressure": 0.19496191763658546,
+        "off_heap_headroom": 0.0,
+        "vcore_utilization": 0.00010038526972190411,
+        "idle_ratio": null,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 1.0,
+        "spill_ratio": null,
+        "has_spill": false,
+        "retried_task_waste": 0.0
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "200",
+        "cluster_autoscaling": true,
+        "cluster_min_workers": 1,
+        "cluster_max_workers": 2,
+        "cluster_workers": 1,
+        "dynamic_allocation_enabled": false,
+        "is_databricks": true,
+        "max_executors_param": null,
+        "min_executors_param": null,
+        "executor_instances_param": null,
+        "executor_cores": 4
+      },
+      "pre_tuning_durations_ms": [
+        43248.75,
+        43212.521,
+        43217.125,
+        43237.356,
+        43210.266
+      ],
+      "pre_tuning_cost_usd": 7.623132376025123,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [],
+    "health_breach_unactioned": false,
+    "plan_degraded": false,
+    "summary": "4 recommendation(s), ordered health-first. 2 blocked by safety rules. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "00447d9b397e"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.5280443732739035,
+    "gc_pressure": 0.19496191763658546,
+    "off_heap_headroom": 0.0,
+    "vcore_utilization": 0.00010038526972190411,
+    "idle_ratio": null,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 1.0,
+    "spill_ratio": null,
+    "has_spill": false,
+    "retried_task_waste": 0.0
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 8.7567,
+    "cluster_workers": 1,
+    "workers_availability": "SPOT_WITH_FALLBACK"
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "aws_attributes.availability",
+      "current_value": null,
+      "suggested_value": "ON_DEMAND",
+      "action": "set_cluster_config",
+      "explanation": "The executor events confirm that executor 141 \u2014 a spot instance (lifecycle: 'spot', host i-09667841f81e99fe2) \u2014 ran for over 8 hours before being evicted via a heartbeat-loss mechanism ('Not receiving heartbeat for 60 seconds'), and this was not an isolated incident: executors 149, 150, 151, 153, and others on the same host were all spot instances that were later terminated. The cluster is currently configured as SPOT_WITH_FALLBACK (confirmed in the cluster_info event), meaning there is no eviction protection \u2014 any preemption mid-micro-batch forces the driver to recompute all in-flight tasks for the lost executor. The driver was already operating at 99.2% heap utilization (driver_max_heap_memory_utilization: 0.9917) and 12% GC time, meaning any recomputation pressure from executor loss could tip it into OOM. Switching to ON_DEMAND eliminates the spot eviction vector entirely, removing the compounded risk of simultaneous executor loss and driver heap exhaustion on a 12-hour streaming job (43,240-second duration).",
+      "expected_impact": "Eliminates spot eviction-driven recomputation events and removes the risk of a full-job failure caused by executor loss coinciding with driver-side heap saturation at 99.2%.",
+      "risk_note": "ON_DEMAND instances cost more per vCore-hour than spot; however, with the cluster at only 1\u20132 workers and a 12-hour runtime, the absolute cost delta is modest relative to the operational risk of losing a multi-hour streaming run."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMinWorkers",
+      "current_value": null,
+      "suggested_value": 1,
+      "action": "set_cluster_config",
+      "explanation": "The cluster_info event shows clusterMinWorkers is already set to 1 in the current cluster topology, matching the proposed value. Without explicit hardening in the job config, this floor is only enforced by the current cluster policy template \u2014 if that template is modified or a new policy is applied, the minimum could silently drift to 0, leaving micro-batches with no executor to absorb work and causing cold-start latency spikes at the start of each trigger cycle. Given the 12-hour streaming job processes 288,917 triggers across 885 jobs and 1,189 stages, even brief cold-start periods at the autoscaler floor could compound into meaningful added latency. Explicitly pinning clusterMinWorkers=1 in the job definition makes this constraint durable and policy-template-independent.",
+      "expected_impact": "Provides configuration-level guarantee that at least one executor is always available, preventing cold-start latency from autoscaler under-provisioning without any performance regression.",
+      "risk_note": null
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.sql.adaptive.enabled",
+      "current_value": null,
+      "suggested_value": "true",
+      "action": "set_spark_config",
+      "explanation": "AQE is not currently enabled (spark.sql.adaptive.enabled is not set, so the Databricks runtime default may or may not activate it depending on the DBR version). Stage 630575 directly illustrates the scheduler delay pathology: 8 tasks with median duration 1,199ms of which 1,182ms is scheduler delay and only 13ms is executor CPU time \u2014 a 98.9% scheduler overhead ratio. This pattern repeats across the 1,189 stages and 2,878 tasks in this run (total num_spark_stages: 1189, num_spark_tasks: 2878 confirmed in metrics), where shuffle data volumes per micro-batch are tiny (total shuffle_bytes_written: ~10MB across the entire 12-hour run). AQE's coalescePartitions feature can dynamically merge these small shuffle partitions into fewer, larger tasks per stage, reducing the number of individual task-launch events the driver must schedule and cutting the per-stage scheduler overhead that currently dominates wall-clock time.",
+      "expected_impact": "Expected to reduce per-stage scheduler delay overhead \u2014 which currently accounts for 80\u201399% of individual task wall-clock time in high-delay stages \u2014 by consolidating small shuffle partitions and lowering total task launch count per micro-batch.",
+      "risk_note": "AQE effectiveness is limited to shuffle-dependent stages; map-only stages (which are common in this streaming workload's isEmpty and call stages) will not benefit, so improvement may be partial and confidence is moderate (0.65)."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.sql.adaptive.coalescePartitions.minPartitionSize",
+      "current_value": null,
+      "suggested_value": "64m",
+      "action": "set_spark_config",
+      "explanation": "This parameter is not set (source: not_set), so the Spark 3.x default of 1MB applies. With per-task shuffle writes observed at 1,300\u201321,000 bytes in the hottest stages (e.g., Stage 630575 shuffle writes averaging ~2,700 bytes per task across 8 tasks, total ~21KB for the stage), the 1MB default would prevent AQE from coalescing these fragments because each is already below the coalesce threshold \u2014 AQE would leave them as separate tasks and the scheduler delay pathology would persist. Setting minPartitionSize=64m forces AQE to be far more aggressive in merging these tiny partitions into a single task per stage wherever shuffle output is sub-64MB, directly addressing the root cause of the 1,182ms median scheduler delay observed in Stage 630575.",
+      "expected_impact": "Forces AQE to coalesce the workload's characteristically tiny shuffle partitions (many stages write <50KB total) into single tasks per stage, reducing task launch count and its associated scheduler delay overhead.",
+      "risk_note": "If any individual stage has a legitimately large shuffle output that should be split across executors, an aggressive minPartitionSize of 64MB could over-consolidate and create a single oversized task; review any stage with shuffle output exceeding 64MB before applying."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.driver.memory",
+      "current_value": null,
+      "suggested_value": "28g",
+      "action": "set_spark_config",
+      "blocked_by": [
+        "llm safety review: The driver heap is confirmed at 99.2% utilization (18.84 GB used of 18.90 GB) with peak GC buckets of 60,385 ms, and the driver runs on an r6id.xlarge with only 32 GB total RAM; however, the driver_max_off_heap_used_memory is already 6.79 GB and driver_max_used_memory totals 24.69 GB, meaning on-heap + off-heap together already consume ~24.7 GB \u2014 setting spark.driver.memory to 28g would push the JVM reservation to 28g + mandatory off-heap + OS overhead well above the 32 GB physical limit of the r6id.xlarge, creating a near-certain host-level OOM risk."
+      ]
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMaxWorkers",
+      "current_value": null,
+      "suggested_value": 1,
+      "action": "set_cluster_config",
+      "blocked_by": [
+        "llm safety review: The time-series data shows max active_tasks reaching 99 and app_vcores_max_used reaching 8.0 (both workers fully utilised at peak), and the streaming job experienced a spot eviction cascade (executors 141, 149-153) that caused repeated recomputation; reducing clusterMaxWorkers to 1 would leave the job with a single 4-core executor during these burst phases, which \u2014 given 99 concurrent tasks were observed \u2014 would cause severe task queuing, micro-batch backlog, and potential SLA breach on this latency-sensitive 12-hour streaming workload."
+      ]
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Critical: Spot Executor Lost Mid-Run (Heartbeat Timeout) Causing Work Recomputation",
+        "title": "Critical: Spot Executor Lost Mid-Run (Heartbeat Timeout) Causing Work Recomputation",
+        "description": "Executor 141, running on spot instance i-09667841f81e99fe2 (m6idn.xlarge), was silently lost during the run via 'worker lost: Not receiving heartbeat for 60 seconds'. This executor ran for over 8 hours (21:52 Mar 23 to 06:19 Mar 24) before being evicted, meaning a large portion of its in-flight work had to be recomputed. The run completed successfully only because other executors absorbed the failed tasks, but this added latency and is a silent correctness/reliability risk. Additional executors (149\u2013153) were also churned via 'kill request from HTTP endpoint' around 04:47\u201305:05, indicating autoscaler thrash.",
+        "evidence": "Event executors_info: executor 141 removedReason = 'worker lost: Not receiving heartbeat for 60 seconds', lifecycle='spot', hostId=i-09667841f81e99fe2. Executors 149\u2013153 removed around 04:47\u201305:05 via kill requests. Cluster is SPOT_WITH_FALLBACK availability with clusterMinWorkers=1, clusterMaxWorkers=2.",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "Switch the cluster availability policy from SPOT_WITH_FALLBACK to ON_DEMAND for the driver-side workload, or enable Databricks spot fallback with a checkpoint-aware recovery strategy. For this streaming job (mysql_exchange), consider adding a grace period or increasing spark.task.maxFailures. Alternatively, use SPOT_WITH_FALLBACK with a minimum on-demand worker count (clusterMinWorkers set to an on-demand node), ensuring at least one executor survives spot preemption.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Driver Heap Near Saturation with 12% GC Time \u2014 Memory Pressure Health Risk",
+        "title": "Driver Heap Near Saturation with 12% GC Time \u2014 Memory Pressure Health Risk",
+        "description": "The driver JVM is running at 99.2% heap utilization (18.84 GB used of 19.0 GB heap), with GC consuming 12.08% of driver wall-clock time. The driver instance is r6id.xlarge, which has a large memory budget, but the driver heap allocation is clearly under-sized relative to the workload. This is well above the critical threshold (>10% GC indicates heap saturation). This is a driver-side GC spiral \u2014 separate from executor GC which is nominal (5.9 total seconds). A full driver OOM could fail the entire 12-hour streaming job silently.",
+        "evidence": "Metrics: driver_jvm_gc_time_pct=12.08%, driver_max_heap_memory_utilization=0.9917, driver_max_heap_used_memory=18.84 GB, driver_heap_memory=18.90 GB. Time series: driver_jvm_gc_time_over_time max=60,385ms per 240s bucket, avg=28,797ms \u2014 meaning ~2% of every 4-minute window is spent in driver GC at average, with peaks of 25%. get_current_metrics gc_pressure=0.195 (near the 0.20 SQL threshold).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase the driver heap allocation. On Databricks, set spark.driver.memory to a larger value (e.g., from the default to '28g' or '32g') in the cluster/job configuration, or switch the driver instance type to r6id.2xlarge. Additionally, review driver-side state: with 157 transformations, 885 jobs, and 60M+ input records read through the driver, consider whether broadcast variables or collected DataFrames can be pruned or checkpointed more aggressively to reduce driver heap pressure.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Pervasive Scheduler Delay Dominates Stage Wall Time \u2014 Micro-Batch Overhead",
+        "title": "Pervasive Scheduler Delay Dominates Stage Wall Time \u2014 Micro-Batch Overhead",
+        "description": "Across hundreds of stages, scheduler delay accounts for 80\u201399% of individual task wall-clock time, while actual executor CPU time is in the single-digit milliseconds. This is a structural inefficiency where Spark's task dispatch overhead dwarfs useful work. For example: Stage 630575 (8 tasks) shows median task duration 1,199ms with scheduler delay 1,182ms and executorRunTime 13ms. Stage 664436 (4 tasks) shows all tasks spending 1,583\u20131,596ms total with 1,583\u20131,590ms in scheduler delay vs 4\u201310ms executor time. The vcore_utilization at 36.4% and vcore_time (used: 173,020s vs allocated: 475,116s) confirm that executors spend the majority of their time idle.",
+        "evidence": "Stage 630575 taskMetricsDistributions: duration median=1199ms, schedulerDelay median=1182ms, executorRunTime median=13ms. Stage 664436: schedulerDelay=[1583,1583,1586,1590ms], executorRunTime=[4,4,8,10ms]. Metric: vcore_utilization=0.364, used_vcore_time=173,020s vs vcore_time=475,116s. Total 2,878 tasks across 1,189 stages for a 12-hour streaming job processing small micro-batches (avg batch_duration=271s, avg input rows per batch tiny).",
+        "confidence": 0.9,
+        "severity": "performance",
+        "suggested_action": "Increase the micro-batch trigger interval to allow more data to accumulate per batch, reducing the number of Spark jobs and stages launched per unit time. Review the streaming trigger configuration: if currently using Trigger.ProcessingTime with a very short interval, increase it (e.g., to 60\u2013120 seconds). Additionally, consolidate parallelism: many stages run with 1\u20134 tasks on 8+ executor cores \u2014 consider reducing spark.default.parallelism or using coalesce on small outputs to avoid launching 8-core stage graphs for sub-millisecond payloads.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Autoscaling Cluster with Dynamic Allocation Disabled Creates Persistent Idle Executor Capacity",
+        "title": "Autoscaling Cluster with Dynamic Allocation Disabled Creates Persistent Idle Executor Capacity",
+        "description": "The Databricks cluster has autoscaling enabled (clusterMinWorkers=1, clusterMaxWorkers=2), but spark.dynamicAllocation.enabled=false and no spark.executor.instances is set. In this configuration, Databricks controls the cluster node count but Spark cannot release executors between micro-batches. With tiny, bursty micro-batches (often 0\u201330 input rows), executors sit idle for extended periods between task waves. The executor_max_off_heap_memory_utilization=1.0 alongside executor_max_heap_memory_utilization=0.47 signals off-heap pressure alongside heap waste, while the cluster paid for 8 vcores (2 workers \u00d7 4 cores) across a 12-hour run with only 36% average vcore utilization.",
+        "evidence": "task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=2, dynamic_allocation_enabled=false. Metrics: vcore_utilization=0.364, app_vcores_max_used_over_time avg=6.99 but vcores_avg_used_over_time avg=4.77 vs vcores_max_over_time avg=7.34. active_tasks_over_time avg=1.95 vs max=99, confirming most time is spent with near-zero active tasks. executor_max_off_heap_memory_utilization=1.0 (saturated off-heap).",
+        "confidence": 0.85,
+        "severity": "cost",
+        "suggested_action": "For this streaming job, the effective cluster should idle at clusterMinWorkers=1. Set clusterMaxWorkers to 1 (or keep at 2 for burst headroom but ensure the cluster scales down promptly). Consider enabling Databricks enhanced autoscaling for streaming workloads, which respects batch boundaries and can scale to zero between idle periods. Alternatively, explicitly pin executor resources to match the sustained load: with avg_active_tasks\u22482, 1 worker with 4 cores is sufficient for baseline throughput, reserving the second only for bursts.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Critical: Spot Executor Lost Mid-Run (Heartbeat Timeout) Causing Work Recomputation",
+        "title": "Critical: Spot Executor Lost Mid-Run (Heartbeat Timeout) Causing Work Recomputation",
+        "description": "Executor 141, running on spot instance i-09667841f81e99fe2 (m6idn.xlarge), was silently lost during the run via 'worker lost: Not receiving heartbeat for 60 seconds'. This executor ran for over 8 hours (21:52 Mar 23 to 06:19 Mar 24) before being evicted, meaning a large portion of its in-flight work had to be recomputed. The run completed successfully only because other executors absorbed the failed tasks, but this added latency and is a silent correctness/reliability risk. Additional executors (149\u2013153) were also churned via 'kill request from HTTP endpoint' around 04:47\u201305:05, indicating autoscaler thrash.",
+        "evidence": "Event executors_info: executor 141 removedReason = 'worker lost: Not receiving heartbeat for 60 seconds', lifecycle='spot', hostId=i-09667841f81e99fe2. Executors 149\u2013153 removed around 04:47\u201305:05 via kill requests. Cluster is SPOT_WITH_FALLBACK availability with clusterMinWorkers=1, clusterMaxWorkers=2.",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "Switch the cluster availability policy from SPOT_WITH_FALLBACK to ON_DEMAND for the driver-side workload, or enable Databricks spot fallback with a checkpoint-aware recovery strategy. For this streaming job (mysql_exchange), consider adding a grace period or increasing spark.task.maxFailures. Alternatively, use SPOT_WITH_FALLBACK with a minimum on-demand worker count (clusterMinWorkers set to an on-demand node), ensuring at least one executor survives spot preemption.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Driver Heap Near Saturation with 12% GC Time \u2014 Memory Pressure Health Risk",
+        "title": "Driver Heap Near Saturation with 12% GC Time \u2014 Memory Pressure Health Risk",
+        "description": "The driver JVM is running at 99.2% heap utilization (18.84 GB used of 19.0 GB heap), with GC consuming 12.08% of driver wall-clock time. The driver instance is r6id.xlarge, which has a large memory budget, but the driver heap allocation is clearly under-sized relative to the workload. This is well above the critical threshold (>10% GC indicates heap saturation). This is a driver-side GC spiral \u2014 separate from executor GC which is nominal (5.9 total seconds). A full driver OOM could fail the entire 12-hour streaming job silently.",
+        "evidence": "Metrics: driver_jvm_gc_time_pct=12.08%, driver_max_heap_memory_utilization=0.9917, driver_max_heap_used_memory=18.84 GB, driver_heap_memory=18.90 GB. Time series: driver_jvm_gc_time_over_time max=60,385ms per 240s bucket, avg=28,797ms \u2014 meaning ~2% of every 4-minute window is spent in driver GC at average, with peaks of 25%. get_current_metrics gc_pressure=0.195 (near the 0.20 SQL threshold).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase the driver heap allocation. On Databricks, set spark.driver.memory to a larger value (e.g., from the default to '28g' or '32g') in the cluster/job configuration, or switch the driver instance type to r6id.2xlarge. Additionally, review driver-side state: with 157 transformations, 885 jobs, and 60M+ input records read through the driver, consider whether broadcast variables or collected DataFrames can be pruned or checkpointed more aggressively to reduce driver heap pressure.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Pervasive Scheduler Delay Dominates Stage Wall Time \u2014 Micro-Batch Overhead",
+        "title": "Pervasive Scheduler Delay Dominates Stage Wall Time \u2014 Micro-Batch Overhead",
+        "description": "Across hundreds of stages, scheduler delay accounts for 80\u201399% of individual task wall-clock time, while actual executor CPU time is in the single-digit milliseconds. This is a structural inefficiency where Spark's task dispatch overhead dwarfs useful work. For example: Stage 630575 (8 tasks) shows median task duration 1,199ms with scheduler delay 1,182ms and executorRunTime 13ms. Stage 664436 (4 tasks) shows all tasks spending 1,583\u20131,596ms total with 1,583\u20131,590ms in scheduler delay vs 4\u201310ms executor time. The vcore_utilization at 36.4% and vcore_time (used: 173,020s vs allocated: 475,116s) confirm that executors spend the majority of their time idle.",
+        "evidence": "Stage 630575 taskMetricsDistributions: duration median=1199ms, schedulerDelay median=1182ms, executorRunTime median=13ms. Stage 664436: schedulerDelay=[1583,1583,1586,1590ms], executorRunTime=[4,4,8,10ms]. Metric: vcore_utilization=0.364, used_vcore_time=173,020s vs vcore_time=475,116s. Total 2,878 tasks across 1,189 stages for a 12-hour streaming job processing small micro-batches (avg batch_duration=271s, avg input rows per batch tiny).",
+        "confidence": 0.9,
+        "severity": "performance",
+        "suggested_action": "Increase the micro-batch trigger interval to allow more data to accumulate per batch, reducing the number of Spark jobs and stages launched per unit time. Review the streaming trigger configuration: if currently using Trigger.ProcessingTime with a very short interval, increase it (e.g., to 60\u2013120 seconds). Additionally, consolidate parallelism: many stages run with 1\u20134 tasks on 8+ executor cores \u2014 consider reducing spark.default.parallelism or using coalesce on small outputs to avoid launching 8-core stage graphs for sub-millisecond payloads.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Autoscaling Cluster with Dynamic Allocation Disabled Creates Persistent Idle Executor Capacity",
+        "title": "Autoscaling Cluster with Dynamic Allocation Disabled Creates Persistent Idle Executor Capacity",
+        "description": "The Databricks cluster has autoscaling enabled (clusterMinWorkers=1, clusterMaxWorkers=2), but spark.dynamicAllocation.enabled=false and no spark.executor.instances is set. In this configuration, Databricks controls the cluster node count but Spark cannot release executors between micro-batches. With tiny, bursty micro-batches (often 0\u201330 input rows), executors sit idle for extended periods between task waves. The executor_max_off_heap_memory_utilization=1.0 alongside executor_max_heap_memory_utilization=0.47 signals off-heap pressure alongside heap waste, while the cluster paid for 8 vcores (2 workers \u00d7 4 cores) across a 12-hour run with only 36% average vcore utilization.",
+        "evidence": "task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=2, dynamic_allocation_enabled=false. Metrics: vcore_utilization=0.364, app_vcores_max_used_over_time avg=6.99 but vcores_avg_used_over_time avg=4.77 vs vcores_max_over_time avg=7.34. active_tasks_over_time avg=1.95 vs max=99, confirming most time is spent with near-zero active tasks. executor_max_off_heap_memory_utilization=1.0 (saturated off-heap).",
+        "confidence": 0.85,
+        "severity": "cost",
+        "suggested_action": "For this streaming job, the effective cluster should idle at clusterMinWorkers=1. Set clusterMaxWorkers to 1 (or keep at 2 for burst headroom but ensure the cluster scales down promptly). Consider enabling Databricks enhanced autoscaling for streaming workloads, which respects batch boundaries and can scale to zero between idle periods. Alternatively, explicitly pin executor resources to match the sustained load: with avg_active_tasks\u22482, 1 worker with 4 cores is sufficient for baseline throughput, reserving the second only for bursts.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        1,
+        0
+      ],
+      "tier2_cluster": [
+        3
+      ],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        2
+      ],
+      "active_conflicts": [
+        "Insight 3 recommends reducing idle executor capacity (enabling dynamic allocation or reducing cluster workers), but Insight 0 shows spot executor eviction already caused work recomputation on a lean cluster \u2014 any executor reduction must be weighed against the residual reliability risk of further spot-induced capacity loss. Resolve in favour of health: address spot reliability (Insight 0) before tuning executor counts downward."
+      ],
+      "reasoning": "Four insights were examined against the triage rules, confirmed metrics, and raw run data.\n\n**Insight 1 (driver GC saturation):** The metrics confirm driver_max_heap_memory_utilization = 99.2% and driver_jvm_gc_time_pct = 12.08%, both critical thresholds. The gc_pressure signal (0.195) is derived from executor GC, which is nominal (5.9 total seconds, elevated but not severe). However, the driver-side GC at 12%+ of wall-clock time is explicitly a Tier 1 health risk \u2014 it is above the \"GC death spiral\" threshold of >10%, and 99.2% heap headroom usage means the next GC cycle on the driver could trigger a full OOM that kills the entire 12-hour streaming job. This maps squarely to Tier 1 (tight heap / severe GC).\n\n**Insight 0 (spot executor lost, autoscaler thrash):** Executor 141 was silently lost after >8 hours due to heartbeat timeout on a spot instance \u2014 this caused in-flight work recomputation. Executors 149\u2013153 were churned by autoscaler HTTP kill requests. The run completed, but this is a reliability and hidden-correctness risk (silent work loss, added latency). The `retried_task_waste` metric is 0.0 and `num_spark_tasks_retries` = 0 (stage retries = 0), meaning Spark didn't formally retry tasks. However, the spot eviction causing executor loss and work recomputation is a structural reliability issue that could recur \u2014 it doesn't meet the strict thresholds for Tier 1 retried_task_waste (>0.05), but it is a health/correctness risk closer to Tier 1 than Tier 2. It sits at the boundary; since it triggered actual work recomputation and is a reliability crisis on a spot-heavy cluster for a 12-hour job, it belongs in Tier 1.\n\n**Insight 3 (dynamic allocation disabled, persistent idle executors):** Autoscaling enabled at the cluster level but `spark.dynamicAllocation.enabled=false` means Spark can't release executors between micro-batches. With bursty tiny micro-batches (0\u201330 rows) and vcore_utilization at 36.4%, the cluster is persistently over-provisioned between bursts. This is a classic Tier 2 cluster right-sizing issue \u2014 idle executors, over-provisioned compute.\n\n**Insight 2 (scheduler delay dominates stage wall time):** Scheduler delay accounting for 80\u201399% of task duration is a structural micro-batch overhead issue. The vcore_utilization is 36% (historically low). This is not a data correctness or health issue \u2014 it is a tuning/structural inefficiency that overlaps with insight 3's idle-executor picture. Since it's about partition/task scheduling overhead and micro-batch architecture, it belongs in Tier 4 (fine-tuning / structural scheduling optimization).\n\n**Conflicts:** Insight 3 recommends reducing executor count to address idle ratio. However, insight 0 shows that spot executor loss caused recomputation \u2014 reducing executor count further on a spot cluster could worsen resilience. No memory reduction conflicts triggered (no spill, no executor memory reduction recommended). No skew conflict (skew_ratio = 0). The executor reduction vs spot-loss resilience tension should be noted but is not a hard block per the conflict rules."
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 1,
+          "kind": "discovery",
+          "identifier": "Driver Heap Near Saturation with 12% GC Time \u2014 Memory Pressure Health Risk",
+          "title": "Driver Heap Near Saturation with 12% GC Time \u2014 Memory Pressure Health Risk",
+          "description": "The driver JVM is running at 99.2% heap utilization (18.84 GB used of 19.0 GB heap), with GC consuming 12.08% of driver wall-clock time. The driver instance is r6id.xlarge, which has a large memory budget, but the driver heap allocation is clearly under-sized relative to the workload. This is well above the critical threshold (>10% GC indicates heap saturation). This is a driver-side GC spiral \u2014 separate from executor GC which is nominal (5.9 total seconds). A full driver OOM could fail the entire 12-hour streaming job silently.",
+          "evidence": "Metrics: driver_jvm_gc_time_pct=12.08%, driver_max_heap_memory_utilization=0.9917, driver_max_heap_used_memory=18.84 GB, driver_heap_memory=18.90 GB. Time series: driver_jvm_gc_time_over_time max=60,385ms per 240s bucket, avg=28,797ms \u2014 meaning ~2% of every 4-minute window is spent in driver GC at average, with peaks of 25%. get_current_metrics gc_pressure=0.195 (near the 0.20 SQL threshold).",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Increase the driver heap allocation. On Databricks, set spark.driver.memory to a larger value (e.g., from the default to '28g' or '32g') in the cluster/job configuration, or switch the driver instance type to r6id.2xlarge. Additionally, review driver-side state: with 157 transformations, 885 jobs, and 60M+ input records read through the driver, consider whether broadcast variables or collected DataFrames can be pruned or checkpointed more aggressively to reduce driver heap pressure.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 0,
+          "kind": "discovery",
+          "identifier": "Critical: Spot Executor Lost Mid-Run (Heartbeat Timeout) Causing Work Recomputation",
+          "title": "Critical: Spot Executor Lost Mid-Run (Heartbeat Timeout) Causing Work Recomputation",
+          "description": "Executor 141, running on spot instance i-09667841f81e99fe2 (m6idn.xlarge), was silently lost during the run via 'worker lost: Not receiving heartbeat for 60 seconds'. This executor ran for over 8 hours (21:52 Mar 23 to 06:19 Mar 24) before being evicted, meaning a large portion of its in-flight work had to be recomputed. The run completed successfully only because other executors absorbed the failed tasks, but this added latency and is a silent correctness/reliability risk. Additional executors (149\u2013153) were also churned via 'kill request from HTTP endpoint' around 04:47\u201305:05, indicating autoscaler thrash.",
+          "evidence": "Event executors_info: executor 141 removedReason = 'worker lost: Not receiving heartbeat for 60 seconds', lifecycle='spot', hostId=i-09667841f81e99fe2. Executors 149\u2013153 removed around 04:47\u201305:05 via kill requests. Cluster is SPOT_WITH_FALLBACK availability with clusterMinWorkers=1, clusterMaxWorkers=2.",
+          "confidence": 0.95,
+          "severity": "health",
+          "suggested_action": "Switch the cluster availability policy from SPOT_WITH_FALLBACK to ON_DEMAND for the driver-side workload, or enable Databricks spot fallback with a checkpoint-aware recovery strategy. For this streaming job (mysql_exchange), consider adding a grace period or increasing spark.task.maxFailures. Alternatively, use SPOT_WITH_FALLBACK with a minimum on-demand worker count (clusterMinWorkers set to an on-demand node), ensuring at least one executor survives spot preemption.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "Autoscaling Cluster with Dynamic Allocation Disabled Creates Persistent Idle Executor Capacity",
+          "title": "Autoscaling Cluster with Dynamic Allocation Disabled Creates Persistent Idle Executor Capacity",
+          "description": "The Databricks cluster has autoscaling enabled (clusterMinWorkers=1, clusterMaxWorkers=2), but spark.dynamicAllocation.enabled=false and no spark.executor.instances is set. In this configuration, Databricks controls the cluster node count but Spark cannot release executors between micro-batches. With tiny, bursty micro-batches (often 0\u201330 input rows), executors sit idle for extended periods between task waves. The executor_max_off_heap_memory_utilization=1.0 alongside executor_max_heap_memory_utilization=0.47 signals off-heap pressure alongside heap waste, while the cluster paid for 8 vcores (2 workers \u00d7 4 cores) across a 12-hour run with only 36% average vcore utilization.",
+          "evidence": "task_profile: cluster_autoscaling=true, cluster_min_workers=1, cluster_max_workers=2, dynamic_allocation_enabled=false. Metrics: vcore_utilization=0.364, app_vcores_max_used_over_time avg=6.99 but vcores_avg_used_over_time avg=4.77 vs vcores_max_over_time avg=7.34. active_tasks_over_time avg=1.95 vs max=99, confirming most time is spent with near-zero active tasks. executor_max_off_heap_memory_utilization=1.0 (saturated off-heap).",
+          "confidence": 0.85,
+          "severity": "cost",
+          "suggested_action": "For this streaming job, the effective cluster should idle at clusterMinWorkers=1. Set clusterMaxWorkers to 1 (or keep at 2 for burst headroom but ensure the cluster scales down promptly). Consider enabling Databricks enhanced autoscaling for streaming workloads, which respects batch boundaries and can scale to zero between idle periods. Alternatively, explicitly pin executor resources to match the sustained load: with avg_active_tasks\u22482, 1 worker with 4 cores is sufficient for baseline throughput, reserving the second only for bursts.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "Pervasive Scheduler Delay Dominates Stage Wall Time \u2014 Micro-Batch Overhead",
+          "title": "Pervasive Scheduler Delay Dominates Stage Wall Time \u2014 Micro-Batch Overhead",
+          "description": "Across hundreds of stages, scheduler delay accounts for 80\u201399% of individual task wall-clock time, while actual executor CPU time is in the single-digit milliseconds. This is a structural inefficiency where Spark's task dispatch overhead dwarfs useful work. For example: Stage 630575 (8 tasks) shows median task duration 1,199ms with scheduler delay 1,182ms and executorRunTime 13ms. Stage 664436 (4 tasks) shows all tasks spending 1,583\u20131,596ms total with 1,583\u20131,590ms in scheduler delay vs 4\u201310ms executor time. The vcore_utilization at 36.4% and vcore_time (used: 173,020s vs allocated: 475,116s) confirm that executors spend the majority of their time idle.",
+          "evidence": "Stage 630575 taskMetricsDistributions: duration median=1199ms, schedulerDelay median=1182ms, executorRunTime median=13ms. Stage 664436: schedulerDelay=[1583,1583,1586,1590ms], executorRunTime=[4,4,8,10ms]. Metric: vcore_utilization=0.364, used_vcore_time=173,020s vs vcore_time=475,116s. Total 2,878 tasks across 1,189 stages for a 12-hour streaming job processing small micro-batches (avg batch_duration=271s, avg input rows per batch tiny).",
+          "confidence": 0.9,
+          "severity": "performance",
+          "suggested_action": "Increase the micro-batch trigger interval to allow more data to accumulate per batch, reducing the number of Spark jobs and stages launched per unit time. Review the streaming trigger configuration: if currently using Trigger.ProcessingTime with a very short interval, increase it (e.g., to 60\u2013120 seconds). Additionally, consolidate parallelism: many stages run with 1\u20134 tasks on 8+ executor cores \u2014 consider reducing spark.default.parallelism or using coalesce on small outputs to avoid launching 8-core stage graphs for sub-millisecond payloads.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "00447d9b397e",
+    "historical_runs_count": 9,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": []
+  }
+}

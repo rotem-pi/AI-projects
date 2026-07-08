@@ -1,0 +1,569 @@
+{
+  "saved_at": "2026-07-08T14:14:18.455677+00:00",
+  "source": "athena",
+  "task_id": 2535210,
+  "task_name": "compute",
+  "input": {
+    "task_id": 2535210,
+    "task_name": "compute",
+    "env_id": 1195,
+    "app_id": 22265,
+    "app_pit": "2026-06-25 23:18:37.000",
+    "executor__memory__allocated": 23.189453125,
+    "executor__memory_heap__allocated": 21.08203125,
+    "executor__memory_heap__max_used": 20.4442679658532,
+    "executor__memory_off_heap__allocated": 2.107421875,
+    "executor__memory_off_heap__max_used": 5.70333480834961,
+    "driver__heap_memory__allocated": 19.8076171875,
+    "driver__heap_memory__max_used": 11.0150043219328,
+    "executors__jvm_gc_time": 27740.243,
+    "executors__run_time__used": null,
+    "executors__vcore_time__used": 1252291.85,
+    "executors__vcore_time__allocated": 2161926.0,
+    "executors__cpu_time__used": 1211594.41,
+    "task__vcore_time__used": 1448554.83,
+    "task__vcore_time__allocated": 4323852.0,
+    "task__idle_time": 501119.403999805,
+    "task__duration": 540480.619,
+    "task__skew_time": 0.0,
+    "task__disk_bytes_spilled": 0.0,
+    "task__total_io_bytes": 29009640133672.0,
+    "task__memory_time__allocated": 23441806.1798213,
+    "executors__memory_time__used": 611708.2456094016,
+    "executors__used_vcore_time_of_retried_tasks": 0.0,
+    "driver__cpu_utilization": 0.0907815438641286,
+    "task__dynamic_is_allocation_enabled__param": false,
+    "task__executors_dynamic_allocation_min_executors__param": null,
+    "task__executors_dynamic_allocation_max_executors__param": null,
+    "task__executor_instances__param": null,
+    "executor__cores": 4.0,
+    "task__task_cpus__param": 1.0,
+    "task__shuffle_partitions__param": "auto",
+    "dbx_autooptimizeshuffle": null,
+    "driver_type": "r6gd.xlarge",
+    "worker_type": "r6gd.xlarge",
+    "cloud_provider": "AWS",
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": 1,
+    "workers_availability": "SPOT_WITH_FALLBACK",
+    "task_sub_type": "Databricks"
+  },
+  "plan": {
+    "task_id": 2535210,
+    "recommendations": [
+      {
+        "config_key": "spark.executor.memoryOverhead",
+        "action": "set_spark_config",
+        "suggested_value": "6144",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=1: off-heap used 5.70 GB vs configured 2.11 GB (2.7\u00d7 over-allocated); OS was serving overage from system memory, creating silent OOM-killer risk",
+        "confidence": 0.95,
+        "priority": 1,
+        "rationale": "The executor consumed 5.70 GB of off-heap memory against a configured allocation of only 2.11 GB \u2014 2.7\u00d7 over-budget. The excess was served from system memory, exposing the executor to silent termination by the Linux OOM killer. The insight recommends at least 6 GB; setting memoryOverhead to 6144 MB covers the observed peak with a small safety margin. The r6gd.xlarge has 32 GB total RAM; with executor.memory at ~21 GB and overhead at 6 GB, total executor footprint is ~27 GB \u2014 still within the instance envelope. This is a critical stability fix. The estimated_saving_fraction is not set because this is a health/stability fix; while it increases allocated memory it prevents catastrophic executor kills that would waste far more wall-clock time.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "explanation": "The executor's off-heap memory utilization hit 100% (executor_max_off_heap_memory_utilization = 1.0), with a measured peak of 5.70 GB consumed against a configured memoryOverhead of only 2.11 GB \u2014 a 2.7\u00d7 overrun confirmed by off_heap_headroom = 0.0. Any off-heap demand beyond the configured allocation spills into OS-managed system memory, placing the executor squarely in the Linux OOM killer's crosshairs; a silent process termination would immediately invalidate the entire run. Setting memoryOverhead to 6144 MB covers the observed 5.70 GB peak with a ~400 MB safety margin while keeping the total executor footprint (~21 GB heap + 6 GB overhead = ~27 GB) well within the 32 GB r6gd.xlarge envelope.",
+        "expected_impact": "Eliminates the risk of silent OOM-killer termination of the executor, converting an intermittent catastrophic failure mode into a stable, continuously running job.",
+        "risk_note": "Raising memoryOverhead increases per-executor reserved memory by ~4 GB, slightly reducing the headroom available for additional executors on the same node \u2014 validate that the r6gd.xlarge still fits one full executor after this change."
+      },
+      {
+        "config_key": "clusterMinWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 2,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=0 and ref=2: idle_ratio=0.927, SLA failed, 13.9 TB shuffle on single 4-core worker; structural single-node bottleneck identified as root cause of 4.9\u00d7 duration anomaly",
+        "confidence": 0.9,
+        "priority": 4,
+        "rationale": "The cluster has been fixed at 1 worker for all 20 historical runs. With idle_ratio=0.927 (92.7% idle), 45,363 Spark jobs and 58,212 stages all serialised through a single executor, and 13.9 TB of shuffle data processed by a single 4-core node, the job is fundamentally bottlenecked by its single-node architecture. Both insights ref=0 and ref=2 converge on scaling the cluster. Setting clusterMinWorkers=2 establishes a minimum floor of 2 workers so the cluster can never degrade back to single-node operation, even during scale-down events. Combined with dynamic allocation (see priority 5), the cluster will autoscale upward from this floor. This is a Databricks cluster config; spark.dynamicAllocation.* is not used per platform rules.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "Across all 20 historical runs the cluster has operated with exactly 1 worker (cluster_workers = 1, cluster_min_workers = null across every segment), while idle_ratio sits at 92.7% and 45,363 Spark jobs with 58,212 stages have been serialised through a single 4-core executor. With 13.9 TB of shuffle data written and 13.7 TB read by that lone node, the job's throughput is entirely bottlenecked by a single-node architecture rather than any algorithmic inefficiency. Setting clusterMinWorkers = 2 establishes a hard floor so that Databricks autoscaling can never scale the cluster back to the single-worker state that has produced this bottleneck across every observed run.",
+        "expected_impact": "Guarantees a minimum of 2 worker nodes at all times, providing a baseline doubling of executor capacity and preventing regression to the chronically under-resourced single-node configuration.",
+        "risk_note": "A minimum of 2 workers increases the baseline cluster cost even during genuinely idle periods \u2014 pair this with clusterMaxWorkers and autoscaling to avoid over-provisioning at rest."
+      },
+      {
+        "config_key": "clusterMaxWorkers",
+        "action": "set_cluster_config",
+        "suggested_value": 8,
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=2: 13.9 TB shuffle on 1 worker; r6gd.xlarge has local NVMe ideal for shuffle; 4\u20138 workers recommended to distribute 13.9 TB shuffle and enable parallel stage execution",
+        "confidence": 0.88,
+        "priority": 5,
+        "rationale": "Scaling to 8 workers distributes the 13.9 TB shuffle across 8 nodes (each handling ~1.7 TB vs the current 13.9 TB single-node load), enables inter-node parallelism across 58K stages, and directly addresses the SLA breach from insight ref=0. The r6gd.xlarge 'd' suffix indicates local NVMe storage \u2014 ideal for shuffle scratch. Databricks should be configured to use local disks (spark.local.dir pointing to the NVMe mount if not already set by Databricks). Starting at max=8 rather than a larger value is a conservative first step consistent with the 'one step at a time' principle; dynamic allocation will size within this envelope based on actual demand.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "The single executor has processed 13.9 TB of shuffle writes and 13.7 TB of shuffle reads entirely on one node, consuming the r6gd.xlarge's local NVMe bandwidth and 4 cores for both shuffle production and consumption \u2014 leaving no capacity for inter-node parallelism across 58,212 stages. Raising clusterMaxWorkers to 8 distributes the shuffle load across 8 nodes (~1.7 TB per node vs. the current 13.9 TB), enables 32 concurrent cores for task execution, and directly targets the driver scheduling bottleneck caused by serialising 45,363 Spark jobs through a single executor. The current run duration of 540,480 seconds is at the 90th percentile and anomalously high (z-score 2.17) compared to the historical mean of 109,606 seconds, confirming that single-node saturation is the dominant duration driver.",
+        "expected_impact": "Distributes shuffle I/O and task execution across up to 8 workers, expected to substantially reduce wall-clock duration and resolve the SLA breach observed in the current run.",
+        "risk_note": "Setting maxWorkers to 8 caps autoscaling; if future data volumes grow beyond what 8 workers can handle within the SLA window, this ceiling will need to be revisited."
+      },
+      {
+        "config_key": "spark.sql.adaptive.enabled",
+        "action": "set_spark_config",
+        "suggested_value": "true",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=0: 45,363 jobs and 58,212 stages suggest highly iterative fine-grained execution; AQE coalesces small post-shuffle partitions reducing scheduling overhead; complements the multi-worker scale-out",
+        "confidence": 0.8,
+        "priority": 6,
+        "rationale": "Insight ref=0 identifies 45,363 Spark jobs and 58,212 stages as a driver-side scheduling bottleneck. With shuffle_partitions_param='auto' and AQE currently disabled (dbx_autooptimize_shuffle=false), enabling AQE allows Spark to dynamically coalesce small shuffle partitions, reducing the number of materialised post-shuffle stages the driver must schedule and coordinate. On a multi-worker cluster (after applying priority 4/5 changes), AQE also enables dynamic partition pruning and skew join optimisation. This is a complementary change \u2014 it does not conflict with the memory fixes in priorities 1\u20133 or the cluster sizing in priorities 4\u20135.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "AQE is currently unset (source = 'not_set') and dbx_autooptimize_shuffle = false, meaning Spark uses a static partition plan for all 58,212 shuffle-heavy stages despite shuffle_partitions_param being set to 'auto'. With 13.9 TB of shuffle data spread across tens of thousands of stages, many post-shuffle partitions will be either vastly oversized or contain only a few records \u2014 AQE's dynamic coalesce capability eliminates redundant small tasks, reducing the number of stages the driver must schedule and the associated coordination overhead. On the multi-worker cluster established by recommendations 2 and 3, AQE additionally unlocks dynamic partition pruning and skew join optimisation, which are no-ops in a single-executor context.",
+        "expected_impact": "Reduces driver scheduling overhead by dynamically coalescing small shuffle partitions across 58K stages, and unlocks skew-join and partition-pruning optimisations once the cluster scales to multiple workers.",
+        "risk_note": "AQE can occasionally produce sub-optimal plans when runtime statistics diverge sharply from planner assumptions \u2014 monitor stage counts and shuffle sizes in the first few runs after enabling to confirm the coalesce behavior is beneficial."
+      }
+    ],
+    "blocked_recommendations": [
+      {
+        "config_key": "spark.executor.memory",
+        "action": "set_spark_config",
+        "suggested_value": "24g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=1: memory_headroom=0.030 (3%), executor_max_heap_memory_utilization=0.9697, storage cache peak 11.88 GB competing with execution memory 1.9 GB; ~3% headroom is dangerously thin",
+        "confidence": 0.88,
+        "priority": 2,
+        "rationale": "With only 3% heap headroom and storage cache consuming up to 11.88 GB on-heap against ~1.9 GB execution memory, the executor heap is critically undersized for its workload. The insight suggests raising to 26\u201328 GB. A conservative 25% step from 21 GB \u2192 24 GB (consistent with the recommendation rule of max 25% step / 4 GB cap, where 25% of 21 GB \u2248 5.25 GB but capped at 4 GB gives 25 GB; we use 24 GB as the nearest safe value that, combined with the 6 GB overhead change in priority 1, keeps total executor memory at ~30 GB within the 32 GB r6gd.xlarge). Note: the saving fraction tool returns -0.238 (cost increase) because more memory costs more \u2014 this is intentional; the alternative is OOM-induced run failures which cost more. Estimated_saving_fraction is left unset as this is a stability fix, not a cost reduction.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "blocked_by": [
+          "llm safety review: Recommendation 1 sets executor.memory to 24g (heap) while recommendation 0 sets memoryOverhead to 6144 MB (6 GB): combined footprint is ~30 GB on a 33.2 GB node, but the current run already shows executor_max_memory_utilization at 1.0 (100%) and off_heap_memory_utilization at 1.0, and the executor JVM already peaks at ~25 GB total Java memory use \u2014 raising heap to 24 g without first verifying the overhead fix (rec 0) is safe creates a sequencing risk, but by itself 24g+6g=30g leaves ~3 GB headroom on 33.2 GB, which is marginal; the concrete data hazard is that this recommendation is listed as independent of rec 0 but must be applied after rec 0, otherwise the total unmanaged overhead would remain at only 2.1 GB, and a 24 GB heap pushing storage cache pressure without adequate overhead budget worsens the existing off_heap_headroom=0.0 condition."
+        ]
+      },
+      {
+        "config_key": "spark.executor.memory",
+        "action": "set_spark_config",
+        "suggested_value": "26g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "insight ref=1 follow-up step: if 24g proves stable after 3\u20135 runs and cache pressure is still observed, advance to 26g",
+        "confidence": 0.72,
+        "priority": 3,
+        "rationale": "The insight targets 26\u201328 GB for executor memory. This second step recommendation (24 GB \u2192 26 GB) should be applied only after confirming stability at 24 GB across 3\u20135 runs. At 26 GB heap + 6 GB overhead the total executor footprint is ~32 GB \u2014 at the very limit of the r6gd.xlarge's 32 GB RAM. If this step is taken, also audit whether the large storage cache (8.78 GB) from RDD caching is actually reused; unpersisting unused caches is preferable to pushing memory to the instance ceiling.",
+        "estimated_saving_fraction": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 1,
+        "blocked_by": [
+          "llm safety review: Recommendation 2 sets executor.memory to 26g (heap) plus 6g overhead = 32 GB total executor footprint, exactly equal to the r6gd.xlarge's 33.2 GB total RAM reported in the executor host info \u2014 leaving no room for the OS, JVM non-heap metadata, or the Databricks agent, creating a near-certain OOM-kill risk."
+        ]
+      }
+    ],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memoryOverhead",
+            "current_value": null,
+            "suggested_value": "6144",
+            "rationale": "The executor consumed 5.70 GB of off-heap memory against a configured allocation of only 2.11 GB \u2014 2.7\u00d7 over-budget. The excess was served from system memory, exposing the executor to silent termination by the Linux OOM killer. The insight recommends at least 6 GB; setting memoryOverhead to 6144 MB covers the observed peak with a small safety margin. The r6gd.xlarge has 32 GB total RAM; with executor.memory at ~21 GB and overhead at 6 GB, total executor footprint is ~27 GB \u2014 still within the instance envelope. This is a critical stability fix. The estimated_saving_fraction is not set because this is a health/stability fix; while it increases allocated memory it prevents catastrophic executor kills that would waste far more wall-clock time.",
+            "confidence": 0.95
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMinWorkers",
+            "current_value": null,
+            "suggested_value": 2,
+            "rationale": "The cluster has been fixed at 1 worker for all 20 historical runs. With idle_ratio=0.927 (92.7% idle), 45,363 Spark jobs and 58,212 stages all serialised through a single executor, and 13.9 TB of shuffle data processed by a single 4-core node, the job is fundamentally bottlenecked by its single-node architecture. Both insights ref=0 and ref=2 converge on scaling the cluster. Setting clusterMinWorkers=2 establishes a minimum floor of 2 workers so the cluster can never degrade back to single-node operation, even during scale-down events. Combined with dynamic allocation (see priority 5), the cluster will autoscale upward from this floor. This is a Databricks cluster config; spark.dynamicAllocation.* is not used per platform rules.",
+            "confidence": 0.9
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_cluster_config",
+            "config_key": "clusterMaxWorkers",
+            "current_value": null,
+            "suggested_value": 8,
+            "rationale": "Scaling to 8 workers distributes the 13.9 TB shuffle across 8 nodes (each handling ~1.7 TB vs the current 13.9 TB single-node load), enables inter-node parallelism across 58K stages, and directly addresses the SLA breach from insight ref=0. The r6gd.xlarge 'd' suffix indicates local NVMe storage \u2014 ideal for shuffle scratch. Databricks should be configured to use local disks (spark.local.dir pointing to the NVMe mount if not already set by Databricks). Starting at max=8 rather than a larger value is a conservative first step consistent with the 'one step at a time' principle; dynamic allocation will size within this envelope based on actual demand.",
+            "confidence": 0.88
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.sql.adaptive.enabled",
+            "current_value": null,
+            "suggested_value": "true",
+            "rationale": "Insight ref=0 identifies 45,363 Spark jobs and 58,212 stages as a driver-side scheduling bottleneck. With shuffle_partitions_param='auto' and AQE currently disabled (dbx_autooptimize_shuffle=false), enabling AQE allows Spark to dynamically coalesce small shuffle partitions, reducing the number of materialised post-shuffle stages the driver must schedule and coordinate. On a multi-worker cluster (after applying priority 4/5 changes), AQE also enables dynamic partition pruning and skew join optimisation. This is a complementary change \u2014 it does not conflict with the memory fixes in priorities 1\u20133 or the cluster sizing in priorities 4\u20135.",
+            "confidence": 0.8
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memory",
+            "current_value": null,
+            "suggested_value": "24g",
+            "rationale": "With only 3% heap headroom and storage cache consuming up to 11.88 GB on-heap against ~1.9 GB execution memory, the executor heap is critically undersized for its workload. The insight suggests raising to 26\u201328 GB. A conservative 25% step from 21 GB \u2192 24 GB (consistent with the recommendation rule of max 25% step / 4 GB cap, where 25% of 21 GB \u2248 5.25 GB but capped at 4 GB gives 25 GB; we use 24 GB as the nearest safe value that, combined with the 6 GB overhead change in priority 1, keeps total executor memory at ~30 GB within the 32 GB r6gd.xlarge). Note: the saving fraction tool returns -0.238 (cost increase) because more memory costs more \u2014 this is intentional; the alternative is OOM-induced run failures which cost more. Estimated_saving_fraction is left unset as this is a stability fix, not a cost reduction.",
+            "confidence": 0.88
+          },
+          "usd_cost_annual": null
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memory",
+            "current_value": null,
+            "suggested_value": "26g",
+            "rationale": "The insight targets 26\u201328 GB for executor memory. This second step recommendation (24 GB \u2192 26 GB) should be applied only after confirming stability at 24 GB across 3\u20135 runs. At 26 GB heap + 6 GB overhead the total executor footprint is ~32 GB \u2014 at the very limit of the r6gd.xlarge's 32 GB RAM. If this step is taken, also audit whether the large storage cache (8.78 GB) from RDD caching is actually reused; unpersisting unused caches is preferable to pushing memory to the instance ceiling.",
+            "confidence": 0.72
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.03025151023560879,
+        "gc_pressure": 0.02215157992124599,
+        "off_heap_headroom": 0.0,
+        "vcore_utilization": 0.5792482490149987,
+        "idle_ratio": 0.9271736790987598,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 0.9675016331057331,
+        "spill_ratio": null,
+        "has_spill": false,
+        "retried_task_waste": 0.0
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "auto",
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": 1,
+        "dynamic_allocation_enabled": false,
+        "is_databricks": true,
+        "max_executors_param": null,
+        "min_executors_param": null,
+        "executor_instances_param": null,
+        "executor_cores": 4
+      },
+      "pre_tuning_durations_ms": [
+        43323.761,
+        43208.41,
+        43206.702,
+        43206.786,
+        43208.121
+      ],
+      "pre_tuning_cost_usd": 7.4062396303240305,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+        "description": "Both the driver and executor are running Java 8's legacy Parallel Scavenge + PS MarkSweep (Parallel Old) garbage collector. At the heap utilization levels observed in this run (driver max heap used: 11.0 GB / 19.8 GB = 55.6%; executor peak: 97%), PS MarkSweep performs stop-the-world full GC collections that pause all JVM threads. The driver GC consumed 26.77% of driver CPU time (driver_jvm_gc_time_pct=0.267) \u2014 over a quarter of the driver's CPU budget lost to garbage collection. Executor GC time (27,740 s) is anomalously high relative to the historical baseline mean of 5,457 s (z=2.21). Switching to G1GC, which Databricks Runtime 13.x supports, would reduce pause duration and allow incremental collection \u2014 particularly important given the large long-lived cached objects (up to 8.78 GB) that cause PS MarkSweep to trigger expensive full collections.",
+        "reason": "The GC algorithm (PS MarkSweep / G1GC) is tuned via spark.driver.extraJavaOptions and spark.executor.extraJavaOptions, neither of which appears in the approved config_key list. No valid config_key exists to implement this recommendation. The G1GC change is noted as valuable context \u2014 engineers should apply it manually via cluster Advanced Options in the Databricks UI (spark.driver.extraJavaOptions=-XX:+UseG1GC and spark.executor.extraJavaOptions=-XX:+UseG1GC) \u2014 but cannot be encoded as a structured recommendation in this plan."
+      }
+    ],
+    "health_breach_unactioned": true,
+    "plan_degraded": false,
+    "summary": "4 recommendation(s), ordered health-first. 2 blocked by safety rules. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "00447d9b397e"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.03025151023560879,
+    "gc_pressure": 0.02215157992124599,
+    "off_heap_headroom": 0.0,
+    "vcore_utilization": 0.5792482490149987,
+    "idle_ratio": 0.9271736790987598,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 0.9675016331057331,
+    "spill_ratio": null,
+    "has_spill": false,
+    "retried_task_waste": 0.0
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 92.6116,
+    "cluster_workers": 1,
+    "workers_availability": "SPOT_WITH_FALLBACK"
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memoryOverhead",
+      "current_value": null,
+      "suggested_value": "6144",
+      "action": "set_spark_config",
+      "explanation": "The executor's off-heap memory utilization hit 100% (executor_max_off_heap_memory_utilization = 1.0), with a measured peak of 5.70 GB consumed against a configured memoryOverhead of only 2.11 GB \u2014 a 2.7\u00d7 overrun confirmed by off_heap_headroom = 0.0. Any off-heap demand beyond the configured allocation spills into OS-managed system memory, placing the executor squarely in the Linux OOM killer's crosshairs; a silent process termination would immediately invalidate the entire run. Setting memoryOverhead to 6144 MB covers the observed 5.70 GB peak with a ~400 MB safety margin while keeping the total executor footprint (~21 GB heap + 6 GB overhead = ~27 GB) well within the 32 GB r6gd.xlarge envelope.",
+      "expected_impact": "Eliminates the risk of silent OOM-killer termination of the executor, converting an intermittent catastrophic failure mode into a stable, continuously running job.",
+      "risk_note": "Raising memoryOverhead increases per-executor reserved memory by ~4 GB, slightly reducing the headroom available for additional executors on the same node \u2014 validate that the r6gd.xlarge still fits one full executor after this change."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMinWorkers",
+      "current_value": null,
+      "suggested_value": 2,
+      "action": "set_cluster_config",
+      "explanation": "Across all 20 historical runs the cluster has operated with exactly 1 worker (cluster_workers = 1, cluster_min_workers = null across every segment), while idle_ratio sits at 92.7% and 45,363 Spark jobs with 58,212 stages have been serialised through a single 4-core executor. With 13.9 TB of shuffle data written and 13.7 TB read by that lone node, the job's throughput is entirely bottlenecked by a single-node architecture rather than any algorithmic inefficiency. Setting clusterMinWorkers = 2 establishes a hard floor so that Databricks autoscaling can never scale the cluster back to the single-worker state that has produced this bottleneck across every observed run.",
+      "expected_impact": "Guarantees a minimum of 2 worker nodes at all times, providing a baseline doubling of executor capacity and preventing regression to the chronically under-resourced single-node configuration.",
+      "risk_note": "A minimum of 2 workers increases the baseline cluster cost even during genuinely idle periods \u2014 pair this with clusterMaxWorkers and autoscaling to avoid over-provisioning at rest."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "clusterMaxWorkers",
+      "current_value": null,
+      "suggested_value": 8,
+      "action": "set_cluster_config",
+      "explanation": "The single executor has processed 13.9 TB of shuffle writes and 13.7 TB of shuffle reads entirely on one node, consuming the r6gd.xlarge's local NVMe bandwidth and 4 cores for both shuffle production and consumption \u2014 leaving no capacity for inter-node parallelism across 58,212 stages. Raising clusterMaxWorkers to 8 distributes the shuffle load across 8 nodes (~1.7 TB per node vs. the current 13.9 TB), enables 32 concurrent cores for task execution, and directly targets the driver scheduling bottleneck caused by serialising 45,363 Spark jobs through a single executor. The current run duration of 540,480 seconds is at the 90th percentile and anomalously high (z-score 2.17) compared to the historical mean of 109,606 seconds, confirming that single-node saturation is the dominant duration driver.",
+      "expected_impact": "Distributes shuffle I/O and task execution across up to 8 workers, expected to substantially reduce wall-clock duration and resolve the SLA breach observed in the current run.",
+      "risk_note": "Setting maxWorkers to 8 caps autoscaling; if future data volumes grow beyond what 8 workers can handle within the SLA window, this ceiling will need to be revisited."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.sql.adaptive.enabled",
+      "current_value": null,
+      "suggested_value": "true",
+      "action": "set_spark_config",
+      "explanation": "AQE is currently unset (source = 'not_set') and dbx_autooptimize_shuffle = false, meaning Spark uses a static partition plan for all 58,212 shuffle-heavy stages despite shuffle_partitions_param being set to 'auto'. With 13.9 TB of shuffle data spread across tens of thousands of stages, many post-shuffle partitions will be either vastly oversized or contain only a few records \u2014 AQE's dynamic coalesce capability eliminates redundant small tasks, reducing the number of stages the driver must schedule and the associated coordination overhead. On the multi-worker cluster established by recommendations 2 and 3, AQE additionally unlocks dynamic partition pruning and skew join optimisation, which are no-ops in a single-executor context.",
+      "expected_impact": "Reduces driver scheduling overhead by dynamically coalescing small shuffle partitions across 58K stages, and unlocks skew-join and partition-pruning optimisations once the cluster scales to multiple workers.",
+      "risk_note": "AQE can occasionally produce sub-optimal plans when runtime statistics diverge sharply from planner assumptions \u2014 monitor stage counts and shuffle sizes in the first few runs after enabling to confirm the coalesce behavior is beneficial."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memory",
+      "current_value": null,
+      "suggested_value": "24g",
+      "action": "set_spark_config",
+      "blocked_by": [
+        "llm safety review: Recommendation 2 sets executor.memory to 26g (heap) plus 6g overhead = 32 GB total executor footprint, exactly equal to the r6gd.xlarge's 33.2 GB total RAM reported in the executor host info \u2014 leaving no room for the OS, JVM non-heap metadata, or the Databricks agent, creating a near-certain OOM-kill risk."
+      ]
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memory",
+      "current_value": null,
+      "suggested_value": "26g",
+      "action": "set_spark_config",
+      "blocked_by": [
+        "llm safety review: Recommendation 2 sets executor.memory to 26g (heap) plus 6g overhead = 32 GB total executor footprint, exactly equal to the r6gd.xlarge's 33.2 GB total RAM reported in the executor host info \u2014 leaving no room for the OS, JVM non-heap metadata, or the Databricks agent, creating a near-certain OOM-kill risk."
+      ]
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Run duration 4.9\u00d7 above baseline with 92.7% executor idle time \u2014 SLA breach",
+        "title": "Run duration 4.9\u00d7 above baseline with 92.7% executor idle time \u2014 SLA breach",
+        "description": "This run lasted 540,480 seconds (\u22486.25 days) against a historical mean of 109,605 s and a SLA upper bound of 410,000 s \u2014 the SLA test formally failed. Of that wall-clock time, 501,119 s (92.7%) was idle: the executor was allocated but not executing Spark tasks. The job spawned an extraordinary 45,363 Spark jobs and 58,212 stages, all serialised through a single-worker cluster. Historical runs show two prior outlier episodes (760K s and 610K s), confirming this is a recurring instability pattern \u2014 not a one-off. The root cause is a driver-side scheduling bottleneck: with 1 executor processing a workload that generates this many fine-grained stages, the driver spends the vast majority of time coordinating rather than executing.",
+        "evidence": "task_idle_time=501,119 s; task_duration=540,480 s; idle_ratio=0.927; historical baseline mean=109,605 s, z_score=2.17 (anomalously_high band); SLA test FAILED (run_value=917,171 vs upper_bound=410,000); num_spark_jobs=45,363; num_spark_stages=58,212; cluster_workers=1 (stable across all 20 historical runs); vcores_avg_used_over_time avg=0.284 out of 4 available.",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "Investigate whether the workload's stage count (58K stages, 45K jobs) has grown relative to prior runs \u2014 check upstream pipeline changes or data volume. As an immediate structural fix, evaluate enabling dynamic allocation (spark.dynamicAllocation.enabled=true with clusterMinWorkers/clusterMaxWorkers bounds on the Databricks job cluster) so the cluster can scale workers during burst stages. If stage count growth is confirmed as the root cause, consider consolidating fine-grained transformations to reduce scheduling overhead.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor memory fully saturated with off-heap overcommit \u2014 imminent OOM risk",
+        "title": "Executor memory fully saturated with off-heap overcommit \u2014 imminent OOM risk",
+        "description": "The executor reached 100% total memory utilization and 96.97% heap utilization during this run, leaving only 3% headroom (memory_headroom=0.030). More critically, the off-heap memory used (5.70 GB peak) materially exceeded the configured off-heap allocation (executor_off_heap_memory=2.11 GB) \u2014 the OS was serving the overage from system memory, which can lead to silent executor kill by the Linux OOM killer. The storage cache alone consumed up to 11.9 GB on-heap, competing directly with execution memory (up to 1.9 GB). The job has never spilled to disk across 20 historical runs, meaning Spark is currently succeeding only because the data barely fits \u2014 a modest increase in data volume or concurrency will cause OOM failures.",
+        "evidence": "executor_max_memory_utilization=1.0 (100%); executor_max_heap_memory_utilization=0.9697; executor_max_off_heap_used_memory=5.70 GB vs executor_off_heap_memory=2.11 GB (2.7\u00d7 over-allocated); memory_headroom=0.030; cached_data_max_memory_size=8.78 GB; executor_managed_storage_memory_on_heap_max_used peak=11.88 GB; disk_bytes_spilled=0 across all 20 historical runs.",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase spark.executor.memoryOverhead (or the Databricks equivalent spark.executor.memoryOverheadFactor) to cover the observed 5.7 GB off-heap peak \u2014 set it to at least 6g. Also evaluate raising spark.executor.memory from its current ~21 GB to ~26\u201328 GB on the r6gd.xlarge (which has 32 GB total) to widen the execution/storage headroom. If the large storage cache (up to 8.78 GB) is from RDD caching, audit whether cached datasets are actually reused \u2014 unpersisting unused caches would free memory for execution.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "13.9 TB shuffle processed by a single 4-core executor \u2014 structural throughput bottleneck",
+        "title": "13.9 TB shuffle processed by a single 4-core executor \u2014 structural throughput bottleneck",
+        "description": "The job shuffled 13.9 TB written and 13.7 TB read on a cluster with exactly one worker (4 cores, r6gd.xlarge). This yields a shuffle amplification ratio of ~10.7\u00d7 over the 1.3 TB input. Shuffle write time alone consumed 32,202 seconds of executor CPU time \u2014 comparable in magnitude to actual computation time. With a single executor, all shuffle data must be written, sorted, and read back by the same process with no inter-node parallelism. The shuffle bytes are remarkably consistent per time-series bucket (min 70 GB, max 125 GB per 64-minute window), confirming this is a sustained structural pattern rather than a burst. This single-node shuffle architecture fundamentally caps throughput regardless of any Spark tuning.",
+        "evidence": "shuffle_bytes_written=13.94 TB; shuffle_bytes_read=13.74 TB; input_bytes_read=1.30 TB; shuffle/input ratio=10.7\u00d7; executors_shuffle_write_time=32,202 s; shuffle_bytes_written_over_time avg=98.9 GB/bucket, min=70.8 GB, max=124.3 GB (141 buckets \u00d7 64 min); cluster_workers=1; executor_cores=4; dynamic_allocation_enabled=false.",
+        "confidence": 0.9,
+        "severity": "performance",
+        "suggested_action": "Scale the cluster to multiple workers. Given the shuffle volume (13.9 TB), even 4\u20138 workers would distribute shuffle partitions across nodes, dramatically reducing per-executor shuffle I/O and enabling true parallel stage execution. On the Databricks job cluster, set clusterMinWorkers=2 and clusterMaxWorkers=8 with dynamic allocation enabled. The r6gd.xlarge has local NVMe storage (the 'd' suffix) which is ideal for shuffle \u2014 ensure Databricks is configured to use local disk for shuffle scratch (spark.local.dir should point to the NVMe mount).",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+        "title": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+        "description": "Both the driver and executor are running Java 8's legacy Parallel Scavenge + PS MarkSweep (Parallel Old) garbage collector. At the heap utilization levels observed in this run (driver max heap used: 11.0 GB / 19.8 GB = 55.6%; executor peak: 97%), PS MarkSweep performs stop-the-world full GC collections that pause all JVM threads. The driver GC consumed 26.77% of driver CPU time (driver_jvm_gc_time_pct=0.267) \u2014 over a quarter of the driver's CPU budget lost to garbage collection. Executor GC time (27,740 s) is anomalously high relative to the historical baseline mean of 5,457 s (z=2.21). Switching to G1GC, which Databricks Runtime 13.x supports, would reduce pause duration and allow incremental collection \u2014 particularly important given the large long-lived cached objects (up to 8.78 GB) that cause PS MarkSweep to trigger expensive full collections.",
+        "evidence": "gcType='PS MarkSweep,PS Scavenge' (both driver and executor, from events payload); driver_jvm_gc_time_pct=0.2676 (26.76% of driver CPU); executors_jvm_gc_time=27,740 s, baseline mean=5,457 s, z_score=2.21 (anomalously_high); driver_max_heap_memory_utilization=0.556; executor_max_heap_memory_utilization=0.970; cached_data_max_memory_size peak=8.78 GB (promotes large objects to old-gen, triggering full GC).",
+        "confidence": 0.85,
+        "severity": "performance",
+        "suggested_action": "Add the following JVM flags to the Databricks cluster's Spark configuration to enable G1GC on both driver and executor: spark.driver.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+G1UseAdaptiveIHOP and spark.executor.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m. G1GC handles large heap regions and mixed-generation collections more gracefully than PS MarkSweep and significantly reduces stop-the-world pause times on Spark workloads with large caches.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Run duration 4.9\u00d7 above baseline with 92.7% executor idle time \u2014 SLA breach",
+        "title": "Run duration 4.9\u00d7 above baseline with 92.7% executor idle time \u2014 SLA breach",
+        "description": "This run lasted 540,480 seconds (\u22486.25 days) against a historical mean of 109,605 s and a SLA upper bound of 410,000 s \u2014 the SLA test formally failed. Of that wall-clock time, 501,119 s (92.7%) was idle: the executor was allocated but not executing Spark tasks. The job spawned an extraordinary 45,363 Spark jobs and 58,212 stages, all serialised through a single-worker cluster. Historical runs show two prior outlier episodes (760K s and 610K s), confirming this is a recurring instability pattern \u2014 not a one-off. The root cause is a driver-side scheduling bottleneck: with 1 executor processing a workload that generates this many fine-grained stages, the driver spends the vast majority of time coordinating rather than executing.",
+        "evidence": "task_idle_time=501,119 s; task_duration=540,480 s; idle_ratio=0.927; historical baseline mean=109,605 s, z_score=2.17 (anomalously_high band); SLA test FAILED (run_value=917,171 vs upper_bound=410,000); num_spark_jobs=45,363; num_spark_stages=58,212; cluster_workers=1 (stable across all 20 historical runs); vcores_avg_used_over_time avg=0.284 out of 4 available.",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "Investigate whether the workload's stage count (58K stages, 45K jobs) has grown relative to prior runs \u2014 check upstream pipeline changes or data volume. As an immediate structural fix, evaluate enabling dynamic allocation (spark.dynamicAllocation.enabled=true with clusterMinWorkers/clusterMaxWorkers bounds on the Databricks job cluster) so the cluster can scale workers during burst stages. If stage count growth is confirmed as the root cause, consider consolidating fine-grained transformations to reduce scheduling overhead.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor memory fully saturated with off-heap overcommit \u2014 imminent OOM risk",
+        "title": "Executor memory fully saturated with off-heap overcommit \u2014 imminent OOM risk",
+        "description": "The executor reached 100% total memory utilization and 96.97% heap utilization during this run, leaving only 3% headroom (memory_headroom=0.030). More critically, the off-heap memory used (5.70 GB peak) materially exceeded the configured off-heap allocation (executor_off_heap_memory=2.11 GB) \u2014 the OS was serving the overage from system memory, which can lead to silent executor kill by the Linux OOM killer. The storage cache alone consumed up to 11.9 GB on-heap, competing directly with execution memory (up to 1.9 GB). The job has never spilled to disk across 20 historical runs, meaning Spark is currently succeeding only because the data barely fits \u2014 a modest increase in data volume or concurrency will cause OOM failures.",
+        "evidence": "executor_max_memory_utilization=1.0 (100%); executor_max_heap_memory_utilization=0.9697; executor_max_off_heap_used_memory=5.70 GB vs executor_off_heap_memory=2.11 GB (2.7\u00d7 over-allocated); memory_headroom=0.030; cached_data_max_memory_size=8.78 GB; executor_managed_storage_memory_on_heap_max_used peak=11.88 GB; disk_bytes_spilled=0 across all 20 historical runs.",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase spark.executor.memoryOverhead (or the Databricks equivalent spark.executor.memoryOverheadFactor) to cover the observed 5.7 GB off-heap peak \u2014 set it to at least 6g. Also evaluate raising spark.executor.memory from its current ~21 GB to ~26\u201328 GB on the r6gd.xlarge (which has 32 GB total) to widen the execution/storage headroom. If the large storage cache (up to 8.78 GB) is from RDD caching, audit whether cached datasets are actually reused \u2014 unpersisting unused caches would free memory for execution.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "13.9 TB shuffle processed by a single 4-core executor \u2014 structural throughput bottleneck",
+        "title": "13.9 TB shuffle processed by a single 4-core executor \u2014 structural throughput bottleneck",
+        "description": "The job shuffled 13.9 TB written and 13.7 TB read on a cluster with exactly one worker (4 cores, r6gd.xlarge). This yields a shuffle amplification ratio of ~10.7\u00d7 over the 1.3 TB input. Shuffle write time alone consumed 32,202 seconds of executor CPU time \u2014 comparable in magnitude to actual computation time. With a single executor, all shuffle data must be written, sorted, and read back by the same process with no inter-node parallelism. The shuffle bytes are remarkably consistent per time-series bucket (min 70 GB, max 125 GB per 64-minute window), confirming this is a sustained structural pattern rather than a burst. This single-node shuffle architecture fundamentally caps throughput regardless of any Spark tuning.",
+        "evidence": "shuffle_bytes_written=13.94 TB; shuffle_bytes_read=13.74 TB; input_bytes_read=1.30 TB; shuffle/input ratio=10.7\u00d7; executors_shuffle_write_time=32,202 s; shuffle_bytes_written_over_time avg=98.9 GB/bucket, min=70.8 GB, max=124.3 GB (141 buckets \u00d7 64 min); cluster_workers=1; executor_cores=4; dynamic_allocation_enabled=false.",
+        "confidence": 0.9,
+        "severity": "performance",
+        "suggested_action": "Scale the cluster to multiple workers. Given the shuffle volume (13.9 TB), even 4\u20138 workers would distribute shuffle partitions across nodes, dramatically reducing per-executor shuffle I/O and enabling true parallel stage execution. On the Databricks job cluster, set clusterMinWorkers=2 and clusterMaxWorkers=8 with dynamic allocation enabled. The r6gd.xlarge has local NVMe storage (the 'd' suffix) which is ideal for shuffle \u2014 ensure Databricks is configured to use local disk for shuffle scratch (spark.local.dir should point to the NVMe mount).",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+        "title": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+        "description": "Both the driver and executor are running Java 8's legacy Parallel Scavenge + PS MarkSweep (Parallel Old) garbage collector. At the heap utilization levels observed in this run (driver max heap used: 11.0 GB / 19.8 GB = 55.6%; executor peak: 97%), PS MarkSweep performs stop-the-world full GC collections that pause all JVM threads. The driver GC consumed 26.77% of driver CPU time (driver_jvm_gc_time_pct=0.267) \u2014 over a quarter of the driver's CPU budget lost to garbage collection. Executor GC time (27,740 s) is anomalously high relative to the historical baseline mean of 5,457 s (z=2.21). Switching to G1GC, which Databricks Runtime 13.x supports, would reduce pause duration and allow incremental collection \u2014 particularly important given the large long-lived cached objects (up to 8.78 GB) that cause PS MarkSweep to trigger expensive full collections.",
+        "evidence": "gcType='PS MarkSweep,PS Scavenge' (both driver and executor, from events payload); driver_jvm_gc_time_pct=0.2676 (26.76% of driver CPU); executors_jvm_gc_time=27,740 s, baseline mean=5,457 s, z_score=2.21 (anomalously_high); driver_max_heap_memory_utilization=0.556; executor_max_heap_memory_utilization=0.970; cached_data_max_memory_size peak=8.78 GB (promotes large objects to old-gen, triggering full GC).",
+        "confidence": 0.85,
+        "severity": "performance",
+        "suggested_action": "Add the following JVM flags to the Databricks cluster's Spark configuration to enable G1GC on both driver and executor: spark.driver.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+G1UseAdaptiveIHOP and spark.executor.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m. G1GC handles large heap regions and mixed-generation collections more gracefully than PS MarkSweep and significantly reduces stop-the-world pause times on Spark workloads with large caches.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        1,
+        3
+      ],
+      "tier2_cluster": [
+        0,
+        2
+      ],
+      "tier3_instance": [],
+      "tier4_tuning": [],
+      "active_conflicts": [],
+      "reasoning": "\nMapping each insight against the triage rules and confirmed metrics:\n\n**Insight 1 \u2192 Tier 1 (Health & Correctness):** memory_headroom = 0.030 (< 0.05 threshold), and off-heap is overcommitted (off_heap_headroom = 0.0). The \"tight heap headroom\" rule triggers directly, and the off-heap overcommit creates an imminent OOM/silent-kill risk. This is a correctness/stability issue that must be addressed first.\n\n**Insight 3 \u2192 Tier 1 (Health & Correctness):** driver_jvm_gc_time_pct = 0.267 (> 0.20 threshold for \"severe GC pressure\"). Even though the executor-level gc_pressure metric reads 0.022 (the executor GC fraction), the driver GC at 26.7% is the bottleneck described and clearly crosses the health threshold. The legacy PS MarkSweep stop-the-world pauses are causing the driver scheduling bottleneck that manifests as the 92.7% idle time observed in insight 0.\n\n**Insight 0 \u2192 Tier 2 (Cluster Right-sizing):** idle_ratio = 0.927 (>> 0.40 threshold). The root cause analysis in the insight itself identifies a driver-side scheduling bottleneck on a single-worker cluster generating 45K Spark jobs. The cluster is massively over-idle and the fix is structural: more workers to parallelize stages, enabling proper task execution rather than serialized driver coordination. This is a cluster right-sizing concern (add workers / enable autoscaling), not a health issue per se\u2014the job completed (status=COMPLETED) and there are no retries (retried_task_waste=0.0). It is the primary cost/performance lever.\n\n**Insight 2 \u2192 Tier 2 (Cluster Right-sizing):** 13.9 TB shuffled through a single 4-core executor is a structural throughput bottleneck attributable to the single-worker cluster configuration. Adding workers would distribute shuffle across multiple executors with inter-node parallelism. This is co-located with Insight 0's diagnosis and falls into the same cluster sizing bucket\u2014but is independently surfaced and reinforces the need for more workers/executors.\n\n**Conflicts:** There is a potential conflict between recommending executor memory reduction (none is being recommended here) and the active spill/memory concerns, but since has_spill=False, that conflict rule doesn't fire. The skew_ratio=0.0 means the \"do not reduce executors when skew>0.30 and vcore>0.60\" rule does not apply. No cross-insight conflicts are detected. Insight 1 (memory) and the cluster sizing insights (0, 2) are complementary\u2014expanding the cluster while also fixing memory/GC is safe and synergistic. Insight 3's GC fix (switch to G1GC) directly supports resolving the driver bottleneck described in Insight 0, so they reinforce each other rather than conflict.\n"
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 1,
+          "kind": "discovery",
+          "identifier": "Executor memory fully saturated with off-heap overcommit \u2014 imminent OOM risk",
+          "title": "Executor memory fully saturated with off-heap overcommit \u2014 imminent OOM risk",
+          "description": "The executor reached 100% total memory utilization and 96.97% heap utilization during this run, leaving only 3% headroom (memory_headroom=0.030). More critically, the off-heap memory used (5.70 GB peak) materially exceeded the configured off-heap allocation (executor_off_heap_memory=2.11 GB) \u2014 the OS was serving the overage from system memory, which can lead to silent executor kill by the Linux OOM killer. The storage cache alone consumed up to 11.9 GB on-heap, competing directly with execution memory (up to 1.9 GB). The job has never spilled to disk across 20 historical runs, meaning Spark is currently succeeding only because the data barely fits \u2014 a modest increase in data volume or concurrency will cause OOM failures.",
+          "evidence": "executor_max_memory_utilization=1.0 (100%); executor_max_heap_memory_utilization=0.9697; executor_max_off_heap_used_memory=5.70 GB vs executor_off_heap_memory=2.11 GB (2.7\u00d7 over-allocated); memory_headroom=0.030; cached_data_max_memory_size=8.78 GB; executor_managed_storage_memory_on_heap_max_used peak=11.88 GB; disk_bytes_spilled=0 across all 20 historical runs.",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Increase spark.executor.memoryOverhead (or the Databricks equivalent spark.executor.memoryOverheadFactor) to cover the observed 5.7 GB off-heap peak \u2014 set it to at least 6g. Also evaluate raising spark.executor.memory from its current ~21 GB to ~26\u201328 GB on the r6gd.xlarge (which has 32 GB total) to widen the execution/storage headroom. If the large storage cache (up to 8.78 GB) is from RDD caching, audit whether cached datasets are actually reused \u2014 unpersisting unused caches would free memory for execution.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+          "title": "Legacy PS MarkSweep GC algorithm causing severe driver GC overhead at high heap utilization",
+          "description": "Both the driver and executor are running Java 8's legacy Parallel Scavenge + PS MarkSweep (Parallel Old) garbage collector. At the heap utilization levels observed in this run (driver max heap used: 11.0 GB / 19.8 GB = 55.6%; executor peak: 97%), PS MarkSweep performs stop-the-world full GC collections that pause all JVM threads. The driver GC consumed 26.77% of driver CPU time (driver_jvm_gc_time_pct=0.267) \u2014 over a quarter of the driver's CPU budget lost to garbage collection. Executor GC time (27,740 s) is anomalously high relative to the historical baseline mean of 5,457 s (z=2.21). Switching to G1GC, which Databricks Runtime 13.x supports, would reduce pause duration and allow incremental collection \u2014 particularly important given the large long-lived cached objects (up to 8.78 GB) that cause PS MarkSweep to trigger expensive full collections.",
+          "evidence": "gcType='PS MarkSweep,PS Scavenge' (both driver and executor, from events payload); driver_jvm_gc_time_pct=0.2676 (26.76% of driver CPU); executors_jvm_gc_time=27,740 s, baseline mean=5,457 s, z_score=2.21 (anomalously_high); driver_max_heap_memory_utilization=0.556; executor_max_heap_memory_utilization=0.970; cached_data_max_memory_size peak=8.78 GB (promotes large objects to old-gen, triggering full GC).",
+          "confidence": 0.85,
+          "severity": "performance",
+          "suggested_action": "Add the following JVM flags to the Databricks cluster's Spark configuration to enable G1GC on both driver and executor: spark.driver.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m -XX:+G1UseAdaptiveIHOP and spark.executor.extraJavaOptions=-XX:+UseG1GC -XX:G1HeapRegionSize=16m. G1GC handles large heap regions and mixed-generation collections more gracefully than PS MarkSweep and significantly reduces stop-the-world pause times on Spark workloads with large caches.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [
+        {
+          "index": 0,
+          "kind": "discovery",
+          "identifier": "Run duration 4.9\u00d7 above baseline with 92.7% executor idle time \u2014 SLA breach",
+          "title": "Run duration 4.9\u00d7 above baseline with 92.7% executor idle time \u2014 SLA breach",
+          "description": "This run lasted 540,480 seconds (\u22486.25 days) against a historical mean of 109,605 s and a SLA upper bound of 410,000 s \u2014 the SLA test formally failed. Of that wall-clock time, 501,119 s (92.7%) was idle: the executor was allocated but not executing Spark tasks. The job spawned an extraordinary 45,363 Spark jobs and 58,212 stages, all serialised through a single-worker cluster. Historical runs show two prior outlier episodes (760K s and 610K s), confirming this is a recurring instability pattern \u2014 not a one-off. The root cause is a driver-side scheduling bottleneck: with 1 executor processing a workload that generates this many fine-grained stages, the driver spends the vast majority of time coordinating rather than executing.",
+          "evidence": "task_idle_time=501,119 s; task_duration=540,480 s; idle_ratio=0.927; historical baseline mean=109,605 s, z_score=2.17 (anomalously_high band); SLA test FAILED (run_value=917,171 vs upper_bound=410,000); num_spark_jobs=45,363; num_spark_stages=58,212; cluster_workers=1 (stable across all 20 historical runs); vcores_avg_used_over_time avg=0.284 out of 4 available.",
+          "confidence": 0.95,
+          "severity": "health",
+          "suggested_action": "Investigate whether the workload's stage count (58K stages, 45K jobs) has grown relative to prior runs \u2014 check upstream pipeline changes or data volume. As an immediate structural fix, evaluate enabling dynamic allocation (spark.dynamicAllocation.enabled=true with clusterMinWorkers/clusterMaxWorkers bounds on the Databricks job cluster) so the cluster can scale workers during burst stages. If stage count growth is confirmed as the root cause, consider consolidating fine-grained transformations to reduce scheduling overhead.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "13.9 TB shuffle processed by a single 4-core executor \u2014 structural throughput bottleneck",
+          "title": "13.9 TB shuffle processed by a single 4-core executor \u2014 structural throughput bottleneck",
+          "description": "The job shuffled 13.9 TB written and 13.7 TB read on a cluster with exactly one worker (4 cores, r6gd.xlarge). This yields a shuffle amplification ratio of ~10.7\u00d7 over the 1.3 TB input. Shuffle write time alone consumed 32,202 seconds of executor CPU time \u2014 comparable in magnitude to actual computation time. With a single executor, all shuffle data must be written, sorted, and read back by the same process with no inter-node parallelism. The shuffle bytes are remarkably consistent per time-series bucket (min 70 GB, max 125 GB per 64-minute window), confirming this is a sustained structural pattern rather than a burst. This single-node shuffle architecture fundamentally caps throughput regardless of any Spark tuning.",
+          "evidence": "shuffle_bytes_written=13.94 TB; shuffle_bytes_read=13.74 TB; input_bytes_read=1.30 TB; shuffle/input ratio=10.7\u00d7; executors_shuffle_write_time=32,202 s; shuffle_bytes_written_over_time avg=98.9 GB/bucket, min=70.8 GB, max=124.3 GB (141 buckets \u00d7 64 min); cluster_workers=1; executor_cores=4; dynamic_allocation_enabled=false.",
+          "confidence": 0.9,
+          "severity": "performance",
+          "suggested_action": "Scale the cluster to multiple workers. Given the shuffle volume (13.9 TB), even 4\u20138 workers would distribute shuffle partitions across nodes, dramatically reducing per-executor shuffle I/O and enabling true parallel stage execution. On the Databricks job cluster, set clusterMinWorkers=2 and clusterMaxWorkers=8 with dynamic allocation enabled. The r6gd.xlarge has local NVMe storage (the 'd' suffix) which is ideal for shuffle \u2014 ensure Databricks is configured to use local disk for shuffle scratch (spark.local.dir should point to the NVMe mount).",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier3": [],
+      "tier4": []
+    },
+    "kb_version": "00447d9b397e",
+    "historical_runs_count": 20,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": []
+  }
+}
