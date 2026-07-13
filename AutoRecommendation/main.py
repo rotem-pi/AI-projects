@@ -51,15 +51,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent / "definity-app" / "b
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).parent / ".env")
 
 from agent.cost_utils import DEFAULT_MEMORY_PRICE, DEFAULT_VCORE_PRICE, compute_cost_profile
 import app.brain.insights.agent.constants as _agent_constants
-from app.brain.insights.agent.constants import (
-    HISTORICAL_RUNS_FETCH_LIMIT,
-    RUN_CONTEXT_ROWS_PER_TABLE_LIMIT,
-    RUN_CONTEXT_TEXT_MAX_CHARS,
-)
+from app.brain.insights.agent.constants import HISTORICAL_RUNS_FETCH_LIMIT
+
+# The branch removed these from constants.py when fetch_context moved the raw
+# per-run tables to the S3 sandbox (dd494cb3d); this harness still builds an
+# inline run_context from Athena, so the old per-table caps live here now
+# (same values the branch shipped before the sandbox change).
+RUN_CONTEXT_ROWS_PER_TABLE_LIMIT = 300
+RUN_CONTEXT_TEXT_MAX_CHARS = 2000
 
 # Optional .env overrides for the agent's per-node ReAct iteration budgets
 # (e.g. SAFETY_REVIEW_RECURSION_LIMIT=24). A wandering agent that exhausts
@@ -78,6 +81,10 @@ for _limit_name in (
     "PLAN_RECURSION_LIMIT",
     "SAFETY_REVIEW_RECURSION_LIMIT",
     "EXPLAIN_RECURSION_LIMIT",
+    # Soft model-call limit for plan's ForceFinalizeMiddleware — must stay
+    # below PLAN_RECURSION_LIMIT/2 (hard steps ≈ 2 × model calls) or it
+    # never fires and the node degrades via GraphRecursionError instead.
+    "PLAN_FORCE_FINALIZE_MODEL_CALLS",
 ):
     _limit_value = os.getenv(_limit_name)
     if _limit_value:
@@ -89,7 +96,7 @@ for _limit_name in (
             file=sys.stderr,
         )
 from app.brain.insights.agent.models import SqlInsight
-from app.brain.insights.tuning.rules.recommendations.agent import (
+from app.brain.insights.recommendations.agent import (
     PAYLOAD_ACTION,
     PAYLOAD_CONFIG_KEY,
     PAYLOAD_CURRENT_VALUE,
@@ -605,7 +612,10 @@ _BATCH_SUMMARY_FIELDS = [
 
 
 def _results_dir() -> Path:
-    return Path(os.getenv("RESULTS_DIR", "data/results"))
+    configured = Path(os.getenv("RESULTS_DIR", "data/results"))
+    # Relative paths anchor to the repo root, not the caller's CWD, so the
+    # evaluation/ scripts write to the same place as root-level runs.
+    return configured if configured.is_absolute() else Path(__file__).parent / configured
 
 
 def _serialize_insight(insight: Any, index: int) -> dict[str, Any]:

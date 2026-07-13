@@ -23,7 +23,7 @@ from app.brain.insights.agent.enums import InsightSource, RecommendationAction
 from app.brain.insights.agent.models import DbRow, Recommendation, SqlInsight
 from app.brain.insights.agent.state import AgentState
 from app.brain.insights.recommendations import extract_recommendations
-from app.brain.insights.tuning.rules.recommendations.protocol import (
+from app.brain.insights.recommendations.protocol import (
     Recommendation as TuningRecommendation,
 )
 from app.brain.insights.tuning.task_profile import compute_task_profile

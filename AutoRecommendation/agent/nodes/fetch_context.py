@@ -3,15 +3,20 @@
 The row, its real historical runs, and (when available) the raw per-run
 context are fetched from Athena by main.py before the graph is invoked and
 passed in via set_row_override(). This mirrors
-backend/app/brain/insights/agent/nodes/context.py — same
+backend/app/brain/insights/agent/nodes/fetch_context.py — same
 run_metrics/task_profile computation, same "historical runs for trend
-analysis" contract, same run_context sections — the only difference is the
-data source (Athena export vs. Postgres via fetch_sql_file).
+analysis" contract — the only difference is the data source (Athena export
+vs. Postgres).  Two deliberate divergences from the repo node: no S3 run
+sandbox is written (the repo node dumps raw tables to S3; this harness must
+not touch S3 for now, so the per-run data stays in state as run_context
+sections), and no run-id resolution is needed (main.py already injects the
+run to analyze).
 
-agent_historical_enrichments.sql adds a computed run_cost_usd column
-(CALCULATE_USD_COST over vcore/memory time) that the terminal node uses for
-the pre-tuning cost baseline; Athena rows don't carry it, so the same
-formula is applied here to every historical run before it enters the state.
+The historical_enrichments query (repo: dal/sql/insights/agent_context.sql)
+adds a computed run_cost_usd column (CALCULATE_USD_COST over vcore/memory
+time) that the terminal node uses for the pre-tuning cost baseline; Athena
+rows don't carry it, so the same formula is applied here to every
+historical run before it enters the state.
 """
 
 from __future__ import annotations
@@ -63,6 +68,17 @@ def _with_run_cost_usd(run: DbRow) -> DbRow:
     return {**run, "run_cost_usd": cost}
 
 
+def _with_start_time(run: DbRow) -> DbRow:
+    """compute_annual_task_cost reads run["start_time"] to derive runs_per_year;
+    Athena's task_enrichments exposes the same point-in-time as app_pit."""
+    if run.get("start_time") is not None:
+        return run
+    app_pit = run.get("app_pit")
+    if app_pit is None:
+        return run
+    return {**run, "start_time": app_pit}
+
+
 def fetch_context(state: AgentState) -> dict:
     task_id = state["task_id"]
     enrichment = _ROW_OVERRIDE
@@ -87,6 +103,8 @@ def fetch_context(state: AgentState) -> dict:
         "latest_enrichment": enrichment,
         "run_metrics": run_metrics,
         "task_profile": task_profile,
-        "historical_runs": [_with_run_cost_usd(r) for r in _HISTORICAL_RUNS_OVERRIDE],
+        "historical_runs": [
+            _with_start_time(_with_run_cost_usd(r)) for r in _HISTORICAL_RUNS_OVERRIDE
+        ],
         "run_context": _RUN_CONTEXT_OVERRIDE,
     }

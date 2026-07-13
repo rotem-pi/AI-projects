@@ -33,7 +33,12 @@ from langchain.chat_models import init_chat_model
 from langgraph.graph import END, StateGraph
 
 from app.brain.insights.agent.knowledge_base import KnowledgeBase, load_knowledge_base
-from app.brain.insights.agent.models import AgentInsight, FinalPlan, SqlInsight
+from app.brain.insights.agent.models import (
+    AgentInsight,
+    FinalPlan,
+    RunContext,
+    SqlInsight,
+)
 from app.brain.insights.agent.nodes.assemble_output import assemble_output
 from app.brain.insights.agent.nodes.discovery import run_discovery_stream
 from app.brain.insights.agent.nodes.entry_gate import entry_gate
@@ -46,6 +51,19 @@ from agent.nodes.fetch_context import fetch_context
 from agent.nodes.sql_stream import run_sql_stream
 
 logger = logging.getLogger(__name__)
+
+
+class HarnessState(AgentState):
+    """AgentState plus the legacy inline run_context.
+
+    Since dd494cb3d the branch's fetch_context dumps raw per-run tables to an
+    S3 sandbox (state.run_sandbox) and AgentState no longer declares
+    run_context — but plan.py and tools.py still read
+    state.get("run_context") (None-guarded) until they migrate to the
+    sandbox. The harness's Athena fetch_context keeps supplying it inline, so
+    the graph schema must declare the key for LangGraph to carry it."""
+
+    run_context: RunContext | None
 
 # Matches the repo's settings.llm_model default (app/config.py).
 _DEFAULT_LLM_MODEL = "anthropic:claude-sonnet-4-6"
@@ -187,8 +205,8 @@ def _route_after_stamp_kb_version(state: AgentState) -> str:
     return "triage" if state.get("merged_insights") else "assemble_output"
 
 
-def _empty_state(task_id: int, env_name: str) -> AgentState:
-    return AgentState(
+def _empty_state(task_id: int, env_name: str) -> HarnessState:
+    return HarnessState(
         task_id=task_id,
         env_name=env_name,
         latest_enrichment=None,
@@ -196,6 +214,7 @@ def _empty_state(task_id: int, env_name: str) -> AgentState:
         task_profile=None,
         historical_runs=[],
         run_context=None,
+        run_sandbox=None,
         gate_blocked=False,
         gate_reasons=[],
         sql_insights=[],
@@ -228,7 +247,7 @@ def build_inference_graph(llm=None, kb: KnowledgeBase | None = None):
     if llm is None:
         llm = _build_llm()
 
-    graph = StateGraph(AgentState)
+    graph = StateGraph(HarnessState)
 
     graph.add_node("fetch_context", _wrap_node("fetch_context", fetch_context))
     graph.add_node("entry_gate", _wrap_node("entry_gate", entry_gate))

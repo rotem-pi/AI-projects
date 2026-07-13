@@ -1,5 +1,10 @@
 .env
 venv/
+.venv/
 .claude/
 __pycache__/
+.ipynb_checkpoints/
 .DS_Store
+
+# Saved agent runs — local only, not uploaded
+data/results/
