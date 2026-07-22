@@ -1,0 +1,5 @@
+streamlit>=1.38
+boto3>=1.34
+botocore[crt]
+pillow>=10
+pywebview>=5
