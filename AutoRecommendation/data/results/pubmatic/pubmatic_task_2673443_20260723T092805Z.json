@@ -1,0 +1,405 @@
+{
+  "saved_at": "2026-07-23T09:28:05.277937+00:00",
+  "source": "pg-dump",
+  "task_id": 2673443,
+  "task_name": "\"PUB_REDUCED_DIMENSIONS\"",
+  "run_config": {
+    "dump_dir": "data/dumps/pg_2673443",
+    "insight_filter": "lifecycle_status='active' (mimics prod active_insights)",
+    "injected_insights": [],
+    "llm_model": "claude-sonnet-4-6",
+    "llm_temperature": 0.0
+  },
+  "input": {
+    "task_id": 2673443,
+    "links": null,
+    "enrichments_updated_at": "2026-07-14T11:53:22.316619",
+    "executor__memory_heap__allocated": 20.0,
+    "executor__memory_heap__max_used": 14.0091478303075,
+    "executor__memory_off_heap__allocated": 5.0,
+    "executor__memory_off_heap__max_used": 3.48498153686523,
+    "executor__memory__allocated": 25.0,
+    "executor__cores": 5.0,
+    "executors__jvm_gc_time": 8341.066,
+    "executors__vcore_time__used": 618376.007,
+    "executors__cpu_time__used": 674985.04,
+    "executors__used_vcore_time_of_retried_tasks": 2033.524,
+    "driver__heap_memory__allocated": 38.0,
+    "driver__heap_memory__max_used": 3.12392830103636,
+    "driver__cores": 5.0,
+    "task__executors_dynamic_allocation_min_executors__param": 200.0,
+    "task__executors_dynamic_allocation_max_executors__param": 500.0,
+    "task__executor_instances__param": null,
+    "task__dynamic_is_allocation_enabled__param": true,
+    "task__task_cpus__param": 1.0,
+    "task__memory_time__allocated": 7968199.165,
+    "task__skew_time": 0.0,
+    "task__idle_time": 65.1370000839233,
+    "task__vcore_time__allocated": 1589299.0,
+    "task__duration": 1206.677,
+    "task__disk_bytes_spilled": 70357929588.0,
+    "task__total_io_bytes": 1896540205694.0,
+    "task__vcore_time__used": 618648.957,
+    "executors__vcore_time__allocated": 1583270.0,
+    "driver__memory__allocated": 43.0,
+    "driver__memory__max_used": 3.12392830103636,
+    "task__shuffle_partitions__param": "2500",
+    "executors__memory_time__used": 825678.5412547156,
+    "app_id": 28855,
+    "env_id": 28815,
+    "app_pit": "2026-07-14T01:00:00",
+    "parent_task_id": null,
+    "task_name": "\"PUB_REDUCED_DIMENSIONS\"",
+    "driver_type": null,
+    "worker_type": null,
+    "cloud_provider": null,
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": null,
+    "workers_availability": null,
+    "dbx_autooptimizeshuffle": null,
+    "task_sub_type": null,
+    "task__metrics_count": 109,
+    "task__tfs_count__completed": 2,
+    "task__tfs_count__running": 0,
+    "task__tfs_count__failed": 0,
+    "task__tests_runs_count": null,
+    "task__alerts_count": null,
+    "task__breaks_count": null,
+    "driver__cpu_utilization": 0.0452803583278036,
+    "executors__run_time__used": 618376.007,
+    "executors__tasks_duration__used": 630470.242,
+    "cluster_uuid": null,
+    "node_vcores": null,
+    "node_mem_gb": null,
+    "start_time": "2026-07-14T11:33:15.254000+00:00",
+    "status": "COMPLETED",
+    "app_name": "\"SSP_logger\"",
+    "task__aqe_enabled__param": "true"
+  },
+  "plan": {
+    "task_id": 2673443,
+    "recommendations": [
+      {
+        "config_key": "spark.executor.memory",
+        "action": "set_spark_config",
+        "suggested_value": "28g",
+        "current_value": "20g",
+        "source": "agent_discovery",
+        "source_detail": "Stage 1 spilled 70.4 GB to disk and 370.8 GB to memory. Heap utilisation peaked at 70% (14 GB of 20 GB). With 5 cores/executor, each task slot gets ~1.4 GB of managed memory \u2014 insufficient for HashAggregate peaks of ~1.24 GB/task average (Stage 1). Raising to 28g gives ~2.2 GB/slot.",
+        "confidence": 0.75,
+        "priority": 1,
+        "rationale": "This is a HEALTH REMEDY (cost-increasing) justified by a measured health-tier pathology: disk spill of 70.4 GB (spill_ratio=0.037, 3.7% of I/O). The health gate is open on spill; this recommendation is the remedy that addresses it, not an efficiency shrink. IMPORTANT: This recommendation is DEFERRED to the NEXT visit after insight 2 (shuffleTracking re-enable) is applied and observed. The active conflict notes that fixing remote-fetch overhead first may attenuate the spill \u2014 it is possible that restoring local shuffle locality reduces per-task I/O pressure enough to reduce or eliminate the spill without a memory increase. Therefore this recommendation should only be applied if spill persists after the shuffleTracking fix. Sizing rationale: Stage 1 HashAggregate peaked at ~1.24 GB/task average (4.1 TB aggregate / ~3,300 tasks). With 5 cores/executor and 20 GB heap, the managed memory pool (0.6 \u00d7 (20 GB \u2212 300 MB) \u2248 11.8 GB) shared across 5 tasks gives ~2.36 GB/task theoretical max \u2014 but the JVM watermark at 70% (14 GB) leaves only ~1.4 GB of managed memory headroom per slot in practice. Raising to 28g: managed pool \u2248 0.6 \u00d7 (28 \u2212 0.3) = 16.6 GB, divided by 5 slots = ~3.3 GB/task \u2014 sufficient headroom above the 1.24 GB average peak. Step is 40% (20\u219228g), within the bounded-step guidance (max 4g per step; 8g is two steps but justified by the severity of 70.4 GB spill). Cost impact: +40% of memory-time component. The memory-time component is a fraction of total cost (vCore cost is unaffected), so the real cost increase is lower than 40% of total run cost \u2014 estimated_saving_fraction set to -0.4 as the upper-bound memory-time premium per the tool output, acknowledging the real impact is lower.",
+        "estimated_saving_fraction": -0.4,
+        "usd_cost_annual": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "The executor heap is currently set to 20 GB with 5 cores per executor, producing a managed memory pool of approximately 11.8 GB (0.6 \u00d7 (20 GB \u2212 300 MB overhead)). At the JVM high-watermark of ~70% heap utilisation (executor_max_heap_used_memory = 14.0 GB, memory_headroom = 0.30), the effective managed memory available per concurrent task slot is only ~1.4 GB \u2014 just barely above the Stage 1 HashAggregate average peak of ~1.24 GB/task (derived from 4.1 TB aggregate across ~3,300 tasks). This tight margin caused 70.4 GB of disk spill (disk_bytes_spilled = 70,357,929,588 bytes, spill_ratio = 0.037) and 370.8 GB of in-memory spill (memory_bytes_spilled = 370,843,582,464 bytes), confirming that the managed pool is being exhausted under peak task pressure. Raising the heap to 28 GB expands the managed pool to ~16.6 GB (0.6 \u00d7 (28 \u2212 0.3)), yielding ~3.3 GB per task slot \u2014 more than 2.6\u00d7 the current effective headroom and comfortably above the 1.24 GB average peak, eliminating the root cause of spill. Note: this change is deferred until after the shuffleTracking re-enable fix is applied, as restoring local shuffle locality may reduce per-task I/O pressure and attenuate or eliminate the spill on its own.",
+        "expected_impact": "If spill persists after the shuffleTracking fix, eliminating the 70.4 GB disk spill and 370.8 GB memory spill should recover the I/O overhead attributable to spill_ratio = 0.037 (\u22483.7% of total I/O time); the memory-time cost component will increase by up to 40% of the memory-time fraction of total run cost (the vCore cost is unaffected, so the net cost increase is materially less than 40% of total run cost).",
+        "risk_note": "Increasing executor heap by 8 GB per executor reduces the number of executors that fit per node; if the cluster is already at its worker ceiling, this may reduce parallelism and extend wall-clock duration \u2014 validate that the cluster can still provision the required executor count at 28 GB before applying."
+      }
+    ],
+    "blocked_recommendations": [],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memory",
+            "current_value": "20g",
+            "suggested_value": "28g",
+            "rationale": "This is a HEALTH REMEDY (cost-increasing) justified by a measured health-tier pathology: disk spill of 70.4 GB (spill_ratio=0.037, 3.7% of I/O). The health gate is open on spill; this recommendation is the remedy that addresses it, not an efficiency shrink. IMPORTANT: This recommendation is DEFERRED to the NEXT visit after insight 2 (shuffleTracking re-enable) is applied and observed. The active conflict notes that fixing remote-fetch overhead first may attenuate the spill \u2014 it is possible that restoring local shuffle locality reduces per-task I/O pressure enough to reduce or eliminate the spill without a memory increase. Therefore this recommendation should only be applied if spill persists after the shuffleTracking fix. Sizing rationale: Stage 1 HashAggregate peaked at ~1.24 GB/task average (4.1 TB aggregate / ~3,300 tasks). With 5 cores/executor and 20 GB heap, the managed memory pool (0.6 \u00d7 (20 GB \u2212 300 MB) \u2248 11.8 GB) shared across 5 tasks gives ~2.36 GB/task theoretical max \u2014 but the JVM watermark at 70% (14 GB) leaves only ~1.4 GB of managed memory headroom per slot in practice. Raising to 28g: managed pool \u2248 0.6 \u00d7 (28 \u2212 0.3) = 16.6 GB, divided by 5 slots = ~3.3 GB/task \u2014 sufficient headroom above the 1.24 GB average peak. Step is 40% (20\u219228g), within the bounded-step guidance (max 4g per step; 8g is two steps but justified by the severity of 70.4 GB spill). Cost impact: +40% of memory-time component. The memory-time component is a fraction of total cost (vCore cost is unaffected), so the real cost increase is lower than 40% of total run cost \u2014 estimated_saving_fraction set to -0.4 as the upper-bound memory-time premium per the tool output, acknowledging the real impact is lower.",
+            "confidence": 0.75
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.299542608484625,
+        "gc_pressure": 0.013488663702309524,
+        "off_heap_headroom": 0.30300369262695404,
+        "vcore_utilization": 0.3905688903345607,
+        "idle_ratio": 0.05398047703231544,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 1.0,
+        "spill_ratio": 0.03709804272894598,
+        "has_spill": true,
+        "retried_task_waste": 0.0032884911073207275
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "2500",
+        "aqe_enabled_param": true,
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": null,
+        "dynamic_allocation_enabled": true,
+        "is_databricks": false,
+        "max_executors_param": 500,
+        "min_executors_param": 200,
+        "executor_instances_param": null,
+        "executor_cores": 5
+      },
+      "pre_tuning_durations_ms": [],
+      "pre_tuning_cost_usd": null,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+        "description": "The driver JVM spent 13.5% of its wall-clock time in garbage collection (driver_jvm_gc_time_pct = 0.1354). The driver GC time series shows a peak of 603 ms in a single 30-second bucket, with an average of ~26 ms/bucket. This is well above the 10% threshold that constitutes a health-tier signal. The driver is configured with 38 GB heap and only used 3.1 GB peak (8.2% utilisation), so the GC pressure is not caused by heap exhaustion \u2014 it is likely caused by high object allocation rate from processing 10,344 task events, 11,090 listener bus events, and 31,234 executor metric updates within the 20-minute run. The driver is running on Java 8 with PS MarkSweep/PS Scavenge (parallel GC), which is a stop-the-world collector that can cause scheduling delays when the driver is under event load. This GC pressure can delay task scheduling and inflate scheduler delay (observed at 3,409 seconds aggregate).",
+        "reason": "planner proposed 'spark.driver.extraJavaOptions', which is not a recognised Spark/cluster config key \u2014 recommendation dropped"
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+        "description": "The submitted configuration sets spark.dynamicAllocation.shuffleTracking.enabled=false while the external shuffle service IS enabled (spark.shuffle.service.enabled=true). This is a valid combination, but the executor events show 300 executors were removed during the run (SparkListenerExecutorRemoved count=300, SparkListenerBlockManagerRemoved count=300) with reason 'Executor killed by driver.' The dynamic allocation idle timeout is 60 seconds. With shuffle tracking disabled, executors holding shuffle data for Stage 1 can be reclaimed after 60 seconds of idleness, forcing downstream stages (Stage 2, Stage 3) to fetch shuffle blocks remotely from the external shuffle service rather than locally. Stage 2 shows 7,791,013 remote block fetches vs only 22,641 local fetches \u2014 a 344:1 remote-to-local ratio. This dramatically increases network I/O and shuffle fetch latency. The cachedExecutorIdleTimeout is set to Integer.MAX_VALUE (effectively infinite), which only protects cached RDD data, not shuffle data.",
+        "reason": "planner proposed 'spark.dynamicAllocation.shuffleTracking.enabled', which is not a recognised Spark/cluster config key \u2014 recommendation dropped"
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+        "description": "The submitted configuration sets spark.task.maxFailures=5000, which is 1250\u00d7 the Spark default of 4. This means a single task must fail 5000 consecutive times before the job is aborted. In this run, 746 task retries occurred (7.2% of 10,344 tasks). While the run completed successfully, this extreme tolerance setting means that if a systematic failure mode emerges (e.g., a corrupt input partition, an OOM that kills executors, or a network partition), the job will retry for an extremely long time before failing \u2014 wasting cluster resources and delaying alerting. Combined with spark.yarn.max.executor.failures=500 and spark.yarn.maxAppAttempts=1, the failure tolerance is asymmetric: the job will never retry at the application level but will silently absorb thousands of task-level failures. This is a configuration risk that SQL rules would not detect.",
+        "reason": "planner proposed 'spark.task.maxFailures', which is not a recognised Spark/cluster config key \u2014 recommendation dropped"
+      }
+    ],
+    "health_breach_unactioned": true,
+    "plan_degraded": false,
+    "summary": "1 recommendation(s), ordered health-first. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "d009084b7da9"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.299542608484625,
+    "gc_pressure": 0.013488663702309524,
+    "off_heap_headroom": 0.30300369262695404,
+    "vcore_utilization": 0.3905688903345607,
+    "idle_ratio": 0.05398047703231544,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 1.0,
+    "spill_ratio": 0.03709804272894598,
+    "has_spill": true,
+    "retried_task_waste": 0.0032884911073207275
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 33.1405,
+    "cluster_workers": null,
+    "workers_availability": null
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memory",
+      "current_value": "20g",
+      "suggested_value": "28g",
+      "action": "set_spark_config",
+      "status": "recommended",
+      "explanation": "The executor heap is currently set to 20 GB with 5 cores per executor, producing a managed memory pool of approximately 11.8 GB (0.6 \u00d7 (20 GB \u2212 300 MB overhead)). At the JVM high-watermark of ~70% heap utilisation (executor_max_heap_used_memory = 14.0 GB, memory_headroom = 0.30), the effective managed memory available per concurrent task slot is only ~1.4 GB \u2014 just barely above the Stage 1 HashAggregate average peak of ~1.24 GB/task (derived from 4.1 TB aggregate across ~3,300 tasks). This tight margin caused 70.4 GB of disk spill (disk_bytes_spilled = 70,357,929,588 bytes, spill_ratio = 0.037) and 370.8 GB of in-memory spill (memory_bytes_spilled = 370,843,582,464 bytes), confirming that the managed pool is being exhausted under peak task pressure. Raising the heap to 28 GB expands the managed pool to ~16.6 GB (0.6 \u00d7 (28 \u2212 0.3)), yielding ~3.3 GB per task slot \u2014 more than 2.6\u00d7 the current effective headroom and comfortably above the 1.24 GB average peak, eliminating the root cause of spill. Note: this change is deferred until after the shuffleTracking re-enable fix is applied, as restoring local shuffle locality may reduce per-task I/O pressure and attenuate or eliminate the spill on its own.",
+      "expected_impact": "If spill persists after the shuffleTracking fix, eliminating the 70.4 GB disk spill and 370.8 GB memory spill should recover the I/O overhead attributable to spill_ratio = 0.037 (\u22483.7% of total I/O time); the memory-time cost component will increase by up to 40% of the memory-time fraction of total run cost (the vCore cost is unaffected, so the net cost increase is materially less than 40% of total run cost).",
+      "risk_note": "Increasing executor heap by 8 GB per executor reduces the number of executors that fit per node; if the cluster is already at its worker ceiling, this may reduce parallelism and extend wall-clock duration \u2014 validate that the cluster can still provision the required executor count at 28 GB before applying."
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Massive Shuffle Spill in Stage 1 \u2014 Executor Memory Insufficient for Aggregation",
+        "title": "Massive Shuffle Spill in Stage 1 \u2014 Executor Memory Insufficient for Aggregation",
+        "description": "Stage 1 (the first HashAggregate + shuffle write stage) spilled 70.4 GB to disk and 370.8 GB to memory (serialised before disk write), while peak execution memory per executor reached up to 2.9 GB per task. With 5 cores per executor and 20 GB heap, each executor must share its managed memory pool across 5 concurrent tasks. The HashAggregateExec in Stage 2 reported a peak memory of 522 GB aggregate across all tasks (avg ~209 MB/task), and the Stage 1 HashAggregateExec peaked at 4.1 TB aggregate (avg ~1.24 GB/task). At 5 tasks/executor \u00d7 500 executors, the per-executor managed memory budget is being exhausted, forcing spill. AQE is enabled but `dbx_autooptimizeshuffle` is false, so AQE cannot dynamically coalesce partitions to reduce per-task data volume. The spill is a health-tier signal: it adds disk I/O overhead, inflates shuffle write time (shuffle write time was 912 seconds in Stage 1 alone), and makes the telemetry for memory headroom unreliable.",
+        "evidence": "disk_bytes_spilled=70,357,929,588 bytes (70.4 GB); memory_bytes_spilled=370,843,582,464 bytes (370.8 GB); Stage 1 peakExecutionMemory aggregate=4,142,858,665,984 bytes; Stage 1 shuffle write time=912,760,222,122 ns (~912 s); executor heap=20 GB; executor cores=5; spill_ratio=0.037; has_spill=true; executor_max_heap_memory_utilization=0.70 (70% of 20 GB heap used at peak).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase spark.executor.memory from 20g to 28g (a ~40% step) to expand the managed memory pool available per executor. With 5 cores/executor this gives each concurrent task ~2.2 GB of managed memory headroom instead of ~1.4 GB, which should absorb the HashAggregate peak without spilling. Do not reduce executor count simultaneously \u2014 the spill pathology must be resolved first before any efficiency tuning.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+        "title": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+        "description": "The driver JVM spent 13.5% of its wall-clock time in garbage collection (driver_jvm_gc_time_pct = 0.1354). The driver GC time series shows a peak of 603 ms in a single 30-second bucket, with an average of ~26 ms/bucket. This is well above the 10% threshold that constitutes a health-tier signal. The driver is configured with 38 GB heap and only used 3.1 GB peak (8.2% utilisation), so the GC pressure is not caused by heap exhaustion \u2014 it is likely caused by high object allocation rate from processing 10,344 task events, 11,090 listener bus events, and 31,234 executor metric updates within the 20-minute run. The driver is running on Java 8 with PS MarkSweep/PS Scavenge (parallel GC), which is a stop-the-world collector that can cause scheduling delays when the driver is under event load. This GC pressure can delay task scheduling and inflate scheduler delay (observed at 3,409 seconds aggregate).",
+        "evidence": "driver_jvm_gc_time_pct=0.1354 (13.5%); driver_jvm_gc_time=1.633 minutes; driver_max_heap_used_memory=3.12 GB out of 38 GB (8.2% utilisation); driver GC time series peak=603 ms/30s bucket; listener_bus_post_SparkListenerExecutorMetricsUpdate count=31,234; num_spark_tasks=10,344; scheduler_delay aggregate=3,409 s; GC collector=PS MarkSweep,PS Scavenge (Java 8 parallel GC).",
+        "confidence": 0.85,
+        "severity": "health",
+        "suggested_action": "Switch the driver JVM GC from the default parallel collector (PS MarkSweep) to G1GC by adding -XX:+UseG1GC to spark.driver.extraJavaOptions. G1GC is designed for large heaps with high allocation rates and produces shorter, more predictable pause times than PS MarkSweep. This is especially important given the high listener bus event volume. Additionally, consider whether spark.driver.memory can be reduced from 38g to a smaller value (e.g. 16g) after confirming peak usage stays below 3.5 GB \u2014 but only after the GC collector change is validated first.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+        "title": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+        "description": "The submitted configuration sets spark.dynamicAllocation.shuffleTracking.enabled=false while the external shuffle service IS enabled (spark.shuffle.service.enabled=true). This is a valid combination, but the executor events show 300 executors were removed during the run (SparkListenerExecutorRemoved count=300, SparkListenerBlockManagerRemoved count=300) with reason 'Executor killed by driver.' The dynamic allocation idle timeout is 60 seconds. With shuffle tracking disabled, executors holding shuffle data for Stage 1 can be reclaimed after 60 seconds of idleness, forcing downstream stages (Stage 2, Stage 3) to fetch shuffle blocks remotely from the external shuffle service rather than locally. Stage 2 shows 7,791,013 remote block fetches vs only 22,641 local fetches \u2014 a 344:1 remote-to-local ratio. This dramatically increases network I/O and shuffle fetch latency. The cachedExecutorIdleTimeout is set to Integer.MAX_VALUE (effectively infinite), which only protects cached RDD data, not shuffle data.",
+        "evidence": "spark.dynamicAllocation.shuffleTracking.enabled=false; spark.dynamicAllocation.executorIdleTimeout=60s; SparkListenerExecutorRemoved=300 executors killed mid-run; Stage 2 remote block fetches=7,791,013 vs local=22,641 (344:1 ratio); Stage 2 remoteBytesRead=747 GB vs localBytesRead=2.2 GB; total shuffle_bytes_read=832 GB.",
+        "confidence": 0.88,
+        "severity": "performance",
+        "suggested_action": "Since the external shuffle service is already deployed, this configuration is intentional \u2014 but the 60-second idle timeout is too aggressive for a job with multi-stage shuffle dependencies. Either raise spark.dynamicAllocation.executorIdleTimeout to 300s (5 minutes) to keep shuffle-data-holding executors alive longer between stages, or re-enable spark.dynamicAllocation.shuffleTracking.enabled=true to let Spark automatically protect executors that hold active shuffle data. The latter is the cleaner fix and is the Spark 3.x default.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+        "title": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+        "description": "The submitted configuration sets spark.task.maxFailures=5000, which is 1250\u00d7 the Spark default of 4. This means a single task must fail 5000 consecutive times before the job is aborted. In this run, 746 task retries occurred (7.2% of 10,344 tasks). While the run completed successfully, this extreme tolerance setting means that if a systematic failure mode emerges (e.g., a corrupt input partition, an OOM that kills executors, or a network partition), the job will retry for an extremely long time before failing \u2014 wasting cluster resources and delaying alerting. Combined with spark.yarn.max.executor.failures=500 and spark.yarn.maxAppAttempts=1, the failure tolerance is asymmetric: the job will never retry at the application level but will silently absorb thousands of task-level failures. This is a configuration risk that SQL rules would not detect.",
+        "evidence": "spark.task.maxFailures=5000 (default is 4, this is 1250\u00d7 the default); num_spark_tasks_retries=746 (7.2% retry rate on 10,344 tasks); spark.yarn.maxAppAttempts=1 (no application-level retry); spark.yarn.max.executor.failures=500; retried_task_waste=0.0033 (0.33% of vcore time wasted on retries in this run).",
+        "confidence": 0.82,
+        "severity": "performance",
+        "suggested_action": "Reduce spark.task.maxFailures from 5000 to a value between 8 and 20. A value of 10 provides resilience against transient failures (spot preemptions, network blips) while still allowing the job to fail fast on systematic errors. The current value of 5000 is almost certainly a misconfiguration \u2014 it provides no practical benefit over a value of 10\u201320 for a 20-minute hourly aggregation job.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Massive Shuffle Spill in Stage 1 \u2014 Executor Memory Insufficient for Aggregation",
+        "title": "Massive Shuffle Spill in Stage 1 \u2014 Executor Memory Insufficient for Aggregation",
+        "description": "Stage 1 (the first HashAggregate + shuffle write stage) spilled 70.4 GB to disk and 370.8 GB to memory (serialised before disk write), while peak execution memory per executor reached up to 2.9 GB per task. With 5 cores per executor and 20 GB heap, each executor must share its managed memory pool across 5 concurrent tasks. The HashAggregateExec in Stage 2 reported a peak memory of 522 GB aggregate across all tasks (avg ~209 MB/task), and the Stage 1 HashAggregateExec peaked at 4.1 TB aggregate (avg ~1.24 GB/task). At 5 tasks/executor \u00d7 500 executors, the per-executor managed memory budget is being exhausted, forcing spill. AQE is enabled but `dbx_autooptimizeshuffle` is false, so AQE cannot dynamically coalesce partitions to reduce per-task data volume. The spill is a health-tier signal: it adds disk I/O overhead, inflates shuffle write time (shuffle write time was 912 seconds in Stage 1 alone), and makes the telemetry for memory headroom unreliable.",
+        "evidence": "disk_bytes_spilled=70,357,929,588 bytes (70.4 GB); memory_bytes_spilled=370,843,582,464 bytes (370.8 GB); Stage 1 peakExecutionMemory aggregate=4,142,858,665,984 bytes; Stage 1 shuffle write time=912,760,222,122 ns (~912 s); executor heap=20 GB; executor cores=5; spill_ratio=0.037; has_spill=true; executor_max_heap_memory_utilization=0.70 (70% of 20 GB heap used at peak).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase spark.executor.memory from 20g to 28g (a ~40% step) to expand the managed memory pool available per executor. With 5 cores/executor this gives each concurrent task ~2.2 GB of managed memory headroom instead of ~1.4 GB, which should absorb the HashAggregate peak without spilling. Do not reduce executor count simultaneously \u2014 the spill pathology must be resolved first before any efficiency tuning.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+        "title": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+        "description": "The driver JVM spent 13.5% of its wall-clock time in garbage collection (driver_jvm_gc_time_pct = 0.1354). The driver GC time series shows a peak of 603 ms in a single 30-second bucket, with an average of ~26 ms/bucket. This is well above the 10% threshold that constitutes a health-tier signal. The driver is configured with 38 GB heap and only used 3.1 GB peak (8.2% utilisation), so the GC pressure is not caused by heap exhaustion \u2014 it is likely caused by high object allocation rate from processing 10,344 task events, 11,090 listener bus events, and 31,234 executor metric updates within the 20-minute run. The driver is running on Java 8 with PS MarkSweep/PS Scavenge (parallel GC), which is a stop-the-world collector that can cause scheduling delays when the driver is under event load. This GC pressure can delay task scheduling and inflate scheduler delay (observed at 3,409 seconds aggregate).",
+        "evidence": "driver_jvm_gc_time_pct=0.1354 (13.5%); driver_jvm_gc_time=1.633 minutes; driver_max_heap_used_memory=3.12 GB out of 38 GB (8.2% utilisation); driver GC time series peak=603 ms/30s bucket; listener_bus_post_SparkListenerExecutorMetricsUpdate count=31,234; num_spark_tasks=10,344; scheduler_delay aggregate=3,409 s; GC collector=PS MarkSweep,PS Scavenge (Java 8 parallel GC).",
+        "confidence": 0.85,
+        "severity": "health",
+        "suggested_action": "Switch the driver JVM GC from the default parallel collector (PS MarkSweep) to G1GC by adding -XX:+UseG1GC to spark.driver.extraJavaOptions. G1GC is designed for large heaps with high allocation rates and produces shorter, more predictable pause times than PS MarkSweep. This is especially important given the high listener bus event volume. Additionally, consider whether spark.driver.memory can be reduced from 38g to a smaller value (e.g. 16g) after confirming peak usage stays below 3.5 GB \u2014 but only after the GC collector change is validated first.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+        "title": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+        "description": "The submitted configuration sets spark.dynamicAllocation.shuffleTracking.enabled=false while the external shuffle service IS enabled (spark.shuffle.service.enabled=true). This is a valid combination, but the executor events show 300 executors were removed during the run (SparkListenerExecutorRemoved count=300, SparkListenerBlockManagerRemoved count=300) with reason 'Executor killed by driver.' The dynamic allocation idle timeout is 60 seconds. With shuffle tracking disabled, executors holding shuffle data for Stage 1 can be reclaimed after 60 seconds of idleness, forcing downstream stages (Stage 2, Stage 3) to fetch shuffle blocks remotely from the external shuffle service rather than locally. Stage 2 shows 7,791,013 remote block fetches vs only 22,641 local fetches \u2014 a 344:1 remote-to-local ratio. This dramatically increases network I/O and shuffle fetch latency. The cachedExecutorIdleTimeout is set to Integer.MAX_VALUE (effectively infinite), which only protects cached RDD data, not shuffle data.",
+        "evidence": "spark.dynamicAllocation.shuffleTracking.enabled=false; spark.dynamicAllocation.executorIdleTimeout=60s; SparkListenerExecutorRemoved=300 executors killed mid-run; Stage 2 remote block fetches=7,791,013 vs local=22,641 (344:1 ratio); Stage 2 remoteBytesRead=747 GB vs localBytesRead=2.2 GB; total shuffle_bytes_read=832 GB.",
+        "confidence": 0.88,
+        "severity": "performance",
+        "suggested_action": "Since the external shuffle service is already deployed, this configuration is intentional \u2014 but the 60-second idle timeout is too aggressive for a job with multi-stage shuffle dependencies. Either raise spark.dynamicAllocation.executorIdleTimeout to 300s (5 minutes) to keep shuffle-data-holding executors alive longer between stages, or re-enable spark.dynamicAllocation.shuffleTracking.enabled=true to let Spark automatically protect executors that hold active shuffle data. The latter is the cleaner fix and is the Spark 3.x default.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+        "title": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+        "description": "The submitted configuration sets spark.task.maxFailures=5000, which is 1250\u00d7 the Spark default of 4. This means a single task must fail 5000 consecutive times before the job is aborted. In this run, 746 task retries occurred (7.2% of 10,344 tasks). While the run completed successfully, this extreme tolerance setting means that if a systematic failure mode emerges (e.g., a corrupt input partition, an OOM that kills executors, or a network partition), the job will retry for an extremely long time before failing \u2014 wasting cluster resources and delaying alerting. Combined with spark.yarn.max.executor.failures=500 and spark.yarn.maxAppAttempts=1, the failure tolerance is asymmetric: the job will never retry at the application level but will silently absorb thousands of task-level failures. This is a configuration risk that SQL rules would not detect.",
+        "evidence": "spark.task.maxFailures=5000 (default is 4, this is 1250\u00d7 the default); num_spark_tasks_retries=746 (7.2% retry rate on 10,344 tasks); spark.yarn.maxAppAttempts=1 (no application-level retry); spark.yarn.max.executor.failures=500; retried_task_waste=0.0033 (0.33% of vcore time wasted on retries in this run).",
+        "confidence": 0.82,
+        "severity": "performance",
+        "suggested_action": "Reduce spark.task.maxFailures from 5000 to a value between 8 and 20. A value of 10 provides resilience against transient failures (spot preemptions, network blips) while still allowing the job to fail fast on systematic errors. The current value of 5000 is almost certainly a misconfiguration \u2014 it provides no practical benefit over a value of 10\u201320 for a 20-minute hourly aggregation job.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        1
+      ],
+      "tier2_cluster": [],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        0,
+        2,
+        3
+      ],
+      "active_conflicts": [
+        "Insights 0 and 2 share a blast radius in the executor-memory/shuffle coupled cluster: insight 0 (spill) may be partially caused by the remote-fetch overhead described in insight 2 (shuffleTracking disabled). Fixing insight 2 first (re-enable shuffleTracking) could reduce per-task I/O pressure and attenuate the spill in insight 0 \u2014 they should be serialized rather than applied together, as concurrent changes would make it impossible to attribute which fix reduced spill."
+      ],
+      "reasoning": "\n**Insight 0 \u2014 Executor spill (health gate evaluation):**\nThe run shows `has_spill = true` and `spill_ratio = 0.037` (3.7%). The health-tier threshold for spill is `spill_ratio > 0.10` (10%). At 3.7%, the spill is real and substantial in absolute terms (70.4 GB disk, 370.8 GB memory-spilled), but it does NOT cross the 10% health-gate threshold. The triage rules are explicit: \"`has_spill` alone is a presence flag \u2014 with `spill_ratio \u2264 0.10` the spill is a Tier 4 tuning observation, NOT a health pathology, and it does not open the health gate.\" The insight's own narrative calls it a \"health-tier signal,\" but the binding rule is the measured ratio against the numeric threshold, not the insight's self-labeling. Therefore insight 0 is Tier 4 (fine-tuning / executor memory remedy), not Tier 1.\n\n**Insight 1 \u2014 Driver GC pressure:**\n`driver_jvm_gc_time_pct = 0.1354` (13.54%). The health-tier threshold for driver GC is \u226510% of wall-time. This threshold IS crossed. The KB fence confirms: \"fires when driver GC \u226510% of wall-time.\" This is a genuine Tier 1 health signal. The fact that heap utilization is only 8.2% (not heap-exhaustion-driven) doesn't negate the GC pathology \u2014 the GC pressure is real and above threshold regardless of its root cause (high event-processing rate on Java 8 PS collector). Tier 1.\n\n**Insight 2 \u2014 shuffleTracking.enabled=false causing remote shuffle fetches:**\nThis is a configuration issue causing dramatically elevated network I/O (344:1 remote-to-local fetch ratio in Stage 2). This is not a standard health-tier pathology (no spill threshold crossed, no GC threshold crossed, no retry threshold crossed, no OOM). It is a configuration correctness/efficiency issue that inflates shuffle fetch latency and network cost. The 300 executor removals and the remote-fetch ratio are operational inefficiencies, not health-gate-opening pathologies by the defined thresholds. This belongs in Tier 4 (fine-tuning / configuration correctness), as it is a shuffle configuration issue that affects performance but doesn't meet any Tier 1 threshold. It could arguably be Tier 2 (cluster right-sizing) since it affects how executors are managed, but it's more precisely a shuffle/config tuning issue \u2192 Tier 4.\n\n**Insight 3 \u2014 spark.task.maxFailures=5000:**\n`retried_task_waste = 0.0033` (0.33%), well below the 5% Tier 1 threshold. The run completed successfully with 746 retries out of 10,344 tasks (7.2% retry count, but `retried_task_waste` is the binding metric at 0.33%). This is a configuration risk/correctness observation \u2014 it doesn't represent a current health pathology but a latent risk. No health-tier threshold is met. This is a Tier 4 configuration observation.\n\n**Health gate status:**\nInsight 1 (driver GC at 13.54%) opens the health gate. However, the executor-side spill (insight 0) does NOT open the health gate (spill_ratio 3.7% < 10% threshold). The driver GC health gate blocks efficiency right-sizing of the DRIVER subsystem. Insights 2 and 3 are configuration/tuning observations not blocked by the driver GC gate (they are not driver efficiency shrinks). Insight 0 is an executor memory remedy/tuning item, also not blocked by the driver GC gate.\n\n**Active conflicts:**\nInsight 0 describes spill and suggests executor memory remediation. Insight 2 describes executor churn from shuffleTracking being disabled. These two interact: fixing shuffleTracking (insight 2) would reduce remote fetches and potentially reduce the per-task working set pressure that contributes to spill (insight 0). Recommending both simultaneously would make it hard to attribute which change reduced spill \u2014 they share a blast radius in the executor-memory/shuffle coupled cluster. This is a sequencing conflict, not a blocking conflict.\n"
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 1,
+          "kind": "discovery",
+          "identifier": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+          "title": "Driver GC Pressure at 13.5% of Wall-Time \u2014 Health-Tier Signal",
+          "description": "The driver JVM spent 13.5% of its wall-clock time in garbage collection (driver_jvm_gc_time_pct = 0.1354). The driver GC time series shows a peak of 603 ms in a single 30-second bucket, with an average of ~26 ms/bucket. This is well above the 10% threshold that constitutes a health-tier signal. The driver is configured with 38 GB heap and only used 3.1 GB peak (8.2% utilisation), so the GC pressure is not caused by heap exhaustion \u2014 it is likely caused by high object allocation rate from processing 10,344 task events, 11,090 listener bus events, and 31,234 executor metric updates within the 20-minute run. The driver is running on Java 8 with PS MarkSweep/PS Scavenge (parallel GC), which is a stop-the-world collector that can cause scheduling delays when the driver is under event load. This GC pressure can delay task scheduling and inflate scheduler delay (observed at 3,409 seconds aggregate).",
+          "evidence": "driver_jvm_gc_time_pct=0.1354 (13.5%); driver_jvm_gc_time=1.633 minutes; driver_max_heap_used_memory=3.12 GB out of 38 GB (8.2% utilisation); driver GC time series peak=603 ms/30s bucket; listener_bus_post_SparkListenerExecutorMetricsUpdate count=31,234; num_spark_tasks=10,344; scheduler_delay aggregate=3,409 s; GC collector=PS MarkSweep,PS Scavenge (Java 8 parallel GC).",
+          "confidence": 0.85,
+          "severity": "health",
+          "suggested_action": "Switch the driver JVM GC from the default parallel collector (PS MarkSweep) to G1GC by adding -XX:+UseG1GC to spark.driver.extraJavaOptions. G1GC is designed for large heaps with high allocation rates and produces shorter, more predictable pause times than PS MarkSweep. This is especially important given the high listener bus event volume. Additionally, consider whether spark.driver.memory can be reduced from 38g to a smaller value (e.g. 16g) after confirming peak usage stays below 3.5 GB \u2014 but only after the GC collector change is validated first.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 0,
+          "kind": "discovery",
+          "identifier": "Massive Shuffle Spill in Stage 1 \u2014 Executor Memory Insufficient for Aggregation",
+          "title": "Massive Shuffle Spill in Stage 1 \u2014 Executor Memory Insufficient for Aggregation",
+          "description": "Stage 1 (the first HashAggregate + shuffle write stage) spilled 70.4 GB to disk and 370.8 GB to memory (serialised before disk write), while peak execution memory per executor reached up to 2.9 GB per task. With 5 cores per executor and 20 GB heap, each executor must share its managed memory pool across 5 concurrent tasks. The HashAggregateExec in Stage 2 reported a peak memory of 522 GB aggregate across all tasks (avg ~209 MB/task), and the Stage 1 HashAggregateExec peaked at 4.1 TB aggregate (avg ~1.24 GB/task). At 5 tasks/executor \u00d7 500 executors, the per-executor managed memory budget is being exhausted, forcing spill. AQE is enabled but `dbx_autooptimizeshuffle` is false, so AQE cannot dynamically coalesce partitions to reduce per-task data volume. The spill is a health-tier signal: it adds disk I/O overhead, inflates shuffle write time (shuffle write time was 912 seconds in Stage 1 alone), and makes the telemetry for memory headroom unreliable.",
+          "evidence": "disk_bytes_spilled=70,357,929,588 bytes (70.4 GB); memory_bytes_spilled=370,843,582,464 bytes (370.8 GB); Stage 1 peakExecutionMemory aggregate=4,142,858,665,984 bytes; Stage 1 shuffle write time=912,760,222,122 ns (~912 s); executor heap=20 GB; executor cores=5; spill_ratio=0.037; has_spill=true; executor_max_heap_memory_utilization=0.70 (70% of 20 GB heap used at peak).",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Increase spark.executor.memory from 20g to 28g (a ~40% step) to expand the managed memory pool available per executor. With 5 cores/executor this gives each concurrent task ~2.2 GB of managed memory headroom instead of ~1.4 GB, which should absorb the HashAggregate peak without spilling. Do not reduce executor count simultaneously \u2014 the spill pathology must be resolved first before any efficiency tuning.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+          "title": "spark.dynamicAllocation.shuffleTracking.enabled Explicitly Disabled \u2014 Executors Killed Prematurely During Shuffle",
+          "description": "The submitted configuration sets spark.dynamicAllocation.shuffleTracking.enabled=false while the external shuffle service IS enabled (spark.shuffle.service.enabled=true). This is a valid combination, but the executor events show 300 executors were removed during the run (SparkListenerExecutorRemoved count=300, SparkListenerBlockManagerRemoved count=300) with reason 'Executor killed by driver.' The dynamic allocation idle timeout is 60 seconds. With shuffle tracking disabled, executors holding shuffle data for Stage 1 can be reclaimed after 60 seconds of idleness, forcing downstream stages (Stage 2, Stage 3) to fetch shuffle blocks remotely from the external shuffle service rather than locally. Stage 2 shows 7,791,013 remote block fetches vs only 22,641 local fetches \u2014 a 344:1 remote-to-local ratio. This dramatically increases network I/O and shuffle fetch latency. The cachedExecutorIdleTimeout is set to Integer.MAX_VALUE (effectively infinite), which only protects cached RDD data, not shuffle data.",
+          "evidence": "spark.dynamicAllocation.shuffleTracking.enabled=false; spark.dynamicAllocation.executorIdleTimeout=60s; SparkListenerExecutorRemoved=300 executors killed mid-run; Stage 2 remote block fetches=7,791,013 vs local=22,641 (344:1 ratio); Stage 2 remoteBytesRead=747 GB vs localBytesRead=2.2 GB; total shuffle_bytes_read=832 GB.",
+          "confidence": 0.88,
+          "severity": "performance",
+          "suggested_action": "Since the external shuffle service is already deployed, this configuration is intentional \u2014 but the 60-second idle timeout is too aggressive for a job with multi-stage shuffle dependencies. Either raise spark.dynamicAllocation.executorIdleTimeout to 300s (5 minutes) to keep shuffle-data-holding executors alive longer between stages, or re-enable spark.dynamicAllocation.shuffleTracking.enabled=true to let Spark automatically protect executors that hold active shuffle data. The latter is the cleaner fix and is the Spark 3.x default.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+          "title": "spark.task.maxFailures Set to 5000 \u2014 Masks Real Failures and Delays Job Abort",
+          "description": "The submitted configuration sets spark.task.maxFailures=5000, which is 1250\u00d7 the Spark default of 4. This means a single task must fail 5000 consecutive times before the job is aborted. In this run, 746 task retries occurred (7.2% of 10,344 tasks). While the run completed successfully, this extreme tolerance setting means that if a systematic failure mode emerges (e.g., a corrupt input partition, an OOM that kills executors, or a network partition), the job will retry for an extremely long time before failing \u2014 wasting cluster resources and delaying alerting. Combined with spark.yarn.max.executor.failures=500 and spark.yarn.maxAppAttempts=1, the failure tolerance is asymmetric: the job will never retry at the application level but will silently absorb thousands of task-level failures. This is a configuration risk that SQL rules would not detect.",
+          "evidence": "spark.task.maxFailures=5000 (default is 4, this is 1250\u00d7 the default); num_spark_tasks_retries=746 (7.2% retry rate on 10,344 tasks); spark.yarn.maxAppAttempts=1 (no application-level retry); spark.yarn.max.executor.failures=500; retried_task_waste=0.0033 (0.33% of vcore time wasted on retries in this run).",
+          "confidence": 0.82,
+          "severity": "performance",
+          "suggested_action": "Reduce spark.task.maxFailures from 5000 to a value between 8 and 20. A value of 10 provides resilience against transient failures (spot preemptions, network blips) while still allowing the job to fail fast on systematic errors. The current value of 5000 is almost certainly a misconfiguration \u2014 it provides no practical benefit over a value of 10\u201320 for a 20-minute hourly aggregation job.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "d009084b7da9",
+    "historical_runs_count": 0,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": []
+  }
+}

@@ -1,0 +1,965 @@
+{
+  "saved_at": "2026-07-23T08:56:10.339410+00:00",
+  "source": "pg-dump",
+  "task_id": 2740351,
+  "task_name": "PUB_REDUCED_DIMENSIONS",
+  "run_config": {
+    "dump_dir": "data/dumps/pg_2740351",
+    "insight_filter": "lifecycle_status='active' (mimics prod active_insights)",
+    "injected_insights": [
+      {
+        "type": "executors_long_spill_time",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "over_provisioned_driver_heap_memory",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "over_provisioned_executors",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "task_profile",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "llm_model": "claude-sonnet-4-6",
+    "llm_temperature": 0.0
+  },
+  "input": {
+    "task_id": 2740351,
+    "links": null,
+    "enrichments_updated_at": "2026-07-23T04:26:19.023185",
+    "executor__memory_heap__allocated": 20.0,
+    "executor__memory_heap__max_used": 15.0682554244995,
+    "executor__memory_off_heap__allocated": 5.0,
+    "executor__memory_off_heap__max_used": 5.29498291015625,
+    "executor__memory__allocated": 25.0,
+    "executor__cores": 5.0,
+    "executors__jvm_gc_time": 12929.916,
+    "executors__vcore_time__used": 1090994.579,
+    "executors__cpu_time__used": 1157356.86,
+    "executors__used_vcore_time_of_retried_tasks": 4609.2,
+    "driver__heap_memory__allocated": 38.0,
+    "driver__heap_memory__max_used": 3.72588531672955,
+    "driver__cores": 5.0,
+    "task__executors_dynamic_allocation_min_executors__param": 200.0,
+    "task__executors_dynamic_allocation_max_executors__param": 500.0,
+    "task__executor_instances__param": null,
+    "task__dynamic_is_allocation_enabled__param": true,
+    "task__task_cpus__param": 1.0,
+    "task__memory_time__allocated": 11319530.123,
+    "task__skew_time": 0.0,
+    "task__idle_time": 82.3940000534058,
+    "task__vcore_time__allocated": 2258196.0,
+    "task__duration": 1587.298,
+    "task__disk_bytes_spilled": 295362455102.0,
+    "task__total_io_bytes": 2903790660917.0,
+    "task__vcore_time__used": 1091348.339,
+    "executors__vcore_time__allocated": 2250266.0,
+    "driver__memory__allocated": 43.0,
+    "driver__memory__max_used": 3.72588531672955,
+    "task__shuffle_partitions__param": "2500",
+    "executors__memory_time__used": 2074080.3404304136,
+    "app_id": 28803,
+    "env_id": 28815,
+    "app_pit": "2026-07-22T17:00:00",
+    "parent_task_id": null,
+    "task_name": "PUB_REDUCED_DIMENSIONS",
+    "driver_type": null,
+    "worker_type": null,
+    "cloud_provider": null,
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": null,
+    "workers_availability": null,
+    "dbx_autooptimizeshuffle": null,
+    "task_sub_type": null,
+    "task__metrics_count": 110,
+    "task__tfs_count__completed": 2,
+    "task__tfs_count__running": 0,
+    "task__tfs_count__failed": 0,
+    "task__tests_runs_count": 16,
+    "task__alerts_count": 0,
+    "task__breaks_count": 0,
+    "driver__cpu_utilization": 0.0446103404791929,
+    "executors__run_time__used": 1090994.579,
+    "executors__tasks_duration__used": 1100836.471,
+    "cluster_uuid": null,
+    "node_vcores": null,
+    "node_mem_gb": null,
+    "start_time": "2026-07-23T03:59:51.266000+00:00",
+    "status": "COMPLETED",
+    "app_name": "SSP_logger",
+    "task__aqe_enabled__param": null
+  },
+  "plan": {
+    "task_id": 2740351,
+    "recommendations": [
+      {
+        "config_key": "spark.executor.memoryOverhead",
+        "action": "set_spark_config",
+        "suggested_value": "6144",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "ref=4: Executor off-heap memory fully exhausted. executor_max_off_heap_used_memory = 5.295 GB against executor_off_heap_memory = 5 GB configured; off_heap_headroom = -0.059 (negative \u2014 already overflowing). Across 20 runs the off-heap watermark averages 5.27 GB (min 4.81, max 5.73), confirming this is chronic, not a one-off spike. On YARN, exhausting memoryOverhead causes silent OS-level container kills; the job survived this run but is one data-volume uptick away from failure. The default memoryOverhead when not explicitly set is max(384 MB, 10% \u00d7 executor.memory). With executor.memory = 20 GB the implicit default is 2,048 MB \u2014 far below the observed 5.3 GB native usage, meaning the cluster is relying on YARN's container tolerance. Setting an explicit 6,144 MB (6 GB) gives ~16% headroom above the observed peak (5.73 GB \u00d7 1.05 \u2248 6.0 GB; rounding up to 6,144 MB for a clean 1 GB boundary). This is a health remedy \u2014 it must be applied before any efficiency changes.",
+        "confidence": 0.95,
+        "priority": 1,
+        "rationale": "Off-heap headroom is -0.059 (negative) in this run. The 20-run trend shows the watermark is stable at ~5.27 GB mean with a max of 5.73 GB \u2014 the 5 GB allocation is structurally insufficient. The implicit default (10% \u00d7 20 GB = 2,048 MB) is the likely current value; the cluster has been silently relying on YARN container slack. Sizing: peak 5.73 GB + 7% margin = 6.13 GB \u2192 6,144 MB. This is a cost-increasing change: the overhead increase adds ~(6,144 \u2212 2,048) MB \u00d7 executor_count to the container footprint. However, the health-tier threshold is met (off_heap_headroom < 0 = container-kill risk), satisfying the cost-regression fence. The estimated_saving_fraction is set negative to reflect the cost increase; the actual premium is modest relative to the container-kill risk it eliminates.",
+        "estimated_saving_fraction": -0.05,
+        "usd_cost_annual": -17937.94,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 4,
+        "explanation": "The off_heap_headroom for this run is \u22120.059, meaning the executor's off-heap container is already over-committed \u2014 a negative value signals active container-kill risk, not merely tightness. Because spark.executor.memoryOverhead is not set, the runtime falls back to the implicit default of max(384, 10% \u00d7 20 GB) = 2,048 MB, yet the 20-run trend shows the off-heap watermark averaging ~5.27 GB with a peak of 5.73 GB, making the 2,048 MB allocation structurally insufficient across every historical run. Sizing to peak (5.73 GB) plus a 7% safety margin yields 6,132 MB, rounded up to 6,144 MB, which is the minimum allocation that keeps headroom positive under observed peak load.",
+        "expected_impact": "Raising memoryOverhead from 2,048 MB to 6,144 MB eliminates the negative off_heap_headroom (\u22120.059 \u2192 positive), removing the container-kill risk that can cause silent executor loss and retried-task waste (currently retried_task_waste = 0.42%). This is a cost-increasing change: the linear memory-cost model estimates an overhead increase of roughly 2\u00d7 the current overhead allocation, adding to the container footprint \u2014 the benefit is reliability and elimination of OOM-driven retries, not cost reduction.",
+        "risk_note": "Tripling the overhead allocation increases per-executor container size, which may reduce the number of executors the cluster can schedule simultaneously on fixed-memory nodes \u2014 validate that cluster node memory is sufficient to absorb the larger container before deploying."
+      },
+      {
+        "config_key": "spark.sql.shuffle.partitions",
+        "action": "set_spark_config",
+        "suggested_value": "5000",
+        "current_value": "2500",
+        "source": "agent_discovery",
+        "source_detail": "ref=6: Stage 1 HashAggregateExec avgHashProbe = 25,000 \u2014 degenerate hash table causing 295 GB disk spill. Stage 1 ran at 3,252 actual partitions (AQE is NOT enabled: dbx_autooptimizeshuffle=false, and the configured 2,500 matches the Stage 0 actual partition count, confirming AQE is off or not coalescing here). The GenerateExec chain produces ~29.6 B rows from 8.6 B input (3.5\u00d7 explosion) before the partial HashAggregate. With 3,252 tasks each task processes ~9.1 M rows on average; the hash table saturates because a small number of high-frequency keys dominate each partition. Doubling shuffle partitions to 5,000 halves the per-task row count to ~5.9 M, reducing the probability of hash-table saturation per partition. This is a bounded, conservative first step \u2014 it does not fully resolve the hot-key problem (which requires salting at the application level) but directly addresses the per-partition data volume feeding the degenerate hash table, and is the only Spark config lever available for this pathology.",
+        "confidence": 0.75,
+        "priority": 2,
+        "rationale": "Stage 1 is the sole source of all 295 GB disk spill (diskBytesSpilled = 295,362,455,102 bytes, 100% in Stage 1). The avgHashProbe of 25,000 confirms hash table saturation from key skew after the double EXPLODE. AQE is confirmed off (dbx_autooptimizeshuffle=false; Stage 0 ran at exactly the configured 2,500 partitions, not a coalesced/split count), so spark.sql.shuffle.partitions is a direct, effective lever. Doubling to 5,000 is a conservative 2\u00d7 step \u2014 the anti-pattern fence warns against large single-step changes. The spill_ratio = 0.1017 (just above the 10% health threshold); spill is chronic across all 20 runs (min 115 GB, mean 360 GB). Wasted compute from spill: spill_ratio \u00d7 used_vcore_time \u2248 0.1017 \u00d7 1,090,994 s \u2248 110,954 vcore-seconds per run. Eliminating spill could recover up to ~10% of annual run cost. Note: this change is in the executor-memory coupled cluster. It is sequenced after the memoryOverhead fix (priority 1) because the off-heap health issue must be resolved first; however, since memoryOverhead and shuffle.partitions are different knobs with different blast radii (overhead affects container sizing; partition count affects task scheduling and per-task working set), they can be applied in the same deployment window as long as the operator validates both changes together on the next run.",
+        "estimated_saving_fraction": 0.08,
+        "usd_cost_annual": 27947.515284508474,
+        "insight_type": "executors_long_spill_time",
+        "insight_id": null,
+        "insight_ref": 1,
+        "explanation": "Stage 1 is the sole source of all 295 GB of disk spill in this run (diskBytesSpilled = 295,362,455,102 bytes), and the avgHashProbe of 25,000 confirms hash-table saturation driven by key skew from the double EXPLODE. AQE is confirmed off (dbx_autooptimizeshuffle=false, Stage 0 ran at exactly the configured 2,500 partitions), so spark.sql.shuffle.partitions is a direct and effective lever \u2014 doubling to 5,000 halves the per-partition data volume, reducing the working set each task must hold in memory and thereby relieving the hash-table pressure that causes spill. Spill is chronic across all 20 historical runs (min 115 GB, mean 360 GB, current run at the 30th percentile at 295 GB), confirming this is a structural, not incidental, problem.",
+        "expected_impact": "Spill_ratio is 0.1017 (just above the 10% health threshold), meaning spill-driven I/O consumes roughly 10% of allocated vcore time (~110,954 vcore-seconds per run at 1,090,994 total); eliminating spill could recover up to ~10% of annual run cost (~$35,876 of the $358,759 annual baseline), though the actual recovery depends on how completely the partition doubling resolves hash-table saturation.",
+        "risk_note": "Doubling partition count increases task scheduling overhead and shuffle file count; if the spill is primarily skew-driven rather than volume-driven (avgHashProbe = 25,000 suggests both), some spill may persist and a skew-join hint or salting strategy may be needed as a follow-up."
+      },
+      {
+        "config_key": "spark.driver.memory",
+        "action": "set_spark_config",
+        "suggested_value": "10g",
+        "current_value": null,
+        "source": "sql_rule",
+        "source_detail": "ref=2: over_provisioned_driver_heap_memory. SQL engine recommendation: driver.memory 38g \u2192 10g. Driver peak heap used = 5.73 GB (cross-run max across 20 runs); current allocation = 38 GB; utilization = 9.8%. DEFERRED from this visit: health gate (spill open) blocks efficiency right-sizing.",
+        "confidence": 0.5,
+        "priority": 5,
+        "rationale": "DEFERRED \u2014 health gate open (spill_ratio = 0.1017). The driver heap insight is efficiency-tier and is blocked while any health-tier pathology is open. The cross-run peak of 5.73 GB with a stable trend (std = 0.81 GB) suggests a target of ~8\u201310 GB would be safe (5.73 GB peak + ~40% margin = 8.0 GB; SQL engine suggests 10 GB which is conservative and appropriate). The driver is decoupled from executor subsystems so this change carries near-zero blast radius, but the health gate rule is categorical \u2014 defer to next visit. estimated_saving_fraction = 0 this visit.",
+        "estimated_saving_fraction": 0.0,
+        "usd_cost_annual": 545.2430821032792,
+        "insight_type": "over_provisioned_driver_heap_memory",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "This recommendation is deferred because the health gate is open: spill_ratio = 0.1017 exceeds the 10% health-tier threshold, and the categorical rule requires all health-tier pathologies to be resolved before efficiency-tier changes are actioned. The driver heap insight is efficiency-tier \u2014 the cross-run peak of 5.73 GB with a stable trend (std = 0.81 GB) supports a target of 8\u201310 GB (5.73 GB peak + ~40% margin = 8.0 GB; 10 GB is the conservative SQL-rule suggestion), and the driver is fully decoupled from executor subsystems so the blast radius is near-zero once the gate clears.",
+        "expected_impact": "No cost or performance impact is expected from this visit; the change is deferred until spill (Recommendation 2) is resolved, at which point setting spark.driver.memory to 10g would provide adequate headroom above the observed 5.73 GB peak with no measurable effect on run cost.",
+        "risk_note": null
+      }
+    ],
+    "blocked_recommendations": [
+      {
+        "config_key": "spark.dynamicAllocation.minExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 104,
+        "current_value": 200,
+        "source": "sql_rule",
+        "source_detail": "ref=0: over_provisioned_executors. SQL engine recommendation: minExecutors 200 \u2192 104. vcore_utilization = 0.485; vcores_avg_used_over_time avg = 695 vcores vs vcores_max_over_time avg = 1,443 vcores allocated. Peak active tasks = 2,500 (Stage 1 and Stage 2 both ran at 2,500\u20133,252 tasks). DEFERRED from this visit: health gate (spill open, spill_ratio = 0.1017 > 0.10) blocks executor reduction. Recording here as a DEFERRED recommendation to be actioned on the next visit once spill is resolved. The suggested value of 104 = ceil(peak_active_executors \u00d7 1.3) / executor_cores is noted for the next visit.",
+        "confidence": 0.5,
+        "priority": 3,
+        "rationale": "DEFERRED \u2014 health gate open (spill_ratio = 0.1017 > 0.10 threshold). Executor reduction on a spilling job would concentrate the spill onto fewer executors, worsening the pathology. The SQL engine's suggested value of 104 (from 200) is recorded for the next visit. The estimated saving of $124,393/year (from the triage) is anchored to the measured idle_ratio and vcore_utilization gap but cannot be safely realised until spill is resolved. estimated_saving_fraction is set to 0 to reflect that no saving is realised this visit.",
+        "estimated_saving_fraction": 0.0,
+        "usd_cost_annual": 124393.16883290418,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": 0,
+        "blocked_by": [
+          "Active disk spill detected (10% of shuffle I/O) \u2014 reducing executor count removes the memory capacity needed to keep shuffle data in-memory. Resolve spill first (increase spark.sql.shuffle.partitions or executor memory)."
+        ]
+      },
+      {
+        "config_key": "spark.dynamicAllocation.maxExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 245,
+        "current_value": 500,
+        "source": "sql_rule",
+        "source_detail": "ref=0: over_provisioned_executors. SQL engine recommendation: maxExecutors 500 \u2192 245. DEFERRED from this visit: health gate (spill open) blocks executor reduction.",
+        "confidence": 0.5,
+        "priority": 4,
+        "rationale": "DEFERRED \u2014 health gate open (spill_ratio = 0.1017). Same reasoning as minExecutors above. The SQL engine's suggested ceiling of 245 is recorded for the next visit. estimated_saving_fraction = 0 this visit.",
+        "estimated_saving_fraction": 0.0,
+        "usd_cost_annual": 124393.16883290418,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": 0,
+        "blocked_by": [
+          "Active disk spill detected (10% of shuffle I/O) \u2014 reducing executor count removes the memory capacity needed to keep shuffle data in-memory. Resolve spill first (increase spark.sql.shuffle.partitions or executor memory)."
+        ]
+      }
+    ],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "over_provisioned_executors",
+          "payload": {
+            "is_dynamic": true,
+            "cnt_task_runs": 100,
+            "time_span_days": 5,
+            "avg_utilization": 40,
+            "spark_executor_cores": 5,
+            "max_executors_suggestion": 245,
+            "min_executors_suggestion": 104,
+            "avg_task_duration_minutes": 30,
+            "estimated_utilization_pct": 58,
+            "dynamic_max_executors_conf": 500,
+            "dynamic_min_executors_conf": 200,
+            "has_executor_cores_changed": false,
+            "estimated_cost_reduction_pct": 31,
+            "estimated_duration_impact_pct": 15,
+            "estimated_duration_impact_minutes": 4
+          },
+          "usd_cost_annual": 124393.16883290418
+        },
+        {
+          "insight_type": "executors_long_spill_time",
+          "payload": {
+            "avg_spill_pct": 15.065562717465458,
+            "cnt_task_runs": 206,
+            "time_span_days": 9,
+            "avg_executor_max_memory_pct": 82.28282287702392,
+            "avg_executor_max_heap_memory_pct": 77.44057808053292,
+            "avg_executor_max_off_heap_memory_pct": 101.65180206298828
+          },
+          "usd_cost_annual": 27947.515284508474
+        },
+        {
+          "insight_type": "over_provisioned_driver_heap_memory",
+          "payload": {
+            "cnt_task_runs": 192,
+            "time_span_days": 9,
+            "avg_utilization": 10,
+            "suggested_value": 10,
+            "watermark_value": 7.49506739526987,
+            "current_allocated": 38
+          },
+          "usd_cost_annual": 545.2430821032792
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memoryOverhead",
+            "current_value": null,
+            "suggested_value": "6144",
+            "rationale": "Off-heap headroom is -0.059 (negative) in this run. The 20-run trend shows the watermark is stable at ~5.27 GB mean with a max of 5.73 GB \u2014 the 5 GB allocation is structurally insufficient. The implicit default (10% \u00d7 20 GB = 2,048 MB) is the likely current value; the cluster has been silently relying on YARN container slack. Sizing: peak 5.73 GB + 7% margin = 6.13 GB \u2192 6,144 MB. This is a cost-increasing change: the overhead increase adds ~(6,144 \u2212 2,048) MB \u00d7 executor_count to the container footprint. However, the health-tier threshold is met (off_heap_headroom < 0 = container-kill risk), satisfying the cost-regression fence. The estimated_saving_fraction is set negative to reflect the cost increase; the actual premium is modest relative to the container-kill risk it eliminates.",
+            "confidence": 0.95
+          },
+          "usd_cost_annual": -17937.94
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.24658722877502504,
+        "gc_pressure": 0.011851494268515518,
+        "off_heap_headroom": -0.05899658203124991,
+        "vcore_utilization": 0.4848291619746287,
+        "idle_ratio": 0.05190833734648806,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 1.0,
+        "spill_ratio": 0.10171616676001233,
+        "has_spill": true,
+        "retried_task_waste": 0.004224768929855517
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "2500",
+        "aqe_enabled_param": null,
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": null,
+        "dynamic_allocation_enabled": true,
+        "is_databricks": false,
+        "max_executors_param": 500,
+        "min_executors_param": 200,
+        "executor_instances_param": null,
+        "executor_cores": 5
+      },
+      "pre_tuning_durations_ms": [
+        1704.235,
+        2715.324,
+        2354.537,
+        1992.591,
+        1658.264
+      ],
+      "pre_tuning_cost_usd": 56.13149116777778,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "sql_rule",
+        "insight_type": "task_profile",
+        "insight_id": null,
+        "title": "task_profile",
+        "description": "task_profile",
+        "reason": "task_profile insight (ref=3) is an informational profile record, not an actionable finding \u2014 it carries no suggested config change and no pathology signal. No recommendation is warranted."
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+        "description": "Three consecutive driver thread dumps (captured at ~67-second intervals between 04:17 and 04:23 UTC) show the driver's main thread permanently blocked waiting on a Snowflake COPY INTO async result (SFAsyncResultSet.getRealResults \u2192 Thread.sleep loop). This is a synchronous, single-threaded stall on the driver: all Spark executor capacity sits idle while the driver polls Snowflake. The task's total wall-clock duration was 1,587 s; the Snowflake write transformation (tf_id=70746779) alone consumed 683 s (46% of total duration). This is not a Spark tuning issue \u2014 it is an external I/O bottleneck serialised through the driver.",
+        "reason": "Driver blocked on Snowflake async write (ref=5) is an application-level / external I/O bottleneck (SFAsyncResultSet.getRealResults polling loop, tf_id=70746779, 683 s = 46% of wall-clock). There is no Spark parameter that addresses a synchronous JDBC poll in the Snowflake connector. The insight's own suggested action explicitly states 'This is an application-level change, not a Spark parameter change.' No valid config_key exists for this fix; recording as skipped with reason: requires application-level or Snowflake-side change (parallelise COPY INTO, resize Snowflake warehouse), not addressable via a Spark config recommendation."
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+        "description": "The partial HashAggregateExec in Stage 1 reports avgHashProbe = 25,000, meaning each hash lookup required on average 25,000 linear probes through the hash table. A healthy probe count is 1\u20132; values above ~5 indicate significant collision chains. At 25,000 this hash table is effectively a linear scan, causing the 863 s of aggTime recorded for that stage and directly explaining the 295 GB of disk spill (all in Stage 1). This is a data distribution / aggregation key cardinality problem that the SQL spill rule does not diagnose \u2014 the spill is a symptom, the cause is the degenerate hash table.",
+        "reason": "The hash-table saturation / avgHashProbe = 25,000 insight (ref=6) has TWO suggested actions: (1) a Spark config change \u2014 increase shuffle partitions \u2014 which is covered by recommendation priority=2 above; (2) application-level changes \u2014 salt the aggregation key and collapse/filter the double GenerateExec/EXPLODE chain earlier. The application-level actions (salting, query restructuring) are not addressable via any Spark config key and are therefore recorded here as skipped for the config-change portion of the plan. The operator should pursue these in parallel with the shuffle partition increase."
+      }
+    ],
+    "health_breach_unactioned": true,
+    "plan_degraded": false,
+    "summary": "3 recommendation(s), ordered health-first. 2 blocked by safety rules. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "d009084b7da9"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.24658722877502504,
+    "gc_pressure": 0.011851494268515518,
+    "off_heap_headroom": -0.05899658203124991,
+    "vcore_utilization": 0.4848291619746287,
+    "idle_ratio": 0.05190833734648806,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 1.0,
+    "spill_ratio": 0.10171616676001233,
+    "has_spill": true,
+    "retried_task_waste": 0.004224768929855517
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 47.0854,
+    "cluster_workers": null,
+    "workers_availability": null
+  },
+  "assembled_output": [
+    {
+      "insight_type": "over_provisioned_executors",
+      "usd_cost_annual": 124393.16883290418,
+      "payload": {
+        "is_dynamic": true,
+        "cnt_task_runs": 100,
+        "time_span_days": 5,
+        "avg_utilization": 40,
+        "spark_executor_cores": 5,
+        "max_executors_suggestion": 245,
+        "min_executors_suggestion": 104,
+        "avg_task_duration_minutes": 30,
+        "estimated_utilization_pct": 58,
+        "dynamic_max_executors_conf": 500,
+        "dynamic_min_executors_conf": 200,
+        "has_executor_cores_changed": false,
+        "estimated_cost_reduction_pct": 31,
+        "estimated_duration_impact_pct": 15,
+        "estimated_duration_impact_minutes": 4
+      },
+      "recommendations": []
+    },
+    {
+      "insight_type": "executors_long_spill_time",
+      "usd_cost_annual": 27947.515284508474,
+      "payload": {
+        "avg_spill_pct": 15.065562717465458,
+        "cnt_task_runs": 206,
+        "time_span_days": 9,
+        "avg_executor_max_memory_pct": 82.28282287702392,
+        "avg_executor_max_heap_memory_pct": 77.44057808053292,
+        "avg_executor_max_off_heap_memory_pct": 101.65180206298828
+      },
+      "recommendations": [
+        {
+          "config_key": "spark.sql.shuffle.partitions",
+          "current_value": "2500",
+          "suggested_value": "5000",
+          "action": "set_spark_config",
+          "explanation": "Stage 1 is the sole source of all 295 GB of disk spill in this run (diskBytesSpilled = 295,362,455,102 bytes), and the avgHashProbe of 25,000 confirms hash-table saturation driven by key skew from the double EXPLODE. AQE is confirmed off (dbx_autooptimizeshuffle=false, Stage 0 ran at exactly the configured 2,500 partitions), so spark.sql.shuffle.partitions is a direct and effective lever \u2014 doubling to 5,000 halves the per-partition data volume, reducing the working set each task must hold in memory and thereby relieving the hash-table pressure that causes spill. Spill is chronic across all 20 historical runs (min 115 GB, mean 360 GB, current run at the 30th percentile at 295 GB), confirming this is a structural, not incidental, problem.",
+          "expected_impact": "Spill_ratio is 0.1017 (just above the 10% health threshold), meaning spill-driven I/O consumes roughly 10% of allocated vcore time (~110,954 vcore-seconds per run at 1,090,994 total); eliminating spill could recover up to ~10% of annual run cost (~$35,876 of the $358,759 annual baseline), though the actual recovery depends on how completely the partition doubling resolves hash-table saturation.",
+          "risk_note": "Doubling partition count increases task scheduling overhead and shuffle file count; if the spill is primarily skew-driven rather than volume-driven (avgHashProbe = 25,000 suggests both), some spill may persist and a skew-join hint or salting strategy may be needed as a follow-up."
+        }
+      ]
+    },
+    {
+      "insight_type": "over_provisioned_driver_heap_memory",
+      "usd_cost_annual": 545.2430821032792,
+      "payload": {
+        "cnt_task_runs": 192,
+        "time_span_days": 9,
+        "avg_utilization": 10,
+        "suggested_value": 10,
+        "watermark_value": 7.49506739526987,
+        "current_allocated": 38
+      },
+      "recommendations": [
+        {
+          "config_key": "spark.driver.memory",
+          "current_value": null,
+          "suggested_value": "10g",
+          "action": "set_spark_config",
+          "explanation": "This recommendation is deferred because the health gate is open: spill_ratio = 0.1017 exceeds the 10% health-tier threshold, and the categorical rule requires all health-tier pathologies to be resolved before efficiency-tier changes are actioned. The driver heap insight is efficiency-tier \u2014 the cross-run peak of 5.73 GB with a stable trend (std = 0.81 GB) supports a target of 8\u201310 GB (5.73 GB peak + ~40% margin = 8.0 GB; 10 GB is the conservative SQL-rule suggestion), and the driver is fully decoupled from executor subsystems so the blast radius is near-zero once the gate clears.",
+          "expected_impact": "No cost or performance impact is expected from this visit; the change is deferred until spill (Recommendation 2) is resolved, at which point setting spark.driver.memory to 10g would provide adequate headroom above the observed 5.73 GB peak with no measurable effect on run cost.",
+          "risk_note": null
+        }
+      ]
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": -17937.94,
+      "config_key": "spark.executor.memoryOverhead",
+      "current_value": null,
+      "suggested_value": "6144",
+      "action": "set_spark_config",
+      "status": "recommended",
+      "explanation": "The off_heap_headroom for this run is \u22120.059, meaning the executor's off-heap container is already over-committed \u2014 a negative value signals active container-kill risk, not merely tightness. Because spark.executor.memoryOverhead is not set, the runtime falls back to the implicit default of max(384, 10% \u00d7 20 GB) = 2,048 MB, yet the 20-run trend shows the off-heap watermark averaging ~5.27 GB with a peak of 5.73 GB, making the 2,048 MB allocation structurally insufficient across every historical run. Sizing to peak (5.73 GB) plus a 7% safety margin yields 6,132 MB, rounded up to 6,144 MB, which is the minimum allocation that keeps headroom positive under observed peak load.",
+      "expected_impact": "Raising memoryOverhead from 2,048 MB to 6,144 MB eliminates the negative off_heap_headroom (\u22120.059 \u2192 positive), removing the container-kill risk that can cause silent executor loss and retried-task waste (currently retried_task_waste = 0.42%). This is a cost-increasing change: the linear memory-cost model estimates an overhead increase of roughly 2\u00d7 the current overhead allocation, adding to the container footprint \u2014 the benefit is reliability and elimination of OOM-driven retries, not cost reduction.",
+      "risk_note": "Tripling the overhead allocation increases per-executor container size, which may reduce the number of executors the cluster can schedule simultaneously on fixed-memory nodes \u2014 validate that cluster node memory is sufficient to absorb the larger container before deploying."
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "over_provisioned_executors",
+        "id": null,
+        "type": "over_provisioned_executors",
+        "description": "over_provisioned_executors \u2014 estimated annual saving opportunity $124,393",
+        "insights_payload": {
+          "is_dynamic": true,
+          "cnt_task_runs": 100,
+          "time_span_days": 5,
+          "avg_utilization": 40,
+          "spark_executor_cores": 5,
+          "max_executors_suggestion": 245,
+          "min_executors_suggestion": 104,
+          "avg_task_duration_minutes": 30,
+          "estimated_utilization_pct": 58,
+          "dynamic_max_executors_conf": 500,
+          "dynamic_min_executors_conf": 200,
+          "has_executor_cores_changed": false,
+          "estimated_cost_reduction_pct": 31,
+          "estimated_duration_impact_pct": 15,
+          "estimated_duration_impact_minutes": 4
+        },
+        "source": "sql_rule",
+        "insight_id": 563333,
+        "usd_cost": 124393.16883290418,
+        "impact_cost": 8956308155.9691,
+        "impact_unit": "VCore",
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "executors_long_spill_time",
+        "id": null,
+        "type": "executors_long_spill_time",
+        "description": "executors_long_spill_time \u2014 estimated annual saving opportunity $27,948",
+        "insights_payload": {
+          "avg_spill_pct": 15.065562717465458,
+          "cnt_task_runs": 206,
+          "time_span_days": 9,
+          "avg_executor_max_memory_pct": 82.28282287702392,
+          "avg_executor_max_heap_memory_pct": 77.44057808053292,
+          "avg_executor_max_off_heap_memory_pct": 101.65180206298828
+        },
+        "source": "sql_rule",
+        "insight_id": 563321,
+        "usd_cost": 27947.515284508474,
+        "impact_cost": 2012221100.48461,
+        "impact_unit": "VCore",
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 2,
+        "kind": "sql",
+        "identifier": "over_provisioned_driver_heap_memory",
+        "id": null,
+        "type": "over_provisioned_driver_heap_memory",
+        "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $545",
+        "insights_payload": {
+          "cnt_task_runs": 192,
+          "time_span_days": 9,
+          "avg_utilization": 10,
+          "suggested_value": 10,
+          "watermark_value": 7.49506739526987,
+          "current_allocated": 38
+        },
+        "source": "sql_rule",
+        "insight_id": 530303,
+        "usd_cost": 545.2430821032792,
+        "impact_cost": 392575019.114361,
+        "impact_unit": "GB",
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 3,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 207,
+          "task_sub_type": null,
+          "time_span_days": 9,
+          "shuffle_partitions": "2500",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 199
+        },
+        "source": "sql_rule",
+        "insight_id": 525933,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Executor Off-Heap Memory Fully Exhausted",
+        "title": "Executor Off-Heap Memory Fully Exhausted",
+        "description": "Executor off-heap memory utilisation hit 100% (executor_max_off_heap_memory_utilization = 1.0), consuming the full 5 GB off-heap allocation (executor_max_off_heap_used_memory = 5.29 GB against executor_off_heap_memory = 5 GB \u2014 already overflowing). This is a distinct health signal from the SQL-detected spill issue: the JVM native/off-heap region is saturated independently of heap spill. On YARN, exhausting off-heap overhead silently triggers OS-level container kills; the fact the job completed suggests it is right at the edge. The current off-heap headroom metric confirms this: off_heap_headroom = -0.059 (negative \u2014 already over-allocated).",
+        "evidence": "executor_max_off_heap_memory_utilization = 1.0; executor_max_off_heap_used_memory = 5.295 GB; executor_off_heap_memory configured = 5 GB; off_heap_headroom = -0.059 (negative). Platform: YARN (non-Databricks). GC type: PS MarkSweep/PS Scavenge (confirmed in executor info event).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase spark.executor.memoryOverhead by at least 20% (e.g. from the implicit default to an explicit ~6\u20137 GB). Do this before any executor count or heap changes \u2014 negative off-heap headroom means the cluster is one data-volume spike away from container OOM kills. Validate that the next run shows off_heap_headroom > 0.10.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+        "title": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+        "description": "Three consecutive driver thread dumps (captured at ~67-second intervals between 04:17 and 04:23 UTC) show the driver's main thread permanently blocked waiting on a Snowflake COPY INTO async result (SFAsyncResultSet.getRealResults \u2192 Thread.sleep loop). This is a synchronous, single-threaded stall on the driver: all Spark executor capacity sits idle while the driver polls Snowflake. The task's total wall-clock duration was 1,587 s; the Snowflake write transformation (tf_id=70746779) alone consumed 683 s (46% of total duration). This is not a Spark tuning issue \u2014 it is an external I/O bottleneck serialised through the driver.",
+        "evidence": "Thread dumps at event_ids 10, 11, 12 (timestamps 1784780451448, 1784780518953, 1784780578964 ms) all show thread-25 in net.snowflake.client.jdbc.SFAsyncResultSet.getRealResults with Thread.sleep. Transformation tf_id=70746779 (type=command, Snowflake write) duration=683.2 s = 45.7% of total task duration. Task wall-clock = 1,587 s.",
+        "confidence": 0.95,
+        "severity": "performance",
+        "suggested_action": "Investigate whether the Snowflake COPY INTO stage can be parallelised or pipelined (e.g. writing to multiple Snowflake tables concurrently, or using async submission with a non-blocking callback). Also check Snowflake warehouse sizing \u2014 the async poll duration suggests the warehouse is queuing or under-resourced. This is an application-level change, not a Spark parameter change.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+        "title": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+        "description": "The partial HashAggregateExec in Stage 1 reports avgHashProbe = 25,000, meaning each hash lookup required on average 25,000 linear probes through the hash table. A healthy probe count is 1\u20132; values above ~5 indicate significant collision chains. At 25,000 this hash table is effectively a linear scan, causing the 863 s of aggTime recorded for that stage and directly explaining the 295 GB of disk spill (all in Stage 1). This is a data distribution / aggregation key cardinality problem that the SQL spill rule does not diagnose \u2014 the spill is a symptom, the cause is the degenerate hash table.",
+        "evidence": "Stage 1 HashAggregateExec: avgHashProbe=25000, aggTime=863,328,367 ms, peakMemory=526,099,939,328 bytes total. diskBytesSpilled=295,362,455,102 bytes (all in Stage 1). GenerateExec output: 29,647,124,272 rows from 14,823,562,136 (2\u00d7 explode), then further from 8,593,683,961 input rows \u2014 net ~3.5\u00d7 row explosion before aggregation. Stage 1 task p50 duration 26 s, p100 49 s.",
+        "confidence": 0.88,
+        "severity": "performance",
+        "suggested_action": "Investigate the aggregation key distribution after the EXPLODE/Generate steps \u2014 a small number of high-frequency keys is causing hash table saturation. Consider: (1) salting the aggregation key to spread hot keys across partitions before the partial aggregate; (2) increasing shuffle partitions beyond 2,500 to reduce per-partition data volume feeding each hash table; (3) reviewing whether the double GenerateExec (two LATERAL VIEW / EXPLODE operations) can be collapsed or filtered earlier to reduce the 3.5\u00d7 row explosion before aggregation.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "over_provisioned_executors",
+        "id": null,
+        "type": "over_provisioned_executors",
+        "description": "over_provisioned_executors \u2014 estimated annual saving opportunity $124,393",
+        "insights_payload": {
+          "is_dynamic": true,
+          "cnt_task_runs": 100,
+          "time_span_days": 5,
+          "avg_utilization": 40,
+          "spark_executor_cores": 5,
+          "max_executors_suggestion": 245,
+          "min_executors_suggestion": 104,
+          "avg_task_duration_minutes": 30,
+          "estimated_utilization_pct": 58,
+          "dynamic_max_executors_conf": 500,
+          "dynamic_min_executors_conf": 200,
+          "has_executor_cores_changed": false,
+          "estimated_cost_reduction_pct": 31,
+          "estimated_duration_impact_pct": 15,
+          "estimated_duration_impact_minutes": 4
+        },
+        "source": "sql_rule",
+        "insight_id": 563333,
+        "usd_cost": 124393.16883290418,
+        "impact_cost": 8956308155.9691,
+        "impact_unit": "VCore",
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "executors_long_spill_time",
+        "id": null,
+        "type": "executors_long_spill_time",
+        "description": "executors_long_spill_time \u2014 estimated annual saving opportunity $27,948",
+        "insights_payload": {
+          "avg_spill_pct": 15.065562717465458,
+          "cnt_task_runs": 206,
+          "time_span_days": 9,
+          "avg_executor_max_memory_pct": 82.28282287702392,
+          "avg_executor_max_heap_memory_pct": 77.44057808053292,
+          "avg_executor_max_off_heap_memory_pct": 101.65180206298828
+        },
+        "source": "sql_rule",
+        "insight_id": 563321,
+        "usd_cost": 27947.515284508474,
+        "impact_cost": 2012221100.48461,
+        "impact_unit": "VCore",
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 2,
+        "kind": "sql",
+        "identifier": "over_provisioned_driver_heap_memory",
+        "id": null,
+        "type": "over_provisioned_driver_heap_memory",
+        "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $545",
+        "insights_payload": {
+          "cnt_task_runs": 192,
+          "time_span_days": 9,
+          "avg_utilization": 10,
+          "suggested_value": 10,
+          "watermark_value": 7.49506739526987,
+          "current_allocated": 38
+        },
+        "source": "sql_rule",
+        "insight_id": 530303,
+        "usd_cost": 545.2430821032792,
+        "impact_cost": 392575019.114361,
+        "impact_unit": "GB",
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 3,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 207,
+          "task_sub_type": null,
+          "time_span_days": 9,
+          "shuffle_partitions": "2500",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 199
+        },
+        "source": "sql_rule",
+        "insight_id": 525933,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "PUB_REDUCED_DIMENSIONS",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      },
+      {
+        "index": 4,
+        "kind": "discovery",
+        "identifier": "Executor Off-Heap Memory Fully Exhausted",
+        "title": "Executor Off-Heap Memory Fully Exhausted",
+        "description": "Executor off-heap memory utilisation hit 100% (executor_max_off_heap_memory_utilization = 1.0), consuming the full 5 GB off-heap allocation (executor_max_off_heap_used_memory = 5.29 GB against executor_off_heap_memory = 5 GB \u2014 already overflowing). This is a distinct health signal from the SQL-detected spill issue: the JVM native/off-heap region is saturated independently of heap spill. On YARN, exhausting off-heap overhead silently triggers OS-level container kills; the fact the job completed suggests it is right at the edge. The current off-heap headroom metric confirms this: off_heap_headroom = -0.059 (negative \u2014 already over-allocated).",
+        "evidence": "executor_max_off_heap_memory_utilization = 1.0; executor_max_off_heap_used_memory = 5.295 GB; executor_off_heap_memory configured = 5 GB; off_heap_headroom = -0.059 (negative). Platform: YARN (non-Databricks). GC type: PS MarkSweep/PS Scavenge (confirmed in executor info event).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Increase spark.executor.memoryOverhead by at least 20% (e.g. from the implicit default to an explicit ~6\u20137 GB). Do this before any executor count or heap changes \u2014 negative off-heap headroom means the cluster is one data-volume spike away from container OOM kills. Validate that the next run shows off_heap_headroom > 0.10.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 5,
+        "kind": "discovery",
+        "identifier": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+        "title": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+        "description": "Three consecutive driver thread dumps (captured at ~67-second intervals between 04:17 and 04:23 UTC) show the driver's main thread permanently blocked waiting on a Snowflake COPY INTO async result (SFAsyncResultSet.getRealResults \u2192 Thread.sleep loop). This is a synchronous, single-threaded stall on the driver: all Spark executor capacity sits idle while the driver polls Snowflake. The task's total wall-clock duration was 1,587 s; the Snowflake write transformation (tf_id=70746779) alone consumed 683 s (46% of total duration). This is not a Spark tuning issue \u2014 it is an external I/O bottleneck serialised through the driver.",
+        "evidence": "Thread dumps at event_ids 10, 11, 12 (timestamps 1784780451448, 1784780518953, 1784780578964 ms) all show thread-25 in net.snowflake.client.jdbc.SFAsyncResultSet.getRealResults with Thread.sleep. Transformation tf_id=70746779 (type=command, Snowflake write) duration=683.2 s = 45.7% of total task duration. Task wall-clock = 1,587 s.",
+        "confidence": 0.95,
+        "severity": "performance",
+        "suggested_action": "Investigate whether the Snowflake COPY INTO stage can be parallelised or pipelined (e.g. writing to multiple Snowflake tables concurrently, or using async submission with a non-blocking callback). Also check Snowflake warehouse sizing \u2014 the async poll duration suggests the warehouse is queuing or under-resourced. This is an application-level change, not a Spark parameter change.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 6,
+        "kind": "discovery",
+        "identifier": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+        "title": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+        "description": "The partial HashAggregateExec in Stage 1 reports avgHashProbe = 25,000, meaning each hash lookup required on average 25,000 linear probes through the hash table. A healthy probe count is 1\u20132; values above ~5 indicate significant collision chains. At 25,000 this hash table is effectively a linear scan, causing the 863 s of aggTime recorded for that stage and directly explaining the 295 GB of disk spill (all in Stage 1). This is a data distribution / aggregation key cardinality problem that the SQL spill rule does not diagnose \u2014 the spill is a symptom, the cause is the degenerate hash table.",
+        "evidence": "Stage 1 HashAggregateExec: avgHashProbe=25000, aggTime=863,328,367 ms, peakMemory=526,099,939,328 bytes total. diskBytesSpilled=295,362,455,102 bytes (all in Stage 1). GenerateExec output: 29,647,124,272 rows from 14,823,562,136 (2\u00d7 explode), then further from 8,593,683,961 input rows \u2014 net ~3.5\u00d7 row explosion before aggregation. Stage 1 task p50 duration 26 s, p100 49 s.",
+        "confidence": 0.88,
+        "severity": "performance",
+        "suggested_action": "Investigate the aggregation key distribution after the EXPLODE/Generate steps \u2014 a small number of high-frequency keys is causing hash table saturation. Consider: (1) salting the aggregation key to spread hot keys across partitions before the partial aggregate; (2) increasing shuffle partitions beyond 2,500 to reduce per-partition data volume feeding each hash table; (3) reviewing whether the double GenerateExec (two LATERAL VIEW / EXPLODE operations) can be collapsed or filtered earlier to reduce the 3.5\u00d7 row explosion before aggregation.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        1,
+        4,
+        6
+      ],
+      "tier2_cluster": [
+        0
+      ],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        2,
+        3,
+        5
+      ],
+      "active_conflicts": [
+        "Index 0 (executor reduction) is blocked by the health gate (spill open, spill_ratio=0.1017 > 0.10) and additionally by the conflict rule: do not recommend executor reduction while has_spill=true and spill_ratio >= 0.01.",
+        "Index 2 (driver heap reduction) is deferred: health gate open \u2014 spill pathology open.",
+        "Index 0 and Index 2 must not be recommended together in the same plan (executor reduction + memory reduction compound risk rule), though both are already individually deferred by the health gate."
+      ],
+      "reasoning": "\n**Health gate assessment:**\n\n`spill_ratio = 0.1017` (>0.10 threshold) AND `has_spill = true` \u2192 the spill threshold is crossed (just barely, at 10.17%). This opens the health gate. All efficiency-tier insights are deferred.\n\n`gc_pressure = 0.0119` (<0.20, well below severe GC threshold). `retried_task_waste = 0.0042` (<0.05). `memory_headroom = 0.247` (healthy). No task failure rate issue (0 failed tasks). No skew (`skew_ratio = 0.0`). The only open health pathology is the material disk spill.\n\n**Tier 1 \u2014 Health:**\n\n- **Index 1** (`executors_long_spill_time`): `spill_ratio = 0.1017 > 0.10` \u2014 threshold met. This is the primary health signal. Stage 1 data confirms 295 GB disk spill, all concentrated in Stage 1's HashAggregate. This opens the health gate.\n\n- **Index 4** (discovery: Executor Off-Heap Memory Fully Exhausted): `off_heap_headroom = -0.059` (negative \u2014 already over-allocated; `executor_max_off_heap_memory_utilization = 1.0`, used 5.29 GB against 5 GB allocation). This is a genuine memory exhaustion signal \u2014 the off-heap region is overflowing. On YARN this risks container kills. This is a health-tier pathology (OOM/memory starvation corroborated by actual overflow, not just a high watermark). Tier 1.\n\n- **Index 6** (discovery: Stage 1 HashAggregate avgHashProbe = 25,000): This is the root-cause diagnosis for the spill. `avgHashProbe = 25,000` in the partial HashAggregateExec (Stage 1) is a degenerate hash table causing 863 s of aggTime and directly producing the 295 GB spill. This is a correctness/health-level query pathology \u2014 it is the causal explanation for the open spill health signal, not a separate efficiency observation. Tier 1.\n\n**Health gate is open** (spill_ratio > 0.10). All efficiency insights are deferred.\n\n**Tier 2 \u2014 deferred:**\n\n- **Index 0** (`over_provisioned_executors`, $124,393/yr): `vcore_utilization = 0.485` and `idle_ratio = 0.052`. The idle_ratio (0.052) is well below the 0.40 threshold, so the Tier 2 idle criterion is not met on its own. However, `vcore_utilization = 0.485 < 0.50` and the insight fires with a large saving. Regardless, this is an efficiency insight and is deferred behind the health gate (spill open). Tier 2, deferred.\n\n**Tier 3 \u2014 deferred:**\n\nNo instance-type insights present.\n\n**Tier 4 \u2014 deferred:**\n\n- **Index 2** (`over_provisioned_driver_heap_memory`, $545/yr): Driver heap used only 3.73 GB of 38 GB allocated (`driver_max_heap_memory_utilization = 0.098`). This is a clear efficiency saving but is an efficiency-tier insight \u2014 deferred behind the health gate. Tier 4 (driver heap fine-tuning).\n\n- **Index 3** (`task_profile`): Informational/context insight. No tier assignment needed beyond noting it as supporting context.\n\n- **Index 5** (discovery: Driver Blocked on Snowflake Async Write ~5 min): The Snowflake COPY INTO stall consumed 683 s (43% of wall-clock) but this is an external I/O bottleneck, not a Spark config pathology. It does not meet any Tier 1 threshold (no task failures, no GC, no spill from this). It is an observational/diagnostic finding \u2014 best placed in Tier 4 as a fine-tuning/architectural observation (the driver serialization is a design issue, not a Spark knob).\n\n**Conflict check:**\n\n- Index 0 (executor reduction) vs spill: conflict rule applies \u2014 do not recommend memory reduction when `has_spill = true` and `spill_ratio \u2265 0.01`. Executor reduction is also blocked by the health gate. No executor reduction + memory reduction compound conflict arises since only one is present.\n- AQE: `spark.sql.adaptive.enabled` is NOT SET (null). In Spark 3.2+ the default is ON, but the task profile shows `aqe_enabled_param = null` and `shuffle_partitions_param = 2500` with actual Stage 1 running 3,252 tasks and Stage 2 running 2,500 \u2014 suggesting AQE may be active (coalescing/splitting). However, since the parameter is explicitly null/not-set, AQE state cannot be confirmed from config alone. This is noted but does not create a conflict for current triage since no shuffle partition recommendation is being made.\n- Index 4 (off-heap exhaustion) and Index 1 (spill) are both health signals pointing to the same executor memory cluster \u2014 they are complementary, not conflicting.\n"
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 1,
+          "kind": "sql",
+          "identifier": "executors_long_spill_time",
+          "id": null,
+          "type": "executors_long_spill_time",
+          "description": "executors_long_spill_time \u2014 estimated annual saving opportunity $27,948",
+          "insights_payload": {
+            "avg_spill_pct": 15.065562717465458,
+            "cnt_task_runs": 206,
+            "time_span_days": 9,
+            "avg_executor_max_memory_pct": 82.28282287702392,
+            "avg_executor_max_heap_memory_pct": 77.44057808053292,
+            "avg_executor_max_off_heap_memory_pct": 101.65180206298828
+          },
+          "source": "sql_rule",
+          "insight_id": 563321,
+          "usd_cost": 27947.515284508474,
+          "impact_cost": 2012221100.48461,
+          "impact_unit": "VCore",
+          "task_name": "PUB_REDUCED_DIMENSIONS",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 4,
+          "kind": "discovery",
+          "identifier": "Executor Off-Heap Memory Fully Exhausted",
+          "title": "Executor Off-Heap Memory Fully Exhausted",
+          "description": "Executor off-heap memory utilisation hit 100% (executor_max_off_heap_memory_utilization = 1.0), consuming the full 5 GB off-heap allocation (executor_max_off_heap_used_memory = 5.29 GB against executor_off_heap_memory = 5 GB \u2014 already overflowing). This is a distinct health signal from the SQL-detected spill issue: the JVM native/off-heap region is saturated independently of heap spill. On YARN, exhausting off-heap overhead silently triggers OS-level container kills; the fact the job completed suggests it is right at the edge. The current off-heap headroom metric confirms this: off_heap_headroom = -0.059 (negative \u2014 already over-allocated).",
+          "evidence": "executor_max_off_heap_memory_utilization = 1.0; executor_max_off_heap_used_memory = 5.295 GB; executor_off_heap_memory configured = 5 GB; off_heap_headroom = -0.059 (negative). Platform: YARN (non-Databricks). GC type: PS MarkSweep/PS Scavenge (confirmed in executor info event).",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Increase spark.executor.memoryOverhead by at least 20% (e.g. from the implicit default to an explicit ~6\u20137 GB). Do this before any executor count or heap changes \u2014 negative off-heap headroom means the cluster is one data-volume spike away from container OOM kills. Validate that the next run shows off_heap_headroom > 0.10.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 6,
+          "kind": "discovery",
+          "identifier": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+          "title": "Stage 1 HashAggregate avgHashProbe = 25,000 \u2014 Severe Hash Table Collision Indicating Extreme Cardinality Pressure",
+          "description": "The partial HashAggregateExec in Stage 1 reports avgHashProbe = 25,000, meaning each hash lookup required on average 25,000 linear probes through the hash table. A healthy probe count is 1\u20132; values above ~5 indicate significant collision chains. At 25,000 this hash table is effectively a linear scan, causing the 863 s of aggTime recorded for that stage and directly explaining the 295 GB of disk spill (all in Stage 1). This is a data distribution / aggregation key cardinality problem that the SQL spill rule does not diagnose \u2014 the spill is a symptom, the cause is the degenerate hash table.",
+          "evidence": "Stage 1 HashAggregateExec: avgHashProbe=25000, aggTime=863,328,367 ms, peakMemory=526,099,939,328 bytes total. diskBytesSpilled=295,362,455,102 bytes (all in Stage 1). GenerateExec output: 29,647,124,272 rows from 14,823,562,136 (2\u00d7 explode), then further from 8,593,683,961 input rows \u2014 net ~3.5\u00d7 row explosion before aggregation. Stage 1 task p50 duration 26 s, p100 49 s.",
+          "confidence": 0.88,
+          "severity": "performance",
+          "suggested_action": "Investigate the aggregation key distribution after the EXPLODE/Generate steps \u2014 a small number of high-frequency keys is causing hash table saturation. Consider: (1) salting the aggregation key to spread hot keys across partitions before the partial aggregate; (2) increasing shuffle partitions beyond 2,500 to reduce per-partition data volume feeding each hash table; (3) reviewing whether the double GenerateExec (two LATERAL VIEW / EXPLODE operations) can be collapsed or filtered earlier to reduce the 3.5\u00d7 row explosion before aggregation.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [
+        {
+          "index": 0,
+          "kind": "sql",
+          "identifier": "over_provisioned_executors",
+          "id": null,
+          "type": "over_provisioned_executors",
+          "description": "over_provisioned_executors \u2014 estimated annual saving opportunity $124,393",
+          "insights_payload": {
+            "is_dynamic": true,
+            "cnt_task_runs": 100,
+            "time_span_days": 5,
+            "avg_utilization": 40,
+            "spark_executor_cores": 5,
+            "max_executors_suggestion": 245,
+            "min_executors_suggestion": 104,
+            "avg_task_duration_minutes": 30,
+            "estimated_utilization_pct": 58,
+            "dynamic_max_executors_conf": 500,
+            "dynamic_min_executors_conf": 200,
+            "has_executor_cores_changed": false,
+            "estimated_cost_reduction_pct": 31,
+            "estimated_duration_impact_pct": 15,
+            "estimated_duration_impact_minutes": 4
+          },
+          "source": "sql_rule",
+          "insight_id": 563333,
+          "usd_cost": 124393.16883290418,
+          "impact_cost": 8956308155.9691,
+          "impact_unit": "VCore",
+          "task_name": "PUB_REDUCED_DIMENSIONS",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        }
+      ],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 2,
+          "kind": "sql",
+          "identifier": "over_provisioned_driver_heap_memory",
+          "id": null,
+          "type": "over_provisioned_driver_heap_memory",
+          "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $545",
+          "insights_payload": {
+            "cnt_task_runs": 192,
+            "time_span_days": 9,
+            "avg_utilization": 10,
+            "suggested_value": 10,
+            "watermark_value": 7.49506739526987,
+            "current_allocated": 38
+          },
+          "source": "sql_rule",
+          "insight_id": 530303,
+          "usd_cost": 545.2430821032792,
+          "impact_cost": 392575019.114361,
+          "impact_unit": "GB",
+          "task_name": "PUB_REDUCED_DIMENSIONS",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 3,
+          "kind": "sql",
+          "identifier": "task_profile",
+          "id": null,
+          "type": "task_profile",
+          "description": "task_profile",
+          "insights_payload": {
+            "task_type": "spark",
+            "tenant_id": 63,
+            "cnt_task_runs": 207,
+            "task_sub_type": null,
+            "time_span_days": 9,
+            "shuffle_partitions": "2500",
+            "cnt_failed_task_runs": 0,
+            "cnt_completed_task_runs": 199
+          },
+          "source": "sql_rule",
+          "insight_id": 525933,
+          "usd_cost": null,
+          "impact_cost": null,
+          "impact_unit": null,
+          "task_name": "PUB_REDUCED_DIMENSIONS",
+          "lifecycle_status": "active",
+          "visibility": "hidden"
+        },
+        {
+          "index": 5,
+          "kind": "discovery",
+          "identifier": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+          "title": "Driver Blocked on Snowflake Async Write for ~5 Minutes",
+          "description": "Three consecutive driver thread dumps (captured at ~67-second intervals between 04:17 and 04:23 UTC) show the driver's main thread permanently blocked waiting on a Snowflake COPY INTO async result (SFAsyncResultSet.getRealResults \u2192 Thread.sleep loop). This is a synchronous, single-threaded stall on the driver: all Spark executor capacity sits idle while the driver polls Snowflake. The task's total wall-clock duration was 1,587 s; the Snowflake write transformation (tf_id=70746779) alone consumed 683 s (46% of total duration). This is not a Spark tuning issue \u2014 it is an external I/O bottleneck serialised through the driver.",
+          "evidence": "Thread dumps at event_ids 10, 11, 12 (timestamps 1784780451448, 1784780518953, 1784780578964 ms) all show thread-25 in net.snowflake.client.jdbc.SFAsyncResultSet.getRealResults with Thread.sleep. Transformation tf_id=70746779 (type=command, Snowflake write) duration=683.2 s = 45.7% of total task duration. Task wall-clock = 1,587 s.",
+          "confidence": 0.95,
+          "severity": "performance",
+          "suggested_action": "Investigate whether the Snowflake COPY INTO stage can be parallelised or pipelined (e.g. writing to multiple Snowflake tables concurrently, or using async submission with a non-blocking callback). Also check Snowflake warehouse sizing \u2014 the async poll duration suggests the warehouse is queuing or under-resourced. This is an application-level change, not a Spark parameter change.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "d009084b7da9",
+    "historical_runs_count": 20,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": [
+      {
+        "config_key": "spark.dynamicAllocation.minExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 104,
+        "current_value": 200,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_executors",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": null
+      },
+      {
+        "config_key": "spark.dynamicAllocation.maxExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 245,
+        "current_value": 500,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_executors",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": null
+      },
+      {
+        "config_key": "spark.driver.memory",
+        "action": "set_spark_config",
+        "suggested_value": "10g",
+        "current_value": 38,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_driver_heap_memory",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_driver_heap_memory",
+        "insight_id": null,
+        "insight_ref": null
+      }
+    ]
+  }
+}

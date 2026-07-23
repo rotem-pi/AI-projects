@@ -1,0 +1,643 @@
+{
+  "saved_at": "2026-07-23T08:49:28.426589+00:00",
+  "source": "pg-dump",
+  "task_id": 2741703,
+  "task_name": "spark-LoggerParquetConversion",
+  "run_config": {
+    "dump_dir": "data/dumps/pg_2741703",
+    "insight_filter": "lifecycle_status='active' (mimics prod active_insights)",
+    "injected_insights": [
+      {
+        "type": "over_provisioned_executors",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "task_profile",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "llm_model": "claude-sonnet-4-6",
+    "llm_temperature": 0.0
+  },
+  "input": {
+    "task_id": 2741703,
+    "links": null,
+    "enrichments_updated_at": "2026-07-23T08:21:15.711839",
+    "executor__memory_heap__allocated": 16.0,
+    "executor__memory_heap__max_used": 14.2088219746947,
+    "executor__memory_off_heap__allocated": 4.0,
+    "executor__memory_off_heap__max_used": 2.80659866333008,
+    "executor__memory__allocated": 20.0,
+    "executor__cores": 7.0,
+    "executors__jvm_gc_time": 86952.003,
+    "executors__vcore_time__used": 1553634.362,
+    "executors__cpu_time__used": 1617889.66,
+    "executors__used_vcore_time_of_retried_tasks": 25758.308,
+    "driver__heap_memory__allocated": 30.0,
+    "driver__heap_memory__max_used": 6.74779520183802,
+    "driver__cores": 5.0,
+    "task__executors_dynamic_allocation_min_executors__param": 0.0,
+    "task__executors_dynamic_allocation_max_executors__param": 1200.0,
+    "task__executor_instances__param": null,
+    "task__dynamic_is_allocation_enabled__param": true,
+    "task__task_cpus__param": 1.0,
+    "task__memory_time__allocated": 7784636.235,
+    "task__skew_time": 151.0,
+    "task__idle_time": 49.7670001983643,
+    "task__vcore_time__allocated": 2720020.0,
+    "task__duration": 637.176,
+    "task__disk_bytes_spilled": 2037760607.0,
+    "task__total_io_bytes": 6817416309905.0,
+    "task__vcore_time__used": 1554113.512,
+    "executors__vcore_time__allocated": 2716845.0,
+    "driver__memory__allocated": 35.0,
+    "driver__memory__max_used": 6.74779520183802,
+    "task__shuffle_partitions__param": "11000",
+    "executors__memory_time__used": 1791140.702474987,
+    "app_id": 28803,
+    "env_id": 28815,
+    "app_pit": "2026-07-22T23:00:00",
+    "parent_task_id": null,
+    "task_name": "spark-LoggerParquetConversion",
+    "driver_type": null,
+    "worker_type": null,
+    "cloud_provider": null,
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": null,
+    "workers_availability": null,
+    "dbx_autooptimizeshuffle": null,
+    "task_sub_type": null,
+    "task__metrics_count": 106,
+    "task__tfs_count__completed": 1,
+    "task__tfs_count__running": 0,
+    "task__tfs_count__failed": 0,
+    "task__tests_runs_count": 10,
+    "task__alerts_count": 0,
+    "task__breaks_count": 0,
+    "driver__cpu_utilization": 0.15096093257719,
+    "executors__run_time__used": 1553634.362,
+    "executors__tasks_duration__used": 1595393.496,
+    "cluster_uuid": null,
+    "node_vcores": null,
+    "node_mem_gb": null,
+    "start_time": "2026-07-23T08:10:38.097000+00:00",
+    "status": "COMPLETED",
+    "app_name": "SSP_logger",
+    "task__aqe_enabled__param": null
+  },
+  "plan": {
+    "task_id": 2741703,
+    "recommendations": [
+      {
+        "config_key": "spark.dynamicAllocation.minExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 1,
+        "current_value": 0,
+        "source": "sql_rule",
+        "source_detail": "sql:over_provisioned_executors ref=0: companion min-executor floor to accompany maxExecutors change; anti-pattern fence requires minExecutors \u2265 1 when dynamic allocation is enabled",
+        "confidence": 0.9,
+        "priority": 2,
+        "rationale": "Dynamic allocation is enabled (dynamic_allocation_enabled=true) and minExecutors is currently 0. The anti-pattern fence requires that whenever maxExecutors is set, minExecutors must also be set to \u2265 1 to prevent cold-start with 0 executors. This is a companion safety change to the maxExecutors reduction (priority 2). Setting minExecutors=1 ensures the job always has at least one executor available at startup. Cost impact is negligible (one executor floor vs. zero).",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": 44723.070050534865,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "Dynamic allocation is active (dynamic_allocation_enabled=true) with minExecutors currently confirmed at 0 (source: task_profile) and maxExecutors set to 1,200. When the cluster scales down to zero executors between task waves, the next wave must wait for fresh executor allocation before any work can begin \u2014 a cold-start stall that directly inflates wall-clock duration. Setting minExecutors=1 guarantees at least one executor is always warm and ready, eliminating that startup gap without meaningfully changing resource consumption.",
+        "expected_impact": "Eliminates cold-start executor wait at job startup; the idle_ratio for this run is 7.8%, so the recoverable idle time is bounded by that fraction of allocated time \u2014 the actual gain from this single floor change will be a small subset of that, but the protection against zero-executor stalls is categorical.",
+        "risk_note": "Holding one executor alive continuously adds a negligible, fixed cost (one executor out of a max of 1,200), but there is no functional risk."
+      },
+      {
+        "config_key": "spark.sql.adaptive.enabled",
+        "action": "set_spark_config",
+        "suggested_value": "true",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered ref=2: Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+        "confidence": 0.88,
+        "priority": 3,
+        "rationale": "Disk spill has grown +79% over 20 runs (3.2 GB \u2192 5.7 GB latest, 20-run mean 1.8 GB) with zero config changes, indicating quietly growing input data volume inflating per-task working sets. AQE is currently OFF (spark.sql.adaptive.enabled is unset, defaulting to false on this YARN cluster), so the static 11,000-partition shuffle is the binding runtime count. With AQE enabled, Spark will dynamically coalesce or split shuffle partitions at runtime, shrinking per-task data size as input volume grows \u2014 the lowest-risk first lever for the spill trajectory. This is a health-remedy recommendation; it does not increase cost. The current run spilled 2.04 GB to disk and 70.8 GB from memory, all attributed to Stage 2 (29,861-task read+aggregate). The spill_ratio for this run is 0.000299 \u2014 below the 10% health-gate threshold \u2014 but the monotonically increasing trend across 20 runs makes this a proactive health fix before the gate opens. Annual task cost baseline: $319,538. Enabling AQE has no direct cost impact (no resource allocation change); saving_fraction is not set as the cost direction is neutral.",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 2,
+        "explanation": "spark.sql.adaptive.enabled is unset (confirmed not_set, defaulting to false on this YARN cluster), so the static shuffle partition count of 11,000 is applied uniformly at every stage regardless of actual data volume. Disk spill has grown +79.3% over 20 runs (first run: 3.17 GB, latest run: 5.68 GB, 20-run mean: 1.81 GB) with a monotonically increasing trend and no config changes, indicating that growing input data is inflating per-task working sets against a fixed partition count. Enabling AQE allows Spark to coalesce small shuffle partitions and split oversized ones at runtime, directly reducing the per-task data volume that is currently overflowing executor memory and landing on disk (this run: 2.04 GB disk spill, spill_ratio=0.000299).",
+        "expected_impact": "AQE cannot be arithmetically mapped to a cost saving fraction (no resource allocation changes), but by dynamically right-sizing partitions it is expected to slow or reverse the spill growth trajectory \u2014 the current run's disk spill of 2.04 GB sits at the 70th percentile of the 20-run baseline, and without intervention the trend projects continued growth toward the health-gate threshold.",
+        "risk_note": "AQE's partition coalescing can occasionally produce unexpectedly large merged partitions if skew is severe; with skew_ratio=0.237 on this run, monitor per-task peak memory after enabling to confirm no new OOM pressure."
+      }
+    ],
+    "blocked_recommendations": [
+      {
+        "config_key": "spark.dynamicAllocation.maxExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 618,
+        "current_value": 1200,
+        "source": "sql_rule",
+        "source_detail": "sql:over_provisioned_executors ref=0: SQL engine recommends 1200 \u2192 618",
+        "confidence": 0.72,
+        "priority": 1,
+        "rationale": "The SQL rule detected over-provisioned executors with an estimated annual saving of $44,723. vcore_utilization=0.572 and idle_ratio=0.078 confirm meaningful executor idle time. The active conflict asserts the health gate is open due to spill, but the measured spill_ratio=0.000299 is far below the 0.10 health-gate threshold, so the gate does not open and this efficiency recommendation is not blocked. Skew_ratio=0.237 is also below the 0.30 conflict threshold, so the skew anti-pattern guard does not apply. The SQL engine's suggested ceiling of 618 (from 1200) is a 48.5% reduction. Per the conservative-step fence, a single-step 48.5% cut is aggressive; however, the SQL rule's sizing is based on observed peak active executors with a 30% headroom margin \u2014 this is the deterministic safe floor. The saving estimate from the tool: cutting maxExecutors 1200\u2192618 yields an estimated saving fraction of 0.485 (upper bound assuming the job runs at ceiling; real saving is lower when the ceiling is rarely hit). The idle_ratio of 0.078 provides a floor anchor: at minimum ~7.8% of executor-time is idle, supporting a meaningful reduction. Anchoring conservatively to idle_ratio: estimated_saving_fraction = 0.078 (the directly measured idle waste share). This is a non-Databricks YARN cluster, so spark.dynamicAllocation.maxExecutors is the correct control-plane knob (not clusterMaxWorkers). The minExecutors is currently 0 \u2014 leaving it unchanged is acceptable as it is already set.",
+        "estimated_saving_fraction": 0.078,
+        "usd_cost_annual": 44723.070050534865,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": 0,
+        "blocked_by": [
+          "Active disk spill detected (0% of shuffle I/O) \u2014 reducing executor count removes the memory capacity needed to keep shuffle data in-memory. Resolve spill first (increase spark.sql.shuffle.partitions or executor memory)."
+        ]
+      }
+    ],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "over_provisioned_executors",
+          "payload": {
+            "is_dynamic": true,
+            "cnt_task_runs": 100,
+            "time_span_days": 5,
+            "avg_utilization": 63,
+            "spark_executor_cores": 7,
+            "max_executors_suggestion": 618,
+            "avg_task_duration_minutes": 11,
+            "estimated_utilization_pct": 72,
+            "dynamic_max_executors_conf": 1200,
+            "dynamic_min_executors_conf": 0,
+            "has_executor_cores_changed": false,
+            "estimated_cost_reduction_pct": 12,
+            "estimated_duration_impact_pct": 16,
+            "estimated_duration_impact_minutes": 2
+          },
+          "usd_cost_annual": 44723.070050534865
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.sql.adaptive.enabled",
+            "current_value": null,
+            "suggested_value": "true",
+            "rationale": "Disk spill has grown +79% over 20 runs (3.2 GB \u2192 5.7 GB latest, 20-run mean 1.8 GB) with zero config changes, indicating quietly growing input data volume inflating per-task working sets. AQE is currently OFF (spark.sql.adaptive.enabled is unset, defaulting to false on this YARN cluster), so the static 11,000-partition shuffle is the binding runtime count. With AQE enabled, Spark will dynamically coalesce or split shuffle partitions at runtime, shrinking per-task data size as input volume grows \u2014 the lowest-risk first lever for the spill trajectory. This is a health-remedy recommendation; it does not increase cost. The current run spilled 2.04 GB to disk and 70.8 GB from memory, all attributed to Stage 2 (29,861-task read+aggregate). The spill_ratio for this run is 0.000299 \u2014 below the 10% health-gate threshold \u2014 but the monotonically increasing trend across 20 runs makes this a proactive health fix before the gate opens. Annual task cost baseline: $319,538. Enabling AQE has no direct cost impact (no resource allocation change); saving_fraction is not set as the cost direction is neutral.",
+            "confidence": 0.88
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.11194862658158122,
+        "gc_pressure": 0.05596683822573693,
+        "off_heap_headroom": 0.29835033416748,
+        "vcore_utilization": 0.5718524104245918,
+        "idle_ratio": 0.07810557867585141,
+        "skew_ratio": 0.23698318831845516,
+        "cpu_efficiency": 1.0,
+        "spill_ratio": 0.0002989051151298102,
+        "has_spill": true,
+        "retried_task_waste": 0.016579388709478095
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "11000",
+        "aqe_enabled_param": null,
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": null,
+        "dynamic_allocation_enabled": true,
+        "is_databricks": false,
+        "max_executors_param": 1200,
+        "min_executors_param": 0,
+        "executor_instances_param": null,
+        "executor_cores": 7
+      },
+      "pre_tuning_durations_ms": [
+        642.923,
+        510.731,
+        591.308,
+        954.151,
+        643.048
+      ],
+      "pre_tuning_cost_usd": 43.08289059166667,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "sql_rule",
+        "insight_type": "task_profile",
+        "insight_id": null,
+        "title": "task_profile",
+        "description": "task_profile",
+        "reason": "Insight ref=1 is tagged sql:task_profile (unclassified) \u2014 this is a profile/metadata insight, not an actionable config recommendation. No config change is derivable from a task_profile insight alone; it provides context consumed by other insights."
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+        "description": "Executor JVM GC time has increased monotonically over the last 20 runs (+9.3% first-to-last, current run at 86,952 seconds of fleet GC time, in the 80th percentile of the baseline). Critically, memory headroom is only 11.2% \u2014 well below the 20% fragility threshold \u2014 while gc_pressure is 5.6% (below the SQL rule threshold of 20%, so no SQL rule fired). This combination \u2014 moderate GC pressure + very tight memory headroom + active spill \u2014 is the precursor signature for a GC health event. The job is not in GC thrash today, but the trajectory is clear: as input volume grows (evidenced by the spill trend), the heap will be squeezed further and GC pressure will cross the health threshold. The GC collector in use is PS MarkSweep / PS Scavenge (parallel collector, confirmed from executor events), which is known to degrade non-linearly on heaps above ~16 GB under high allocation pressure.",
+        "reason": "Executor GC monotonically increasing (ref=3): gc_pressure=0.056 (5.6%) is below the 12% health-gate threshold and below the 10% action threshold. The suggested action is to monitor for 3\u20135 more runs and only act if gc_pressure crosses 10%. No config change is warranted this visit \u2014 the insight explicitly states 'do not right-size executor memory downward while this trend is open', and no upsize is justified while gc_pressure has not crossed the health threshold. The AQE enablement (priority 1) addresses the root cause (growing per-task working sets) and is expected to relieve GC pressure indirectly. The GC collector switch (spark.executor.extraJavaOptions=-XX:+UseG1GC) is not a valid config_key in the approved key registry and cannot be recommended this visit; it should be revisited if gc_pressure crosses 10% after AQE is enabled."
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+        "description": "Stage 2 (the 29,861-task read+aggregate stage) shows a confirmed skew event: average task duration 12s, P75=13s, but max=164s \u2014 a 13\u00d7 ratio between the worst task and the 75th percentile. This is the stage responsible for all spill. The skew event was captured in the run's insight events. Speculative execution (spark.speculation) is not configured, meaning the straggler task runs to completion without a parallel speculative attempt, directly extending Stage 2's wall-clock time. The skew_ratio for the run is 0.237 (just below the 0.25 SQL threshold, so no SQL rule fired). With 29,861 tasks and 2,137 executors, a single 164-second straggler at the tail of the stage adds measurable latency. The skew is input-side (FileSourceScanExec reading 215,783 Parquet files across 93 input paths), suggesting uneven file sizes rather than a data-value hot key.",
+        "reason": "Stage 2 skew (ref=4): skew_ratio=0.237 is below the 0.25 SQL threshold and below the 0.30 anti-pattern conflict threshold. The suggested action is to investigate uneven Parquet file sizes across 215,783 files \u2014 this requires a code-level or data-engineering intervention (file compaction / repartitioning of the input dataset), not a Spark config change. The complementary AQE enablement (priority 1) will activate AQE's skew-join handling for shuffle stages and is already recommended. spark.speculation is explicitly called out as NOT the right fix (doubles resource consumption, masks root cause), so it is not recommended. No standalone config change addresses input-file-size skew."
+      }
+    ],
+    "health_breach_unactioned": false,
+    "plan_degraded": false,
+    "summary": "2 recommendation(s), ordered health-first. 1 blocked by safety rules.",
+    "kb_version": "d009084b7da9"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.11194862658158122,
+    "gc_pressure": 0.05596683822573693,
+    "off_heap_headroom": 0.29835033416748,
+    "vcore_utilization": 0.5718524104245918,
+    "idle_ratio": 0.07810557867585141,
+    "skew_ratio": 0.23698318831845516,
+    "cpu_efficiency": 1.0,
+    "spill_ratio": 0.0002989051151298102,
+    "has_spill": true,
+    "retried_task_waste": 0.016579388709478095
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 48.5901,
+    "cluster_workers": null,
+    "workers_availability": null
+  },
+  "assembled_output": [
+    {
+      "insight_type": "over_provisioned_executors",
+      "usd_cost_annual": 44723.070050534865,
+      "payload": {
+        "is_dynamic": true,
+        "cnt_task_runs": 100,
+        "time_span_days": 5,
+        "avg_utilization": 63,
+        "spark_executor_cores": 7,
+        "max_executors_suggestion": 618,
+        "avg_task_duration_minutes": 11,
+        "estimated_utilization_pct": 72,
+        "dynamic_max_executors_conf": 1200,
+        "dynamic_min_executors_conf": 0,
+        "has_executor_cores_changed": false,
+        "estimated_cost_reduction_pct": 12,
+        "estimated_duration_impact_pct": 16,
+        "estimated_duration_impact_minutes": 2
+      },
+      "recommendations": [
+        {
+          "config_key": "spark.dynamicAllocation.minExecutors",
+          "current_value": 0,
+          "suggested_value": 1,
+          "action": "set_spark_config",
+          "explanation": "Dynamic allocation is active (dynamic_allocation_enabled=true) with minExecutors currently confirmed at 0 (source: task_profile) and maxExecutors set to 1,200. When the cluster scales down to zero executors between task waves, the next wave must wait for fresh executor allocation before any work can begin \u2014 a cold-start stall that directly inflates wall-clock duration. Setting minExecutors=1 guarantees at least one executor is always warm and ready, eliminating that startup gap without meaningfully changing resource consumption.",
+          "expected_impact": "Eliminates cold-start executor wait at job startup; the idle_ratio for this run is 7.8%, so the recoverable idle time is bounded by that fraction of allocated time \u2014 the actual gain from this single floor change will be a small subset of that, but the protection against zero-executor stalls is categorical.",
+          "risk_note": "Holding one executor alive continuously adds a negligible, fixed cost (one executor out of a max of 1,200), but there is no functional risk."
+        }
+      ]
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.sql.adaptive.enabled",
+      "current_value": null,
+      "suggested_value": "true",
+      "action": "set_spark_config",
+      "status": "recommended",
+      "explanation": "spark.sql.adaptive.enabled is unset (confirmed not_set, defaulting to false on this YARN cluster), so the static shuffle partition count of 11,000 is applied uniformly at every stage regardless of actual data volume. Disk spill has grown +79.3% over 20 runs (first run: 3.17 GB, latest run: 5.68 GB, 20-run mean: 1.81 GB) with a monotonically increasing trend and no config changes, indicating that growing input data is inflating per-task working sets against a fixed partition count. Enabling AQE allows Spark to coalesce small shuffle partitions and split oversized ones at runtime, directly reducing the per-task data volume that is currently overflowing executor memory and landing on disk (this run: 2.04 GB disk spill, spill_ratio=0.000299).",
+      "expected_impact": "AQE cannot be arithmetically mapped to a cost saving fraction (no resource allocation changes), but by dynamically right-sizing partitions it is expected to slow or reverse the spill growth trajectory \u2014 the current run's disk spill of 2.04 GB sits at the 70th percentile of the 20-run baseline, and without intervention the trend projects continued growth toward the health-gate threshold.",
+      "risk_note": "AQE's partition coalescing can occasionally produce unexpectedly large merged partitions if skew is severe; with skew_ratio=0.237 on this run, monitor per-task peak memory after enabling to confirm no new OOM pressure."
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "over_provisioned_executors",
+        "id": null,
+        "type": "over_provisioned_executors",
+        "description": "over_provisioned_executors \u2014 estimated annual saving opportunity $44,723",
+        "insights_payload": {
+          "is_dynamic": true,
+          "cnt_task_runs": 100,
+          "time_span_days": 5,
+          "avg_utilization": 63,
+          "spark_executor_cores": 7,
+          "max_executors_suggestion": 618,
+          "avg_task_duration_minutes": 11,
+          "estimated_utilization_pct": 72,
+          "dynamic_max_executors_conf": 1200,
+          "dynamic_min_executors_conf": 0,
+          "has_executor_cores_changed": false,
+          "estimated_cost_reduction_pct": 12,
+          "estimated_duration_impact_pct": 16,
+          "estimated_duration_impact_minutes": 2
+        },
+        "source": "sql_rule",
+        "insight_id": 563322,
+        "usd_cost": 44723.070050534865,
+        "impact_cost": 3220061043.63851,
+        "impact_unit": "VCore",
+        "task_name": "spark-LoggerParquetConversion",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 208,
+          "task_sub_type": null,
+          "time_span_days": 9,
+          "shuffle_partitions": "11000",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 199
+        },
+        "source": "sql_rule",
+        "insight_id": 525935,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "spark-LoggerParquetConversion",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+        "title": "Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+        "description": "Disk spill has grown 79% over the last 20 runs (from ~3.2 GB to ~5.7 GB in the most recent run, with a 20-run mean of ~1.8 GB) despite zero configuration changes across the entire window. The current run spilled 2.04 GB to disk and 70.8 GB from memory. AQE is not enabled (spark.sql.adaptive.enabled is unset, defaulting to false on this YARN cluster), so the static shuffle partition count of 11,000 is the actual runtime count. Stage 2 (the read+aggregate stage with 29,861 tasks) is the sole spill source \u2014 all disk_bytes_spilled and memory_bytes_spilled are attributed there. The spill is not caused by too few partitions in the write stage (Stage 4 runs exactly 11,000 tasks, one per output file). The growing spill trajectory without any config or data-volume signal visible in the available metrics suggests the input data volume is quietly growing, pushing per-task working sets past the execution memory pool. This is a health-tier signal: efficiency right-sizing (including the SQL-detected over_provisioned_executors insight) should be deferred until spill is resolved.",
+        "evidence": "task__disk_bytes_spilled trend over 20 runs: [3.2GB, 0.1GB, 0.2GB, 0.05GB, 1.2GB, 0.3GB, 0.3GB, 1.6GB, 3.2GB, 1.2GB, 1.5GB, 3.9GB, 1.9GB, 1.9GB, 1.7GB, 1.7GB, 1.9GB, 2.4GB, 2.1GB, 5.7GB], trend=INCREASING, +79.3% first-to-last. Current run: disk_bytes_spilled=2,037,760,607 bytes, memory_bytes_spilled=70,766,297,088 bytes. Stage 2 metrics confirm: internal.metrics.diskBytesSpilled=2,037,760,607, internal.metrics.memoryBytesSpilled=70,766,297,088. spark.sql.adaptive.enabled=NOT_SET (false). spark.sql.shuffle.partitions=11000 (static, unchanged across 20 runs). executor_heap_memory=16 GB, executor_memory=20 GB, executor_cores=7 (per-slot heap \u2248 16/7 \u2248 2.3 GB).",
+        "confidence": 0.88,
+        "severity": "health",
+        "suggested_action": "Enable AQE (spark.sql.adaptive.enabled=true) so Spark can dynamically right-size shuffle partitions at runtime. With AQE off and a static 11,000-partition shuffle, per-task data size grows directly with input volume. Enabling AQE is the lowest-risk first step; it will also make the static spark.sql.shuffle.partitions value advisory rather than binding. If spill persists after enabling AQE, investigate whether executor_cores=7 is creating excessive memory contention per slot (per-slot execution memory \u2248 2.3 GB heap / 7 cores \u2248 330 MB, which is very tight for a wide-schema 180-column Parquet aggregation).",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+        "title": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+        "description": "Executor JVM GC time has increased monotonically over the last 20 runs (+9.3% first-to-last, current run at 86,952 seconds of fleet GC time, in the 80th percentile of the baseline). Critically, memory headroom is only 11.2% \u2014 well below the 20% fragility threshold \u2014 while gc_pressure is 5.6% (below the SQL rule threshold of 20%, so no SQL rule fired). This combination \u2014 moderate GC pressure + very tight memory headroom + active spill \u2014 is the precursor signature for a GC health event. The job is not in GC thrash today, but the trajectory is clear: as input volume grows (evidenced by the spill trend), the heap will be squeezed further and GC pressure will cross the health threshold. The GC collector in use is PS MarkSweep / PS Scavenge (parallel collector, confirmed from executor events), which is known to degrade non-linearly on heaps above ~16 GB under high allocation pressure.",
+        "evidence": "executors__jvm_gc_time trend over 20 runs: mean=75,570s, current=86,952s (80th percentile, z=1.05, band=ELEVATED), trend=INCREASING +9.3%. memory_headroom=0.112 (11.2%, below 20% fragility threshold). gc_pressure=0.056 (5.6%, below SQL threshold of 20%). has_spill=true. executor_heap_memory=16 GB. GC collector from executor events payload: 'gcType': 'PS MarkSweep,PS Scavenge'. Stage 4 task-level jvmGcTime distribution: p25=3,614ms, p50=6,640ms, p75=8,209ms, max=12,746ms per task.",
+        "confidence": 0.82,
+        "severity": "health",
+        "suggested_action": "Monitor gc_pressure across the next 3\u20135 runs. If the increasing trend continues, the primary lever is enabling AQE (see spill insight above) to reduce per-task working set size. If GC pressure crosses 10% after AQE is enabled, consider switching the GC collector from PS MarkSweep to G1GC via spark.executor.extraJavaOptions=-XX:+UseG1GC, which handles large heaps with high object churn significantly better than the parallel collector. Do not right-size executor memory downward while this trend is open.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+        "title": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+        "description": "Stage 2 (the 29,861-task read+aggregate stage) shows a confirmed skew event: average task duration 12s, P75=13s, but max=164s \u2014 a 13\u00d7 ratio between the worst task and the 75th percentile. This is the stage responsible for all spill. The skew event was captured in the run's insight events. Speculative execution (spark.speculation) is not configured, meaning the straggler task runs to completion without a parallel speculative attempt, directly extending Stage 2's wall-clock time. The skew_ratio for the run is 0.237 (just below the 0.25 SQL threshold, so no SQL rule fired). With 29,861 tasks and 2,137 executors, a single 164-second straggler at the tail of the stage adds measurable latency. The skew is input-side (FileSourceScanExec reading 215,783 Parquet files across 93 input paths), suggesting uneven file sizes rather than a data-value hot key.",
+        "evidence": "Skew insight event (id=7): avg task duration=12s, p75=13s, max=164s in Stage 2 (29,861 tasks). Stage 2 task duration distribution: [p0=48ms, p25=7.8s, p50=10.2s, p75=13.6s, p100=23s], max executorRunTime=131,865ms. skew_ratio=0.237. spark.speculation=NOT_SET. Input scan: 215,783 files across 93 paths, 6.1 TB. All spill (disk: 2.04 GB, memory: 70.8 GB) is in Stage 2.",
+        "confidence": 0.8,
+        "severity": "performance",
+        "suggested_action": "Investigate whether the 215,783 input Parquet files have highly uneven sizes (a few very large files dominate). If so, compact or repartition the input data to produce more uniform file sizes. As a complementary measure, enabling AQE (spark.sql.adaptive.enabled=true) will also activate AQE's skew-join handling for shuffle stages. Do not enable spark.speculation as a primary fix \u2014 it doubles resource consumption for the straggler task and masks the root cause.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "over_provisioned_executors",
+        "id": null,
+        "type": "over_provisioned_executors",
+        "description": "over_provisioned_executors \u2014 estimated annual saving opportunity $44,723",
+        "insights_payload": {
+          "is_dynamic": true,
+          "cnt_task_runs": 100,
+          "time_span_days": 5,
+          "avg_utilization": 63,
+          "spark_executor_cores": 7,
+          "max_executors_suggestion": 618,
+          "avg_task_duration_minutes": 11,
+          "estimated_utilization_pct": 72,
+          "dynamic_max_executors_conf": 1200,
+          "dynamic_min_executors_conf": 0,
+          "has_executor_cores_changed": false,
+          "estimated_cost_reduction_pct": 12,
+          "estimated_duration_impact_pct": 16,
+          "estimated_duration_impact_minutes": 2
+        },
+        "source": "sql_rule",
+        "insight_id": 563322,
+        "usd_cost": 44723.070050534865,
+        "impact_cost": 3220061043.63851,
+        "impact_unit": "VCore",
+        "task_name": "spark-LoggerParquetConversion",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 208,
+          "task_sub_type": null,
+          "time_span_days": 9,
+          "shuffle_partitions": "11000",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 199
+        },
+        "source": "sql_rule",
+        "insight_id": 525935,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "spark-LoggerParquetConversion",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+        "title": "Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+        "description": "Disk spill has grown 79% over the last 20 runs (from ~3.2 GB to ~5.7 GB in the most recent run, with a 20-run mean of ~1.8 GB) despite zero configuration changes across the entire window. The current run spilled 2.04 GB to disk and 70.8 GB from memory. AQE is not enabled (spark.sql.adaptive.enabled is unset, defaulting to false on this YARN cluster), so the static shuffle partition count of 11,000 is the actual runtime count. Stage 2 (the read+aggregate stage with 29,861 tasks) is the sole spill source \u2014 all disk_bytes_spilled and memory_bytes_spilled are attributed there. The spill is not caused by too few partitions in the write stage (Stage 4 runs exactly 11,000 tasks, one per output file). The growing spill trajectory without any config or data-volume signal visible in the available metrics suggests the input data volume is quietly growing, pushing per-task working sets past the execution memory pool. This is a health-tier signal: efficiency right-sizing (including the SQL-detected over_provisioned_executors insight) should be deferred until spill is resolved.",
+        "evidence": "task__disk_bytes_spilled trend over 20 runs: [3.2GB, 0.1GB, 0.2GB, 0.05GB, 1.2GB, 0.3GB, 0.3GB, 1.6GB, 3.2GB, 1.2GB, 1.5GB, 3.9GB, 1.9GB, 1.9GB, 1.7GB, 1.7GB, 1.9GB, 2.4GB, 2.1GB, 5.7GB], trend=INCREASING, +79.3% first-to-last. Current run: disk_bytes_spilled=2,037,760,607 bytes, memory_bytes_spilled=70,766,297,088 bytes. Stage 2 metrics confirm: internal.metrics.diskBytesSpilled=2,037,760,607, internal.metrics.memoryBytesSpilled=70,766,297,088. spark.sql.adaptive.enabled=NOT_SET (false). spark.sql.shuffle.partitions=11000 (static, unchanged across 20 runs). executor_heap_memory=16 GB, executor_memory=20 GB, executor_cores=7 (per-slot heap \u2248 16/7 \u2248 2.3 GB).",
+        "confidence": 0.88,
+        "severity": "health",
+        "suggested_action": "Enable AQE (spark.sql.adaptive.enabled=true) so Spark can dynamically right-size shuffle partitions at runtime. With AQE off and a static 11,000-partition shuffle, per-task data size grows directly with input volume. Enabling AQE is the lowest-risk first step; it will also make the static spark.sql.shuffle.partitions value advisory rather than binding. If spill persists after enabling AQE, investigate whether executor_cores=7 is creating excessive memory contention per slot (per-slot execution memory \u2248 2.3 GB heap / 7 cores \u2248 330 MB, which is very tight for a wide-schema 180-column Parquet aggregation).",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+        "title": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+        "description": "Executor JVM GC time has increased monotonically over the last 20 runs (+9.3% first-to-last, current run at 86,952 seconds of fleet GC time, in the 80th percentile of the baseline). Critically, memory headroom is only 11.2% \u2014 well below the 20% fragility threshold \u2014 while gc_pressure is 5.6% (below the SQL rule threshold of 20%, so no SQL rule fired). This combination \u2014 moderate GC pressure + very tight memory headroom + active spill \u2014 is the precursor signature for a GC health event. The job is not in GC thrash today, but the trajectory is clear: as input volume grows (evidenced by the spill trend), the heap will be squeezed further and GC pressure will cross the health threshold. The GC collector in use is PS MarkSweep / PS Scavenge (parallel collector, confirmed from executor events), which is known to degrade non-linearly on heaps above ~16 GB under high allocation pressure.",
+        "evidence": "executors__jvm_gc_time trend over 20 runs: mean=75,570s, current=86,952s (80th percentile, z=1.05, band=ELEVATED), trend=INCREASING +9.3%. memory_headroom=0.112 (11.2%, below 20% fragility threshold). gc_pressure=0.056 (5.6%, below SQL threshold of 20%). has_spill=true. executor_heap_memory=16 GB. GC collector from executor events payload: 'gcType': 'PS MarkSweep,PS Scavenge'. Stage 4 task-level jvmGcTime distribution: p25=3,614ms, p50=6,640ms, p75=8,209ms, max=12,746ms per task.",
+        "confidence": 0.82,
+        "severity": "health",
+        "suggested_action": "Monitor gc_pressure across the next 3\u20135 runs. If the increasing trend continues, the primary lever is enabling AQE (see spill insight above) to reduce per-task working set size. If GC pressure crosses 10% after AQE is enabled, consider switching the GC collector from PS MarkSweep to G1GC via spark.executor.extraJavaOptions=-XX:+UseG1GC, which handles large heaps with high object churn significantly better than the parallel collector. Do not right-size executor memory downward while this trend is open.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 4,
+        "kind": "discovery",
+        "identifier": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+        "title": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+        "description": "Stage 2 (the 29,861-task read+aggregate stage) shows a confirmed skew event: average task duration 12s, P75=13s, but max=164s \u2014 a 13\u00d7 ratio between the worst task and the 75th percentile. This is the stage responsible for all spill. The skew event was captured in the run's insight events. Speculative execution (spark.speculation) is not configured, meaning the straggler task runs to completion without a parallel speculative attempt, directly extending Stage 2's wall-clock time. The skew_ratio for the run is 0.237 (just below the 0.25 SQL threshold, so no SQL rule fired). With 29,861 tasks and 2,137 executors, a single 164-second straggler at the tail of the stage adds measurable latency. The skew is input-side (FileSourceScanExec reading 215,783 Parquet files across 93 input paths), suggesting uneven file sizes rather than a data-value hot key.",
+        "evidence": "Skew insight event (id=7): avg task duration=12s, p75=13s, max=164s in Stage 2 (29,861 tasks). Stage 2 task duration distribution: [p0=48ms, p25=7.8s, p50=10.2s, p75=13.6s, p100=23s], max executorRunTime=131,865ms. skew_ratio=0.237. spark.speculation=NOT_SET. Input scan: 215,783 files across 93 paths, 6.1 TB. All spill (disk: 2.04 GB, memory: 70.8 GB) is in Stage 2.",
+        "confidence": 0.8,
+        "severity": "performance",
+        "suggested_action": "Investigate whether the 215,783 input Parquet files have highly uneven sizes (a few very large files dominate). If so, compact or repartition the input data to produce more uniform file sizes. As a complementary measure, enabling AQE (spark.sql.adaptive.enabled=true) will also activate AQE's skew-join handling for shuffle stages. Do not enable spark.speculation as a primary fix \u2014 it doubles resource consumption for the straggler task and masks the root cause.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [],
+      "tier2_cluster": [
+        0
+      ],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        2,
+        3,
+        4
+      ],
+      "active_conflicts": [
+        "Insight 2 (discovery) asserts the health gate is open due to spill and recommends deferring insight 0 (over_provisioned_executors). However, the measured spill_ratio is 0.000299 \u2014 far below the 0.10 Tier 1 threshold \u2014 so the health gate does not open and insight 0 is not blocked. Insight 4 (skew) notes skew_ratio=0.237 which is below the 0.30 conflict threshold, so the executor-reduction recommendation in insight 0 is not blocked by the skew conflict rule either."
+      ],
+      "reasoning": "Applying the triage rules strictly against the measured run metrics: **Tier 1 thresholds are not met.** `spill_ratio` = 0.000299 (threshold: >0.10), `gc_pressure` = 0.056 (threshold: >0.20), `retried_task_waste` = 0.017 (threshold: >0.05), and `memory_headroom` = 0.112 without corroborating GC pressure or material spill \u2014 none of the Tier 1 gates open. Insight 2's narrative correctly identifies a worrying trend but the *current run's measured spill_ratio is 0.03% of I/O*, a rounding error, not a signal-corrupting pathology; its self-declared \"health-tier signal\" does not survive the magnitude test. Insight 3 similarly describes a precursor trajectory (GC at 5.6%, memory headroom at 11.2%) but neither threshold is breached today. Insight 4 reports skew_ratio=0.237, below the 0.25 SQL threshold and the 0.30 conflict threshold, so it is a Tier 4 tuning observation. With no health gate open, insight 0 (over_provisioned_executors, $44,723 annual saving) is a legitimate Tier 2 cluster right-sizing recommendation \u2014 `idle_ratio`=0.078 is low but the over-provisioned-executor finding is SQL-detected and cost-quantified. Insight 1 (task_profile) is informational context. Insights 2, 3, and 4 are all Tier 4 tuning/monitoring observations: the spill and GC trends are real and worth watching, and the skew warrants speculative-execution consideration, but none cross their respective Tier 1 thresholds in this run. The conflict between insight 2's gate assertion and the actual spill_ratio is flagged as an active conflict."
+    },
+    "tiered_insights": {
+      "tier1": [],
+      "tier2": [
+        {
+          "index": 0,
+          "kind": "sql",
+          "identifier": "over_provisioned_executors",
+          "id": null,
+          "type": "over_provisioned_executors",
+          "description": "over_provisioned_executors \u2014 estimated annual saving opportunity $44,723",
+          "insights_payload": {
+            "is_dynamic": true,
+            "cnt_task_runs": 100,
+            "time_span_days": 5,
+            "avg_utilization": 63,
+            "spark_executor_cores": 7,
+            "max_executors_suggestion": 618,
+            "avg_task_duration_minutes": 11,
+            "estimated_utilization_pct": 72,
+            "dynamic_max_executors_conf": 1200,
+            "dynamic_min_executors_conf": 0,
+            "has_executor_cores_changed": false,
+            "estimated_cost_reduction_pct": 12,
+            "estimated_duration_impact_pct": 16,
+            "estimated_duration_impact_minutes": 2
+          },
+          "source": "sql_rule",
+          "insight_id": 563322,
+          "usd_cost": 44723.070050534865,
+          "impact_cost": 3220061043.63851,
+          "impact_unit": "VCore",
+          "task_name": "spark-LoggerParquetConversion",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        }
+      ],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 2,
+          "kind": "discovery",
+          "identifier": "Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+          "title": "Spill Trending Sharply Upward \u2014 Partition Count Likely Exhausted",
+          "description": "Disk spill has grown 79% over the last 20 runs (from ~3.2 GB to ~5.7 GB in the most recent run, with a 20-run mean of ~1.8 GB) despite zero configuration changes across the entire window. The current run spilled 2.04 GB to disk and 70.8 GB from memory. AQE is not enabled (spark.sql.adaptive.enabled is unset, defaulting to false on this YARN cluster), so the static shuffle partition count of 11,000 is the actual runtime count. Stage 2 (the read+aggregate stage with 29,861 tasks) is the sole spill source \u2014 all disk_bytes_spilled and memory_bytes_spilled are attributed there. The spill is not caused by too few partitions in the write stage (Stage 4 runs exactly 11,000 tasks, one per output file). The growing spill trajectory without any config or data-volume signal visible in the available metrics suggests the input data volume is quietly growing, pushing per-task working sets past the execution memory pool. This is a health-tier signal: efficiency right-sizing (including the SQL-detected over_provisioned_executors insight) should be deferred until spill is resolved.",
+          "evidence": "task__disk_bytes_spilled trend over 20 runs: [3.2GB, 0.1GB, 0.2GB, 0.05GB, 1.2GB, 0.3GB, 0.3GB, 1.6GB, 3.2GB, 1.2GB, 1.5GB, 3.9GB, 1.9GB, 1.9GB, 1.7GB, 1.7GB, 1.9GB, 2.4GB, 2.1GB, 5.7GB], trend=INCREASING, +79.3% first-to-last. Current run: disk_bytes_spilled=2,037,760,607 bytes, memory_bytes_spilled=70,766,297,088 bytes. Stage 2 metrics confirm: internal.metrics.diskBytesSpilled=2,037,760,607, internal.metrics.memoryBytesSpilled=70,766,297,088. spark.sql.adaptive.enabled=NOT_SET (false). spark.sql.shuffle.partitions=11000 (static, unchanged across 20 runs). executor_heap_memory=16 GB, executor_memory=20 GB, executor_cores=7 (per-slot heap \u2248 16/7 \u2248 2.3 GB).",
+          "confidence": 0.88,
+          "severity": "health",
+          "suggested_action": "Enable AQE (spark.sql.adaptive.enabled=true) so Spark can dynamically right-size shuffle partitions at runtime. With AQE off and a static 11,000-partition shuffle, per-task data size grows directly with input volume. Enabling AQE is the lowest-risk first step; it will also make the static spark.sql.shuffle.partitions value advisory rather than binding. If spill persists after enabling AQE, investigate whether executor_cores=7 is creating excessive memory contention per slot (per-slot execution memory \u2248 2.3 GB heap / 7 cores \u2248 330 MB, which is very tight for a wide-schema 180-column Parquet aggregation).",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+          "title": "Executor GC Monotonically Increasing Over 20 Runs \u2014 Proactive Memory Warning",
+          "description": "Executor JVM GC time has increased monotonically over the last 20 runs (+9.3% first-to-last, current run at 86,952 seconds of fleet GC time, in the 80th percentile of the baseline). Critically, memory headroom is only 11.2% \u2014 well below the 20% fragility threshold \u2014 while gc_pressure is 5.6% (below the SQL rule threshold of 20%, so no SQL rule fired). This combination \u2014 moderate GC pressure + very tight memory headroom + active spill \u2014 is the precursor signature for a GC health event. The job is not in GC thrash today, but the trajectory is clear: as input volume grows (evidenced by the spill trend), the heap will be squeezed further and GC pressure will cross the health threshold. The GC collector in use is PS MarkSweep / PS Scavenge (parallel collector, confirmed from executor events), which is known to degrade non-linearly on heaps above ~16 GB under high allocation pressure.",
+          "evidence": "executors__jvm_gc_time trend over 20 runs: mean=75,570s, current=86,952s (80th percentile, z=1.05, band=ELEVATED), trend=INCREASING +9.3%. memory_headroom=0.112 (11.2%, below 20% fragility threshold). gc_pressure=0.056 (5.6%, below SQL threshold of 20%). has_spill=true. executor_heap_memory=16 GB. GC collector from executor events payload: 'gcType': 'PS MarkSweep,PS Scavenge'. Stage 4 task-level jvmGcTime distribution: p25=3,614ms, p50=6,640ms, p75=8,209ms, max=12,746ms per task.",
+          "confidence": 0.82,
+          "severity": "health",
+          "suggested_action": "Monitor gc_pressure across the next 3\u20135 runs. If the increasing trend continues, the primary lever is enabling AQE (see spill insight above) to reduce per-task working set size. If GC pressure crosses 10% after AQE is enabled, consider switching the GC collector from PS MarkSweep to G1GC via spark.executor.extraJavaOptions=-XX:+UseG1GC, which handles large heaps with high object churn significantly better than the parallel collector. Do not right-size executor memory downward while this trend is open.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 4,
+          "kind": "discovery",
+          "identifier": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+          "title": "Stage 2 Skew: Max Task Duration 13\u00d7 the P75 \u2014 Speculative Execution Not Enabled",
+          "description": "Stage 2 (the 29,861-task read+aggregate stage) shows a confirmed skew event: average task duration 12s, P75=13s, but max=164s \u2014 a 13\u00d7 ratio between the worst task and the 75th percentile. This is the stage responsible for all spill. The skew event was captured in the run's insight events. Speculative execution (spark.speculation) is not configured, meaning the straggler task runs to completion without a parallel speculative attempt, directly extending Stage 2's wall-clock time. The skew_ratio for the run is 0.237 (just below the 0.25 SQL threshold, so no SQL rule fired). With 29,861 tasks and 2,137 executors, a single 164-second straggler at the tail of the stage adds measurable latency. The skew is input-side (FileSourceScanExec reading 215,783 Parquet files across 93 input paths), suggesting uneven file sizes rather than a data-value hot key.",
+          "evidence": "Skew insight event (id=7): avg task duration=12s, p75=13s, max=164s in Stage 2 (29,861 tasks). Stage 2 task duration distribution: [p0=48ms, p25=7.8s, p50=10.2s, p75=13.6s, p100=23s], max executorRunTime=131,865ms. skew_ratio=0.237. spark.speculation=NOT_SET. Input scan: 215,783 files across 93 paths, 6.1 TB. All spill (disk: 2.04 GB, memory: 70.8 GB) is in Stage 2.",
+          "confidence": 0.8,
+          "severity": "performance",
+          "suggested_action": "Investigate whether the 215,783 input Parquet files have highly uneven sizes (a few very large files dominate). If so, compact or repartition the input data to produce more uniform file sizes. As a complementary measure, enabling AQE (spark.sql.adaptive.enabled=true) will also activate AQE's skew-join handling for shuffle stages. Do not enable spark.speculation as a primary fix \u2014 it doubles resource consumption for the straggler task and masks the root cause.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "d009084b7da9",
+    "historical_runs_count": 20,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "test_runs",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": [
+      {
+        "config_key": "spark.dynamicAllocation.maxExecutors",
+        "action": "set_spark_config",
+        "suggested_value": 618,
+        "current_value": 1200,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_executors",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_executors",
+        "insight_id": null,
+        "insight_ref": null
+      }
+    ]
+  }
+}

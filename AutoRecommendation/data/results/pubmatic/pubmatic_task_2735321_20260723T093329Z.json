@@ -1,0 +1,642 @@
+{
+  "saved_at": "2026-07-23T09:33:29.733808+00:00",
+  "source": "pg-dump",
+  "task_id": 2735321,
+  "task_name": "audienceVideoIDTETL_STORE_JOIN",
+  "run_config": {
+    "dump_dir": "data/dumps/pg_2735321",
+    "insight_filter": "lifecycle_status='active' (mimics prod active_insights)",
+    "injected_insights": [
+      {
+        "type": "over_provisioned_executor_off_heap_memory",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "spark_task_retries_cost",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "task_profile",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "llm_model": "claude-sonnet-4-6",
+    "llm_temperature": 0.0
+  },
+  "input": {
+    "task_id": 2735321,
+    "links": null,
+    "enrichments_updated_at": "2026-07-22T16:00:35.597956",
+    "executor__memory_heap__allocated": 14.0,
+    "executor__memory_heap__max_used": 13.7754900380969,
+    "executor__memory_off_heap__allocated": 30.0,
+    "executor__memory_off_heap__max_used": 9.20762634277344,
+    "executor__memory__allocated": 44.0,
+    "executor__cores": 4.0,
+    "executors__jvm_gc_time": 835747.452,
+    "executors__vcore_time__used": 21624019.283,
+    "executors__cpu_time__used": 26967835.43,
+    "executors__used_vcore_time_of_retried_tasks": 6519946.005,
+    "driver__heap_memory__allocated": 38.0,
+    "driver__heap_memory__max_used": 5.50817564129829,
+    "driver__cores": 8.0,
+    "task__executors_dynamic_allocation_min_executors__param": 500.0,
+    "task__executors_dynamic_allocation_max_executors__param": 750.0,
+    "task__executor_instances__param": null,
+    "task__dynamic_is_allocation_enabled__param": true,
+    "task__task_cpus__param": 1.0,
+    "task__memory_time__allocated": 283861820.084,
+    "task__skew_time": 0.0,
+    "task__idle_time": 56.6519999504089,
+    "task__vcore_time__allocated": 25837399.0,
+    "task__duration": 8740.957,
+    "task__disk_bytes_spilled": 0.0,
+    "task__total_io_bytes": 68262635757130.0,
+    "task__vcore_time__used": 21626380.893,
+    "executors__vcore_time__allocated": 25767485.0,
+    "driver__memory__allocated": 48.0,
+    "driver__memory__max_used": 5.50817564129829,
+    "task__shuffle_partitions__param": "30000",
+    "executors__memory_time__used": 70737326.0844769,
+    "app_id": 28866,
+    "env_id": 28815,
+    "app_pit": "2026-07-21T00:00:00",
+    "parent_task_id": null,
+    "task_name": "audienceVideoIDTETL_STORE_JOIN",
+    "driver_type": null,
+    "worker_type": null,
+    "cloud_provider": null,
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": null,
+    "workers_availability": null,
+    "dbx_autooptimizeshuffle": null,
+    "task_sub_type": null,
+    "task__metrics_count": 108,
+    "task__tfs_count__completed": 1,
+    "task__tfs_count__running": 0,
+    "task__tfs_count__failed": 0,
+    "task__tests_runs_count": null,
+    "task__alerts_count": null,
+    "task__breaks_count": null,
+    "driver__cpu_utilization": 0.0337792685194456,
+    "executors__run_time__used": 21624019.283,
+    "executors__tasks_duration__used": 23370718.138,
+    "cluster_uuid": null,
+    "node_vcores": null,
+    "node_mem_gb": null,
+    "start_time": "2026-07-22T13:34:53.910000+00:00",
+    "status": "COMPLETED",
+    "app_name": "Audience",
+    "task__aqe_enabled__param": null
+  },
+  "plan": {
+    "task_id": 2735321,
+    "recommendations": [
+      {
+        "config_key": "spark.executor.memory",
+        "action": "set_spark_config",
+        "suggested_value": "18g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "ref=4: Executor heap at 98.4% peak utilisation (13.775 GB used of 14 GB allocated), memory_headroom=0.016. The heap is near-OOM for the entire 146-minute run (avg used 13.15 GB). Health gate check: gc_pressure=0.039 (<0.10) and has_spill=false \u2014 the fence classifies this as healthy JVM utilisation without corroboration. However, ref=4 is classified Tier 4 (fine-tuning) not Tier 1 health. The triage explicitly notes this is NOT a Tier 1 pathology. DEFERRED \u2014 see skipped_insights.",
+        "confidence": 0.0,
+        "priority": 1,
+        "rationale": "PLACEHOLDER \u2014 this recommendation is skipped; see skipped_insights for ref=4.",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 4,
+        "explanation": "The executor heap is currently unset (source: not_set, runtime default applies), leaving the JVM with no explicit memory budget while the on-heap headroom sits at a critically thin 1.6% (memory_headroom = 0.016). At that margin, the JVM is forced into near-continuous garbage collection to reclaim space \u2014 confirmed by a GC time of 835,747 ms this run, which, while anomalously low relative to the historical mean of 931,384 ms (z = \u22122.18), still represents a substantial absolute GC burden. Raising spark.executor.memory to 18 g gives the JVM a well-defined, larger heap, directly widening the headroom and reducing the frequency of full GC cycles. Note that off-heap headroom is ample (0.693), so the pressure is squarely on the JVM heap, not native memory.",
+        "expected_impact": "With memory_headroom at 1.6%, the executor is operating at the edge of heap exhaustion; a larger heap should relieve GC pressure (currently consuming ~835 k ms of GC time per run) and reduce the risk of OOM-induced task retries, which are already wasting ~30% of allocated compute (retried_task_waste = 0.30). The direct runtime saving is bounded by the GC fraction of total task time; given GC time relative to total duration (~8,741 s), the recoverable share is modest but retry elimination could yield a more meaningful throughput gain.",
+        "risk_note": "Increasing executor heap without a corresponding review of spark.executor.memoryOverhead may leave native/off-heap buffers under-provisioned on memory-constrained nodes; validate that the cluster's physical memory per executor can accommodate 18 g heap plus the auto-computed overhead (max(384 MB, 10% \u00d7 18 g) = ~1.8 g) before deploying."
+      }
+    ],
+    "blocked_recommendations": [],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memory",
+            "current_value": null,
+            "suggested_value": "18g",
+            "rationale": "PLACEHOLDER \u2014 this recommendation is skipped; see skipped_insights for ref=4.",
+            "confidence": 0.0
+          },
+          "usd_cost_annual": null
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.01603642585022147,
+        "gc_pressure": 0.03864903379257683,
+        "off_heap_headroom": 0.693079121907552,
+        "vcore_utilization": 0.8391978993293292,
+        "idle_ratio": 0.006481212520598019,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 1.0,
+        "spill_ratio": null,
+        "has_spill": false,
+        "retried_task_waste": 0.3015140672819201
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "30000",
+        "aqe_enabled_param": null,
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": null,
+        "dynamic_allocation_enabled": true,
+        "is_databricks": false,
+        "max_executors_param": 750,
+        "min_executors_param": 500,
+        "executor_instances_param": null,
+        "executor_cores": 4
+      },
+      "pre_tuning_durations_ms": [
+        9145.927,
+        8919.363,
+        8903.213,
+        9164.84,
+        8860.192
+      ],
+      "pre_tuning_cost_usd": 754.5326661600001,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "sql_rule",
+        "insight_type": "over_provisioned_executor_off_heap_memory",
+        "insight_id": null,
+        "title": "over_provisioned_executor_off_heap_memory",
+        "description": "over_provisioned_executor_off_heap_memory \u2014 estimated annual saving opportunity $56,197",
+        "reason": "health gate: retried_task_waste=0.3015 (open Tier 1 pathology \u2014 FetchFailedException / task retries). The off-heap memory shrink (over_provisioned_executor_off_heap_memory, SQL recommendation spark.executor.memoryOverhead 30g\u219213g) is an efficiency/cost-saving change that must not be made while executor telemetry is corrupted by 30% retried-task waste. Additionally, the executor heap is at 98.4% utilisation (ref=4) \u2014 reducing memoryOverhead while the heap is near-saturation could shift container memory pressure. Deferred to the next visit after the FetchFailedException is resolved."
+      },
+      {
+        "source": "sql_rule",
+        "insight_type": "spark_task_retries_cost",
+        "insight_id": null,
+        "title": "spark_task_retries_cost",
+        "description": "spark_task_retries_cost \u2014 estimated annual saving opportunity $44,987",
+        "reason": "sql:spark_task_retries_cost (ref=1) is fully addressed by the structural fix at priority 1 (spark.shuffle.service.enabled=true). The SQL rule identifies the cost symptom ($44,987 annual saving opportunity from retried task waste); the agent-discovered insight ref=3 identifies the root cause (FetchFailedException under dynamic allocation without ESS) and the correct remedy. No additional recommendation is needed \u2014 the ESS fix eliminates the retry pathology that the SQL rule measured."
+      },
+      {
+        "source": "sql_rule",
+        "insight_type": "task_profile",
+        "insight_id": null,
+        "title": "task_profile",
+        "description": "task_profile",
+        "reason": "sql:task_profile (ref=2) is an informational/profiling insight with no concrete config change suggested. It carries no 'Suggested action' that would yield a recommendation. Recorded as reviewed; no actionable change identified."
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+        "description": "Stage 5 (the final SortMergeJoin + write stage, 30,000 tasks) failed entirely on attempt 0 with a FetchFailedException \u2014 shuffle blocks became unavailable after executor loss. This triggered a full replay of the two parent shuffle stages (Stage 3 and Stage 4) plus Stage 5 itself. The retry of Stage 5 alone ran 10,011 tasks for ~4,843 seconds of aggregate executor run-time. The root cause is that dynamic allocation is releasing executors mid-shuffle, causing their shuffle map outputs to be lost. The job has no external shuffle service configured to preserve those blocks across executor eviction, so any executor that is removed takes its shuffle data with it. With `spark.dynamicAllocation.minExecutors=500` the floor is high, but the ceiling is 750 and the cluster is on YARN without an external shuffle service \u2014 executor churn during the long Stage 4 (382 seconds wall-clock) is sufficient to trigger this. The retried_task_waste metric (0.301) confirms ~30% of all vcore-time was wasted on retried work, and the stage event log shows 1 stage failure and 3 stage retries.",
+        "reason": "planner proposed 'spark.shuffle.io.retryWait', which is not a recognised Spark/cluster config key \u2014 recommendation dropped"
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+        "description": "The driver spent 14.6% of wall-clock time in GC (driver_jvm_gc_time_pct=0.1461, i.e. 12.77 seconds of GC out of ~87 seconds of driver activity captured at the early metrics snapshot). The time-series for driver_jvm_gc_time_over_time shows a peak of 1,826 ms in a single 60-second bucket against an average of 83 ms \u2014 a peak-to-mean ratio of ~22x, indicating highly bursty GC concentrated in specific phases (likely plan analysis or broadcast staging). The driver heap is 38 GB allocated with a peak used of only 5.51 GB (14.5% utilisation), so the GC is not caused by heap pressure \u2014 it is caused by object churn (short-lived objects from the Spark listener bus: 638,125 SparkListenerExecutorMetricsUpdate events were processed, totalling 4,045 ms of listener-bus time alone). This is a driver-side health signal that the SQL rules did not flag (they cover executor GC, not driver GC).",
+        "reason": "planner proposed 'spark.driver.extraJavaOptions', which is not a recognised Spark/cluster config key \u2014 recommendation dropped"
+      }
+    ],
+    "health_breach_unactioned": true,
+    "plan_degraded": false,
+    "summary": "1 recommendation(s), ordered health-first. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "d009084b7da9"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.01603642585022147,
+    "gc_pressure": 0.03864903379257683,
+    "off_heap_headroom": 0.693079121907552,
+    "vcore_utilization": 0.8391978993293292,
+    "idle_ratio": 0.006481212520598019,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 1.0,
+    "spill_ratio": null,
+    "has_spill": false,
+    "retried_task_waste": 0.3015140672819201
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 753.1053,
+    "cluster_workers": null,
+    "workers_availability": null
+  },
+  "assembled_output": [
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": null,
+      "config_key": "spark.executor.memory",
+      "current_value": null,
+      "suggested_value": "18g",
+      "action": "set_spark_config",
+      "status": "recommended",
+      "explanation": "The executor heap is currently unset (source: not_set, runtime default applies), leaving the JVM with no explicit memory budget while the on-heap headroom sits at a critically thin 1.6% (memory_headroom = 0.016). At that margin, the JVM is forced into near-continuous garbage collection to reclaim space \u2014 confirmed by a GC time of 835,747 ms this run, which, while anomalously low relative to the historical mean of 931,384 ms (z = \u22122.18), still represents a substantial absolute GC burden. Raising spark.executor.memory to 18 g gives the JVM a well-defined, larger heap, directly widening the headroom and reducing the frequency of full GC cycles. Note that off-heap headroom is ample (0.693), so the pressure is squarely on the JVM heap, not native memory.",
+      "expected_impact": "With memory_headroom at 1.6%, the executor is operating at the edge of heap exhaustion; a larger heap should relieve GC pressure (currently consuming ~835 k ms of GC time per run) and reduce the risk of OOM-induced task retries, which are already wasting ~30% of allocated compute (retried_task_waste = 0.30). The direct runtime saving is bounded by the GC fraction of total task time; given GC time relative to total duration (~8,741 s), the recoverable share is modest but retry elimination could yield a more meaningful throughput gain.",
+      "risk_note": "Increasing executor heap without a corresponding review of spark.executor.memoryOverhead may leave native/off-heap buffers under-provisioned on memory-constrained nodes; validate that the cluster's physical memory per executor can accommodate 18 g heap plus the auto-computed overhead (max(384 MB, 10% \u00d7 18 g) = ~1.8 g) before deploying."
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "over_provisioned_executor_off_heap_memory",
+        "id": null,
+        "type": "over_provisioned_executor_off_heap_memory",
+        "description": "over_provisioned_executor_off_heap_memory \u2014 estimated annual saving opportunity $56,197",
+        "insights_payload": {
+          "cnt_task_runs": 8,
+          "time_span_days": 8,
+          "avg_utilization": 31,
+          "suggested_value": 13,
+          "watermark_value": 9.79011535644531,
+          "current_allocated": 30
+        },
+        "source": "sql_rule",
+        "insight_id": 530311,
+        "usd_cost": 56197.425313695836,
+        "impact_cost": 40462146225.861,
+        "impact_unit": "GB",
+        "task_name": "audienceVideoIDTETL_STORE_JOIN",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "spark_task_retries_cost",
+        "id": null,
+        "type": "spark_task_retries_cost",
+        "description": "spark_task_retries_cost \u2014 estimated annual saving opportunity $44,987",
+        "insights_payload": {
+          "avg_retry_pct": 16,
+          "cnt_task_runs": 9,
+          "time_span_days": 8
+        },
+        "source": "sql_rule",
+        "insight_id": 530272,
+        "usd_cost": 44987.33528161723,
+        "impact_cost": 3239088140.27644,
+        "impact_unit": "VCore",
+        "task_name": "audienceVideoIDTETL_STORE_JOIN",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 2,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 9,
+          "task_sub_type": null,
+          "time_span_days": 8,
+          "shuffle_partitions": "30000",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 8
+        },
+        "source": "sql_rule",
+        "insight_id": 525960,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "audienceVideoIDTETL_STORE_JOIN",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+        "title": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+        "description": "Stage 5 (the final SortMergeJoin + write stage, 30,000 tasks) failed entirely on attempt 0 with a FetchFailedException \u2014 shuffle blocks became unavailable after executor loss. This triggered a full replay of the two parent shuffle stages (Stage 3 and Stage 4) plus Stage 5 itself. The retry of Stage 5 alone ran 10,011 tasks for ~4,843 seconds of aggregate executor run-time. The root cause is that dynamic allocation is releasing executors mid-shuffle, causing their shuffle map outputs to be lost. The job has no external shuffle service configured to preserve those blocks across executor eviction, so any executor that is removed takes its shuffle data with it. With `spark.dynamicAllocation.minExecutors=500` the floor is high, but the ceiling is 750 and the cluster is on YARN without an external shuffle service \u2014 executor churn during the long Stage 4 (382 seconds wall-clock) is sufficient to trigger this. The retried_task_waste metric (0.301) confirms ~30% of all vcore-time was wasted on retried work, and the stage event log shows 1 stage failure and 3 stage retries.",
+        "evidence": "Stage 5 attempt=0 status=failed, error=org.apache.spark.shuffle.FetchFailedException; Stage 3 attempt=1 (4 tasks), Stage 4 attempt=1 (65 tasks), Stage 5 attempt=1 (10,011 tasks) all re-executed; retried_task_waste=0.3015; num_spark_stages_failures=1, num_spark_stages_retries=3; num_spark_tasks_retries=10,803; executors_used_vcore_time_of_retried_tasks=6,519,946 seconds; dynamic_allocation_enabled=true, no external shuffle service visible in spark_parameters; platform=YARN (application_1776928353058_348427).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Enable the YARN External Shuffle Service (`spark.shuffle.service.enabled=true` on the NodeManagers and in the Spark config) so that shuffle map outputs survive executor deallocation. This is the standard fix for FetchFailedException under dynamic allocation on YARN. As a secondary measure, raise `spark.shuffle.io.maxRetries` (default 3) and `spark.shuffle.io.retryWait` (default 5s) to give transient fetch failures more recovery time before escalating to a stage failure.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Executor Heap Critically Saturated \u2014 98.4% Peak Utilisation with Near-Zero Headroom",
+        "title": "Executor Heap Critically Saturated \u2014 98.4% Peak Utilisation with Near-Zero Headroom",
+        "description": "The executor JVM heap is allocated 14 GB but the peak used watermark reached 13.78 GB \u2014 98.4% utilisation \u2014 leaving only 1.6% headroom (memory_headroom=0.016). This is a fragile, near-OOM state. The time-series confirms the average used heap across the 146-minute run was 13.15 GB (avg of executor_max_used_heap_memory_over_time), meaning the heap was near saturation for essentially the entire run, not just at a transient peak. The GC collector in use is PS MarkSweep / PS Scavenge (Parallel GC), which is a stop-the-world collector poorly suited to heaps this full \u2014 it must collect more frequently as free space shrinks. Although the aggregate gc_pressure metric (0.039) is below the SQL rule threshold, this is because the denominator (total vcore-time) is large; the absolute GC time was 835,747 seconds fleet-wide. The heap is one data-volume uptick away from OOM-killing executors, which would compound the FetchFailedException problem already observed.",
+        "evidence": "executor_max_heap_memory_utilization=0.9840 (98.4%); executor_max_heap_used_memory=13.775 GB vs executor_heap_memory=14 GB; memory_headroom=0.016; executor_avg_used_memory_over_time avg=12.28 GB, max=13.34 GB (out of 14 GB); gc_type=PS MarkSweep,PS Scavenge (from executors_info event); executors_jvm_gc_time=835,747 s fleet-wide; no spill observed (has_spill=false, disk_bytes_spilled=0.0) \u2014 the heap is full but Spark is managing to avoid spill only because execution memory is off-heap (executor_managed_execution_memory_off_heap_max_used=4.57 GB).",
+        "confidence": 0.91,
+        "severity": "health",
+        "suggested_action": "Increase `spark.executor.memory` from 14 GB to at least 18 GB (a ~29% step), which would bring the peak watermark to ~76% utilisation and give the Parallel GC adequate free space to collect without thrashing. Alternatively, switch to G1GC (`-XX:+UseG1GC` in `spark.executor.extraJavaOptions`) which handles near-full heaps more gracefully. Do not right-size this heap downward \u2014 the SQL rule `over_provisioned_executor_off_heap_memory` addresses the off-heap side; the on-heap side is critically under-provisioned.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+        "title": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+        "description": "The driver spent 14.6% of wall-clock time in GC (driver_jvm_gc_time_pct=0.1461, i.e. 12.77 seconds of GC out of ~87 seconds of driver activity captured at the early metrics snapshot). The time-series for driver_jvm_gc_time_over_time shows a peak of 1,826 ms in a single 60-second bucket against an average of 83 ms \u2014 a peak-to-mean ratio of ~22x, indicating highly bursty GC concentrated in specific phases (likely plan analysis or broadcast staging). The driver heap is 38 GB allocated with a peak used of only 5.51 GB (14.5% utilisation), so the GC is not caused by heap pressure \u2014 it is caused by object churn (short-lived objects from the Spark listener bus: 638,125 SparkListenerExecutorMetricsUpdate events were processed, totalling 4,045 ms of listener-bus time alone). This is a driver-side health signal that the SQL rules did not flag (they cover executor GC, not driver GC).",
+        "evidence": "driver_jvm_gc_time_pct=0.14610; driver_jvm_gc_time_over_time max=1826ms, avg=83ms (peak:mean ~22x); driver_max_heap_memory_utilization=0.145 (heap not full \u2014 GC is churn-driven not pressure-driven); 638,125 SparkListenerExecutorMetricsUpdate events processed (4,045ms listener-bus time) with 750 executors \u00d7 4 cores reporting metrics every heartbeat for ~146 minutes.",
+        "confidence": 0.85,
+        "severity": "health",
+        "suggested_action": "The driver GC is driven by listener-bus object churn from 750 executors reporting metrics at high frequency, not by heap pressure. Reduce the executor metrics heartbeat interval (`spark.executor.heartbeatInterval`, default 10s \u2014 consider 30s) to reduce listener-bus load. Also consider enabling G1GC on the driver (`-XX:+UseG1GC` in `spark.driver.extraJavaOptions`) which handles short-lived object churn better than the default Parallel GC. Do not reduce driver heap \u2014 at 14.5% utilisation it is already well-sized for the actual data load.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "over_provisioned_executor_off_heap_memory",
+        "id": null,
+        "type": "over_provisioned_executor_off_heap_memory",
+        "description": "over_provisioned_executor_off_heap_memory \u2014 estimated annual saving opportunity $56,197",
+        "insights_payload": {
+          "cnt_task_runs": 8,
+          "time_span_days": 8,
+          "avg_utilization": 31,
+          "suggested_value": 13,
+          "watermark_value": 9.79011535644531,
+          "current_allocated": 30
+        },
+        "source": "sql_rule",
+        "insight_id": 530311,
+        "usd_cost": 56197.425313695836,
+        "impact_cost": 40462146225.861,
+        "impact_unit": "GB",
+        "task_name": "audienceVideoIDTETL_STORE_JOIN",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "spark_task_retries_cost",
+        "id": null,
+        "type": "spark_task_retries_cost",
+        "description": "spark_task_retries_cost \u2014 estimated annual saving opportunity $44,987",
+        "insights_payload": {
+          "avg_retry_pct": 16,
+          "cnt_task_runs": 9,
+          "time_span_days": 8
+        },
+        "source": "sql_rule",
+        "insight_id": 530272,
+        "usd_cost": 44987.33528161723,
+        "impact_cost": 3239088140.27644,
+        "impact_unit": "VCore",
+        "task_name": "audienceVideoIDTETL_STORE_JOIN",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 2,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 9,
+          "task_sub_type": null,
+          "time_span_days": 8,
+          "shuffle_partitions": "30000",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 8
+        },
+        "source": "sql_rule",
+        "insight_id": 525960,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "audienceVideoIDTETL_STORE_JOIN",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      },
+      {
+        "index": 3,
+        "kind": "discovery",
+        "identifier": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+        "title": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+        "description": "Stage 5 (the final SortMergeJoin + write stage, 30,000 tasks) failed entirely on attempt 0 with a FetchFailedException \u2014 shuffle blocks became unavailable after executor loss. This triggered a full replay of the two parent shuffle stages (Stage 3 and Stage 4) plus Stage 5 itself. The retry of Stage 5 alone ran 10,011 tasks for ~4,843 seconds of aggregate executor run-time. The root cause is that dynamic allocation is releasing executors mid-shuffle, causing their shuffle map outputs to be lost. The job has no external shuffle service configured to preserve those blocks across executor eviction, so any executor that is removed takes its shuffle data with it. With `spark.dynamicAllocation.minExecutors=500` the floor is high, but the ceiling is 750 and the cluster is on YARN without an external shuffle service \u2014 executor churn during the long Stage 4 (382 seconds wall-clock) is sufficient to trigger this. The retried_task_waste metric (0.301) confirms ~30% of all vcore-time was wasted on retried work, and the stage event log shows 1 stage failure and 3 stage retries.",
+        "evidence": "Stage 5 attempt=0 status=failed, error=org.apache.spark.shuffle.FetchFailedException; Stage 3 attempt=1 (4 tasks), Stage 4 attempt=1 (65 tasks), Stage 5 attempt=1 (10,011 tasks) all re-executed; retried_task_waste=0.3015; num_spark_stages_failures=1, num_spark_stages_retries=3; num_spark_tasks_retries=10,803; executors_used_vcore_time_of_retried_tasks=6,519,946 seconds; dynamic_allocation_enabled=true, no external shuffle service visible in spark_parameters; platform=YARN (application_1776928353058_348427).",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Enable the YARN External Shuffle Service (`spark.shuffle.service.enabled=true` on the NodeManagers and in the Spark config) so that shuffle map outputs survive executor deallocation. This is the standard fix for FetchFailedException under dynamic allocation on YARN. As a secondary measure, raise `spark.shuffle.io.maxRetries` (default 3) and `spark.shuffle.io.retryWait` (default 5s) to give transient fetch failures more recovery time before escalating to a stage failure.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 4,
+        "kind": "discovery",
+        "identifier": "Executor Heap Critically Saturated \u2014 98.4% Peak Utilisation with Near-Zero Headroom",
+        "title": "Executor Heap Critically Saturated \u2014 98.4% Peak Utilisation with Near-Zero Headroom",
+        "description": "The executor JVM heap is allocated 14 GB but the peak used watermark reached 13.78 GB \u2014 98.4% utilisation \u2014 leaving only 1.6% headroom (memory_headroom=0.016). This is a fragile, near-OOM state. The time-series confirms the average used heap across the 146-minute run was 13.15 GB (avg of executor_max_used_heap_memory_over_time), meaning the heap was near saturation for essentially the entire run, not just at a transient peak. The GC collector in use is PS MarkSweep / PS Scavenge (Parallel GC), which is a stop-the-world collector poorly suited to heaps this full \u2014 it must collect more frequently as free space shrinks. Although the aggregate gc_pressure metric (0.039) is below the SQL rule threshold, this is because the denominator (total vcore-time) is large; the absolute GC time was 835,747 seconds fleet-wide. The heap is one data-volume uptick away from OOM-killing executors, which would compound the FetchFailedException problem already observed.",
+        "evidence": "executor_max_heap_memory_utilization=0.9840 (98.4%); executor_max_heap_used_memory=13.775 GB vs executor_heap_memory=14 GB; memory_headroom=0.016; executor_avg_used_memory_over_time avg=12.28 GB, max=13.34 GB (out of 14 GB); gc_type=PS MarkSweep,PS Scavenge (from executors_info event); executors_jvm_gc_time=835,747 s fleet-wide; no spill observed (has_spill=false, disk_bytes_spilled=0.0) \u2014 the heap is full but Spark is managing to avoid spill only because execution memory is off-heap (executor_managed_execution_memory_off_heap_max_used=4.57 GB).",
+        "confidence": 0.91,
+        "severity": "health",
+        "suggested_action": "Increase `spark.executor.memory` from 14 GB to at least 18 GB (a ~29% step), which would bring the peak watermark to ~76% utilisation and give the Parallel GC adequate free space to collect without thrashing. Alternatively, switch to G1GC (`-XX:+UseG1GC` in `spark.executor.extraJavaOptions`) which handles near-full heaps more gracefully. Do not right-size this heap downward \u2014 the SQL rule `over_provisioned_executor_off_heap_memory` addresses the off-heap side; the on-heap side is critically under-provisioned.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 5,
+        "kind": "discovery",
+        "identifier": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+        "title": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+        "description": "The driver spent 14.6% of wall-clock time in GC (driver_jvm_gc_time_pct=0.1461, i.e. 12.77 seconds of GC out of ~87 seconds of driver activity captured at the early metrics snapshot). The time-series for driver_jvm_gc_time_over_time shows a peak of 1,826 ms in a single 60-second bucket against an average of 83 ms \u2014 a peak-to-mean ratio of ~22x, indicating highly bursty GC concentrated in specific phases (likely plan analysis or broadcast staging). The driver heap is 38 GB allocated with a peak used of only 5.51 GB (14.5% utilisation), so the GC is not caused by heap pressure \u2014 it is caused by object churn (short-lived objects from the Spark listener bus: 638,125 SparkListenerExecutorMetricsUpdate events were processed, totalling 4,045 ms of listener-bus time alone). This is a driver-side health signal that the SQL rules did not flag (they cover executor GC, not driver GC).",
+        "evidence": "driver_jvm_gc_time_pct=0.14610; driver_jvm_gc_time_over_time max=1826ms, avg=83ms (peak:mean ~22x); driver_max_heap_memory_utilization=0.145 (heap not full \u2014 GC is churn-driven not pressure-driven); 638,125 SparkListenerExecutorMetricsUpdate events processed (4,045ms listener-bus time) with 750 executors \u00d7 4 cores reporting metrics every heartbeat for ~146 minutes.",
+        "confidence": 0.85,
+        "severity": "health",
+        "suggested_action": "The driver GC is driven by listener-bus object churn from 750 executors reporting metrics at high frequency, not by heap pressure. Reduce the executor metrics heartbeat interval (`spark.executor.heartbeatInterval`, default 10s \u2014 consider 30s) to reduce listener-bus load. Also consider enabling G1GC on the driver (`-XX:+UseG1GC` in `spark.driver.extraJavaOptions`) which handles short-lived object churn better than the default Parallel GC. Do not reduce driver heap \u2014 at 14.5% utilisation it is already well-sized for the actual data load.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        1,
+        3,
+        5
+      ],
+      "tier2_cluster": [],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        0,
+        2,
+        4
+      ],
+      "active_conflicts": [
+        "Insight 0 (off-heap memory shrink) is deferred by the health gate: retried_task_waste=0.301 (open Tier 1 pathology). Do not right-size executor memory while task retries are corrupting telemetry.",
+        "Insight 4 (executor heap near-saturation) is NOT a Tier 1 pathology because the corroboration requirement is unmet: gc_pressure=0.039 (<0.10 threshold) and has_spill=false \u2014 the fence explicitly classifies an uncorroborated full-heap watermark as healthy JVM utilisation, not starvation. Promoting it to Tier 1 would incorrectly hold back efficiency work on a future clean run.",
+        "Insight 0 (off-heap shrink) and insight 4 (heap fullness risk) are in mild tension: reducing off-heap while executor heap is near-full could shift memory pressure if the off-heap budget is being used as a buffer. Both are deferred this visit, so the conflict is latent rather than active."
+      ],
+      "reasoning": "Let me evaluate each insight against the triage rules and fence constraints:\n\n**Tier 1 \u2014 Health & Correctness:**\n\nInsight 3 (discovery: FetchFailedException / stage retries): `retried_task_waste = 0.301`, which is well above the 0.05 threshold. This is a clear, measured Tier 1 health pathology \u2014 ~30% of all vcore-time was wasted on retried work. This opens the health gate.\n\nInsight 1 (sql: spark_task_retries_cost): This is the SQL-rule counterpart to insight 3 \u2014 it quantifies the cost of the same retry pathology ($44,987/yr). Since retried_task_waste > 0.05 is confirmed, this is also a Tier 1 health signal (it is the health remedy/fix recommendation for the retry problem, not an efficiency shrink).\n\nInsight 5 (discovery: Driver GC > 14.6% of wall-clock): The driver GC fraction is 0.1461, which exceeds the 10% health-tier threshold for driver GC pressure (`detect_driver_gc_pressure` fires at \u226510% of wall-time). This is a genuine Tier 1 health signal per the fence definition, even though the executor-side gc_pressure (0.039) is below threshold. The driver GC detector fires independently.\n\nInsight 4 (discovery: Executor Heap 98.4% saturated): memory_headroom = 0.016 (< 0.05), but the corroboration test must be applied. gc_pressure = 0.039 (< 0.10) and has_spill = false (spill_ratio = null, no spill). The fence is explicit: \"heap headroom < 5% is a pathology ONLY when corroborated by GC pressure (> 10%) or material spill (> 10% of I/O); an uncorroborated full-heap watermark is healthy utilisation.\" The executor GC is actually anomalously LOW vs baseline (z-score = -2.18, percentile 14.3). The narrative in insight 4 acknowledges gc_pressure = 0.039 is below the SQL rule threshold. Without corroboration, this does NOT open the health gate and is NOT Tier 1. However, it is a legitimate concern about fragility \u2014 it belongs in Tier 4 as a fine-tuning/monitoring observation (heap sizing), since it's not a current measured pathology but a risk flag.\n\n**Health gate status:** Tier 1 is open (retried_task_waste = 0.301 >> 0.05; driver GC = 14.6% > 10%). This means all efficiency insights are deferred.\n\n**Efficiency insights (deferred by health gate):**\n\nInsight 0 (sql: over_provisioned_executor_off_heap_memory, $56,197/yr): This is an efficiency shrink \u2014 deferred. Health gate: retried_task_waste open.\n\nInsight 2 (sql: task_profile): This is informational context, not a recommendation. It belongs in Tier 4 as a tuning/context item (or could be considered meta-information). Since it carries no actionable recommendation and is purely descriptive, it fits best in Tier 4.\n\nInsight 4: As analyzed above \u2014 not Tier 1 (no corroboration), not an efficiency shrink (it's a risk flag about heap fullness). It's a Tier 4 fine-tuning observation about heap sizing risk.\n\n**Conflicts:**\n- Insight 0 (off-heap memory reduction) conflicts with insight 4 (executor heap near-saturation concern) \u2014 reducing off-heap while heap is near-full could shift memory pressure. However, off_heap_headroom = 0.693 (69% free), so off-heap is genuinely over-provisioned. The conflict is mild but worth noting. More importantly, both are deferred by the health gate.\n- Insight 0 (executor memory reduction) and any executor count reduction would be a compound risk \u2014 but no executor count reduction is present in the insight list.\n- The retry pathology (insight 3) is the root cause that makes insight 4's heap risk worse \u2014 fixing retries (reducing executor churn) may also reduce heap pressure from shuffle data accumulation."
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 1,
+          "kind": "sql",
+          "identifier": "spark_task_retries_cost",
+          "id": null,
+          "type": "spark_task_retries_cost",
+          "description": "spark_task_retries_cost \u2014 estimated annual saving opportunity $44,987",
+          "insights_payload": {
+            "avg_retry_pct": 16,
+            "cnt_task_runs": 9,
+            "time_span_days": 8
+          },
+          "source": "sql_rule",
+          "insight_id": 530272,
+          "usd_cost": 44987.33528161723,
+          "impact_cost": 3239088140.27644,
+          "impact_unit": "VCore",
+          "task_name": "audienceVideoIDTETL_STORE_JOIN",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 3,
+          "kind": "discovery",
+          "identifier": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+          "title": "Stage Failure from FetchFailedException Causing Costly Full-Stage Replay",
+          "description": "Stage 5 (the final SortMergeJoin + write stage, 30,000 tasks) failed entirely on attempt 0 with a FetchFailedException \u2014 shuffle blocks became unavailable after executor loss. This triggered a full replay of the two parent shuffle stages (Stage 3 and Stage 4) plus Stage 5 itself. The retry of Stage 5 alone ran 10,011 tasks for ~4,843 seconds of aggregate executor run-time. The root cause is that dynamic allocation is releasing executors mid-shuffle, causing their shuffle map outputs to be lost. The job has no external shuffle service configured to preserve those blocks across executor eviction, so any executor that is removed takes its shuffle data with it. With `spark.dynamicAllocation.minExecutors=500` the floor is high, but the ceiling is 750 and the cluster is on YARN without an external shuffle service \u2014 executor churn during the long Stage 4 (382 seconds wall-clock) is sufficient to trigger this. The retried_task_waste metric (0.301) confirms ~30% of all vcore-time was wasted on retried work, and the stage event log shows 1 stage failure and 3 stage retries.",
+          "evidence": "Stage 5 attempt=0 status=failed, error=org.apache.spark.shuffle.FetchFailedException; Stage 3 attempt=1 (4 tasks), Stage 4 attempt=1 (65 tasks), Stage 5 attempt=1 (10,011 tasks) all re-executed; retried_task_waste=0.3015; num_spark_stages_failures=1, num_spark_stages_retries=3; num_spark_tasks_retries=10,803; executors_used_vcore_time_of_retried_tasks=6,519,946 seconds; dynamic_allocation_enabled=true, no external shuffle service visible in spark_parameters; platform=YARN (application_1776928353058_348427).",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Enable the YARN External Shuffle Service (`spark.shuffle.service.enabled=true` on the NodeManagers and in the Spark config) so that shuffle map outputs survive executor deallocation. This is the standard fix for FetchFailedException under dynamic allocation on YARN. As a secondary measure, raise `spark.shuffle.io.maxRetries` (default 3) and `spark.shuffle.io.retryWait` (default 5s) to give transient fetch failures more recovery time before escalating to a stage failure.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 5,
+          "kind": "discovery",
+          "identifier": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+          "title": "Driver GC Time Exceeds 14.6% of Wall-Clock \u2014 Health-Tier Signal",
+          "description": "The driver spent 14.6% of wall-clock time in GC (driver_jvm_gc_time_pct=0.1461, i.e. 12.77 seconds of GC out of ~87 seconds of driver activity captured at the early metrics snapshot). The time-series for driver_jvm_gc_time_over_time shows a peak of 1,826 ms in a single 60-second bucket against an average of 83 ms \u2014 a peak-to-mean ratio of ~22x, indicating highly bursty GC concentrated in specific phases (likely plan analysis or broadcast staging). The driver heap is 38 GB allocated with a peak used of only 5.51 GB (14.5% utilisation), so the GC is not caused by heap pressure \u2014 it is caused by object churn (short-lived objects from the Spark listener bus: 638,125 SparkListenerExecutorMetricsUpdate events were processed, totalling 4,045 ms of listener-bus time alone). This is a driver-side health signal that the SQL rules did not flag (they cover executor GC, not driver GC).",
+          "evidence": "driver_jvm_gc_time_pct=0.14610; driver_jvm_gc_time_over_time max=1826ms, avg=83ms (peak:mean ~22x); driver_max_heap_memory_utilization=0.145 (heap not full \u2014 GC is churn-driven not pressure-driven); 638,125 SparkListenerExecutorMetricsUpdate events processed (4,045ms listener-bus time) with 750 executors \u00d7 4 cores reporting metrics every heartbeat for ~146 minutes.",
+          "confidence": 0.85,
+          "severity": "health",
+          "suggested_action": "The driver GC is driven by listener-bus object churn from 750 executors reporting metrics at high frequency, not by heap pressure. Reduce the executor metrics heartbeat interval (`spark.executor.heartbeatInterval`, default 10s \u2014 consider 30s) to reduce listener-bus load. Also consider enabling G1GC on the driver (`-XX:+UseG1GC` in `spark.driver.extraJavaOptions`) which handles short-lived object churn better than the default Parallel GC. Do not reduce driver heap \u2014 at 14.5% utilisation it is already well-sized for the actual data load.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 0,
+          "kind": "sql",
+          "identifier": "over_provisioned_executor_off_heap_memory",
+          "id": null,
+          "type": "over_provisioned_executor_off_heap_memory",
+          "description": "over_provisioned_executor_off_heap_memory \u2014 estimated annual saving opportunity $56,197",
+          "insights_payload": {
+            "cnt_task_runs": 8,
+            "time_span_days": 8,
+            "avg_utilization": 31,
+            "suggested_value": 13,
+            "watermark_value": 9.79011535644531,
+            "current_allocated": 30
+          },
+          "source": "sql_rule",
+          "insight_id": 530311,
+          "usd_cost": 56197.425313695836,
+          "impact_cost": 40462146225.861,
+          "impact_unit": "GB",
+          "task_name": "audienceVideoIDTETL_STORE_JOIN",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 2,
+          "kind": "sql",
+          "identifier": "task_profile",
+          "id": null,
+          "type": "task_profile",
+          "description": "task_profile",
+          "insights_payload": {
+            "task_type": "spark",
+            "tenant_id": 63,
+            "cnt_task_runs": 9,
+            "task_sub_type": null,
+            "time_span_days": 8,
+            "shuffle_partitions": "30000",
+            "cnt_failed_task_runs": 0,
+            "cnt_completed_task_runs": 8
+          },
+          "source": "sql_rule",
+          "insight_id": 525960,
+          "usd_cost": null,
+          "impact_cost": null,
+          "impact_unit": null,
+          "task_name": "audienceVideoIDTETL_STORE_JOIN",
+          "lifecycle_status": "active",
+          "visibility": "hidden"
+        },
+        {
+          "index": 4,
+          "kind": "discovery",
+          "identifier": "Executor Heap Critically Saturated \u2014 98.4% Peak Utilisation with Near-Zero Headroom",
+          "title": "Executor Heap Critically Saturated \u2014 98.4% Peak Utilisation with Near-Zero Headroom",
+          "description": "The executor JVM heap is allocated 14 GB but the peak used watermark reached 13.78 GB \u2014 98.4% utilisation \u2014 leaving only 1.6% headroom (memory_headroom=0.016). This is a fragile, near-OOM state. The time-series confirms the average used heap across the 146-minute run was 13.15 GB (avg of executor_max_used_heap_memory_over_time), meaning the heap was near saturation for essentially the entire run, not just at a transient peak. The GC collector in use is PS MarkSweep / PS Scavenge (Parallel GC), which is a stop-the-world collector poorly suited to heaps this full \u2014 it must collect more frequently as free space shrinks. Although the aggregate gc_pressure metric (0.039) is below the SQL rule threshold, this is because the denominator (total vcore-time) is large; the absolute GC time was 835,747 seconds fleet-wide. The heap is one data-volume uptick away from OOM-killing executors, which would compound the FetchFailedException problem already observed.",
+          "evidence": "executor_max_heap_memory_utilization=0.9840 (98.4%); executor_max_heap_used_memory=13.775 GB vs executor_heap_memory=14 GB; memory_headroom=0.016; executor_avg_used_memory_over_time avg=12.28 GB, max=13.34 GB (out of 14 GB); gc_type=PS MarkSweep,PS Scavenge (from executors_info event); executors_jvm_gc_time=835,747 s fleet-wide; no spill observed (has_spill=false, disk_bytes_spilled=0.0) \u2014 the heap is full but Spark is managing to avoid spill only because execution memory is off-heap (executor_managed_execution_memory_off_heap_max_used=4.57 GB).",
+          "confidence": 0.91,
+          "severity": "health",
+          "suggested_action": "Increase `spark.executor.memory` from 14 GB to at least 18 GB (a ~29% step), which would bring the peak watermark to ~76% utilisation and give the Parallel GC adequate free space to collect without thrashing. Alternatively, switch to G1GC (`-XX:+UseG1GC` in `spark.executor.extraJavaOptions`) which handles near-full heaps more gracefully. Do not right-size this heap downward \u2014 the SQL rule `over_provisioned_executor_off_heap_memory` addresses the off-heap side; the on-heap side is critically under-provisioned.",
+          "source": "agent_discovery"
+        }
+      ]
+    },
+    "kb_version": "d009084b7da9",
+    "historical_runs_count": 7,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": [
+      {
+        "config_key": "spark.executor.memoryOverhead",
+        "action": "set_spark_config",
+        "suggested_value": "13g",
+        "current_value": 30,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_executor_off_heap_memory",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_executor_off_heap_memory",
+        "insight_id": null,
+        "insight_ref": null
+      }
+    ]
+  }
+}

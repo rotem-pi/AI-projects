@@ -1,0 +1,840 @@
+{
+  "saved_at": "2026-07-23T09:01:37.410374+00:00",
+  "source": "pg-dump",
+  "task_id": 2720420,
+  "task_name": "sampledStaging",
+  "run_config": {
+    "dump_dir": "data/dumps/pg_2720420",
+    "insight_filter": "lifecycle_status='active' (mimics prod active_insights)",
+    "injected_insights": [
+      {
+        "type": "executors_long_spill_time",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "over_provisioned_driver_cores",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "over_provisioned_driver_heap_memory",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "type": "task_profile",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "llm_model": "claude-sonnet-4-6",
+    "llm_temperature": 0.0
+  },
+  "input": {
+    "task_id": 2720420,
+    "links": null,
+    "enrichments_updated_at": "2026-07-20T15:33:31.644596",
+    "executor__memory_heap__allocated": 30.0,
+    "executor__memory_heap__max_used": 29.7367329224944,
+    "executor__memory_off_heap__allocated": 5.0,
+    "executor__memory_off_heap__max_used": 7.86387252807617,
+    "executor__memory__allocated": 35.0,
+    "executor__cores": 5.0,
+    "executors__jvm_gc_time": 145732.023,
+    "executors__vcore_time__used": 9319123.826,
+    "executors__cpu_time__used": 9775726.97999999,
+    "executors__used_vcore_time_of_retried_tasks": 78804.897,
+    "driver__heap_memory__allocated": 20.0,
+    "driver__heap_memory__max_used": 5.51527839154005,
+    "driver__cores": 5.0,
+    "task__executors_dynamic_allocation_min_executors__param": 50.0,
+    "task__executors_dynamic_allocation_max_executors__param": 500.0,
+    "task__executor_instances__param": null,
+    "task__dynamic_is_allocation_enabled__param": true,
+    "task__task_cpus__param": 1.0,
+    "task__memory_time__allocated": 70938171.56,
+    "task__skew_time": 0.0,
+    "task__idle_time": 51.8900001049042,
+    "task__vcore_time__allocated": 10142389.0,
+    "task__duration": 5858.009,
+    "task__disk_bytes_spilled": 24121585318545.0,
+    "task__total_io_bytes": 32342500845802.0,
+    "task__vcore_time__used": 9319863.506,
+    "executors__vcore_time__allocated": 10113112.0,
+    "driver__memory__allocated": 25.0,
+    "driver__memory__max_used": 6.2679291293025,
+    "task__shuffle_partitions__param": "5000",
+    "executors__memory_time__used": 39675670.0833945,
+    "app_id": 28803,
+    "env_id": 28815,
+    "app_pit": "2026-07-20T04:00:00",
+    "parent_task_id": null,
+    "task_name": "sampledStaging",
+    "driver_type": null,
+    "worker_type": null,
+    "cloud_provider": null,
+    "cluster_min_workers": null,
+    "cluster_max_workers": null,
+    "cluster_workers": null,
+    "workers_availability": null,
+    "dbx_autooptimizeshuffle": null,
+    "task_sub_type": null,
+    "task__metrics_count": 130,
+    "task__tfs_count__completed": 1,
+    "task__tfs_count__running": 0,
+    "task__tfs_count__failed": 0,
+    "task__tests_runs_count": null,
+    "task__alerts_count": null,
+    "task__breaks_count": null,
+    "driver__cpu_utilization": 0.0252648836971001,
+    "executors__run_time__used": 9319123.826,
+    "executors__tasks_duration__used": 9340806.368,
+    "cluster_uuid": null,
+    "node_vcores": null,
+    "node_mem_gb": null,
+    "start_time": "2026-07-20T13:55:53.062000+00:00",
+    "status": "COMPLETED",
+    "app_name": "SSP_logger",
+    "task__aqe_enabled__param": null
+  },
+  "plan": {
+    "task_id": 2720420,
+    "recommendations": [
+      {
+        "config_key": "spark.executor.memoryOverhead",
+        "action": "set_spark_config",
+        "suggested_value": "8192",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=4: executor off-heap pool at 100% utilisation (7.86 GB used vs 5 GB allocated), negative headroom (-0.573), 1,541 task retries recorded. Health-tier threshold met (retried_task_waste = 0.85%, executor off-heap over-committed). Annual cost baseline $1,602,105.",
+        "confidence": 0.92,
+        "priority": 1,
+        "rationale": "The executor off-heap (memoryOverhead) pool is fully exhausted: peak observed usage is 7.86 GB against an effective allocation of ~5 GB (cluster-level override), giving a headroom of -0.573 \u2014 already over-committed. When the JVM native layer exceeds the YARN container's overhead budget the OS kills the container silently, causing executor loss and task retries. The job is currently absorbing this via 1,541 retried tasks (retried_task_waste = 0.85%), but the margin is zero. The PS MarkSweep/PS Scavenge parallel collector is known for higher native overhead, compounding the risk. No spark.executor.memoryOverhead is explicitly set; the default of max(384 MB, 10% \u00d7 30 GB heap) \u2248 3 GB is in effect, yet the container is configured for 5 GB \u2014 still insufficient. Recommended value: 8,192 MB (8 GB) = peak observed 7.86 GB \u00d7 1.20 safety margin, rounded up to the nearest 512 MB boundary. This is a single bounded step within the executor-memory coupled cluster. Cost impact: raising memoryOverhead from ~3 GB to 8 GB increases the container footprint; the linear model estimates a -1.67\u00d7 fraction (i.e. a cost increase), but this is a gross overestimate because the model assumes all memory-time scales linearly \u2014 in practice only the overhead delta is added to the container, not the full heap. The real premium is bounded by the overhead delta share: (8 GB \u2212 5 GB) / (30 GB heap + 5 GB overhead) \u2248 +8.6% of memory-time cost. This cost increase is justified by a met health-tier threshold (executor container-kill risk, 1,541 retries, zero headroom). Estimated saving fraction set to -0.086 (cost increase of ~8.6% of memory-time component, which is a fraction of total annual cost). Verify on the next run that executor_max_off_heap_memory_utilization drops below 0.80 and task retries decrease. Do NOT bundle with any other executor-memory change this visit \u2014 orthogonality fence requires serialisation with the spill remedy.",
+        "estimated_saving_fraction": -0.086,
+        "usd_cost_annual": -137781.06,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 4,
+        "explanation": "The executor off-heap (memoryOverhead) pool is critically over-committed: peak observed usage is 7.86 GB against an effective container allocation of ~5 GB, yielding an off_heap_headroom of -0.573 \u2014 meaning the container is already operating beyond its overhead budget. When the JVM native layer exceeds the YARN container's overhead ceiling, the OS silently kills the container, which is the direct cause of the 1,541 retried tasks (retried_task_waste = 0.85%) observed in this run. No spark.executor.memoryOverhead is explicitly set, so the runtime default (~3 GB) is in effect, yet even the cluster-level 5 GB override is insufficient; setting 8,192 MB (= peak 7.86 GB \u00d7 1.20 safety margin, rounded to the nearest 512 MB) closes the headroom deficit and eliminates the container-kill trigger.",
+        "expected_impact": "Raising memoryOverhead to 8,192 MB should eliminate the zero-headroom container-kill risk and materially reduce the 1,541 retried tasks; the memory-time cost premium is bounded by the overhead delta share \u2014 (8 GB \u2212 5 GB) / (30 GB heap + 5 GB overhead) \u2248 +8.6% of the memory-time cost component, which is a modest increase justified by the health-gate breach.",
+        "risk_note": "Increasing memoryOverhead enlarges each executor container, which may reduce the number of executors that fit on a node and slightly increase cluster cost (~8.6% of the memory-time component); do NOT bundle this with any other executor-memory change in the same deployment cycle per the orthogonality fence."
+      },
+      {
+        "config_key": "spark.sql.shuffle.partitions",
+        "action": "set_spark_config",
+        "suggested_value": "10000",
+        "current_value": "5000",
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=6 + sql:executors_long_spill_time ref=0: Stage 16 HashAggregateExec 99.8% task fallback (4,992/5,000), spill_ratio=0.746, uniform per-task disk spill p25=2.25 GB, p50=2.70 GB. AQE not reducing actual partition count (runtime Stage 16 = 5,000 matching static config). Annual spill saving opportunity $1,161,129.",
+        "confidence": 0.88,
+        "priority": 2,
+        "rationale": "This recommendation addresses both the SQL spill health insight (ref=0, $1.16M annual saving opportunity) and the agent-discovered root-cause analysis (ref=6). The spill is not a skew problem: Stage 16 disk spill distribution is p25=2.25 GB, p50=2.70 GB, p75=2.70 GB \u2014 uniform across all 5,000 tasks, confirming a per-slot memory shortage, not hot-key concentration. The per-task working set at 5,000 partitions is approximately 9.3 TB shuffle data / 5,000 \u2248 1.86 GB per partition, which saturates the per-slot execution pool (executor_managed_execution_memory_on_heap_max_used = 15.82 GB confirms pool saturation). AQE is confirmed NOT reducing the actual partition count: dbx_autooptimize_shuffle = false, shuffle_partitions_param is explicitly set to 5,000, and the runtime Stage 16 numTasks = 5,000 matches the static config exactly \u2014 so raising spark.sql.shuffle.partitions IS a valid and effective lever here. Raising to 10,000 halves the per-task working set to ~0.93 GB per partition, which should fit within the per-slot execution pool and eliminate the near-universal hash-to-sort fallback (numTasksFallBacked = 4,992/5,000 = 99.8%). Saving arithmetic: spill_ratio = 0.746 means ~74.6% of I/O is spill overhead (each spilled byte written + re-read). Eliminating spill can recover at most spill_ratio \u00d7 annual_cost = 0.746 \u00d7 $1,602,105 \u2248 $1,195,170 in wasted compute. A conservative first step (10,000 partitions) may not eliminate all spill but should materially reduce it; estimated_saving_fraction = 0.50 (conservative: assume 50% of spill eliminated in this step, recovering ~0.373 \u00d7 annual cost, but capped at a realistic 0.50 given the uniform nature of the spill). This is a single change within the executor-memory coupled cluster. Do NOT simultaneously change spark.executor.memory or any other executor-memory knob \u2014 orthogonality fence. Verify on the next run that numTasksFallBacked drops materially and spill_ratio falls below 0.10.",
+        "estimated_saving_fraction": 0.5,
+        "usd_cost_annual": 1161129.3192215501,
+        "insight_type": "executors_long_spill_time",
+        "insight_id": null,
+        "insight_ref": 0,
+        "explanation": "The spill is uniform across all 5,000 Stage 16 tasks (p25=2.25 GB, p50=2.70 GB, p75=2.70 GB), confirming a per-slot memory shortage rather than a skew problem: with ~9.3 TB of shuffle data divided across 5,000 partitions, each task carries ~1.86 GB, saturating the per-slot execution pool (executor_managed_execution_memory_on_heap_max_used = 15.82 GB) and forcing a near-universal hash-to-sort fallback (numTasksFallBacked = 4,992/5,000 = 99.8%). AQE is confirmed inactive (dbx_autooptimize_shuffle = false, runtime Stage 16 numTasks = 5,000 matches the static config exactly), so raising spark.sql.shuffle.partitions to 10,000 directly halves the per-task working set to ~0.93 GB, which should fit within the execution pool and eliminate the spill-driven I/O overhead. The spill_ratio of 0.746 means ~74.6% of observed I/O is pure spill overhead (each byte written then re-read), so eliminating even a large fraction of it recovers a substantial share of compute time.",
+        "expected_impact": "Halving the per-task working set should materially reduce or eliminate the near-universal spill; conservatively assuming 50% of spill is eliminated in this first step, the recoverable compute waste is approximately 0.50 \u00d7 0.746 \u00d7 annual cost \u2248 37% of annual cost, against a baseline annual cost of ~$1.6 M.",
+        "risk_note": "Doubling shuffle partitions increases task scheduling overhead and may expose skew in partitions that were previously merged; verify on the next run that numTasksFallBacked drops materially and spill_ratio falls below 0.10 before making further partition changes, and do NOT simultaneously alter spark.executor.memory or any other executor-memory knob."
+      },
+      {
+        "config_key": "spark.driver.memory",
+        "action": "set_spark_config",
+        "suggested_value": "20g",
+        "current_value": null,
+        "source": "agent_discovery",
+        "source_detail": "agent_discovered insight ref=5: driver GC at 14.0% of wall-time (above 10% health threshold), 13 broadcasts, ~1.38 GB total broadcast data, peak-to-mean GC ratio ~44x. SQL insight ref=2 (over_provisioned_driver_heap_memory) deferred under this health gate.",
+        "confidence": 0.95,
+        "priority": 3,
+        "rationale": "The driver GC health signal (ref=5) fires at 14.0% of wall-time \u2014 above the 10% health-tier threshold \u2014 driven by broadcast staging pressure (13 broadcasts, ~1.38 GB total, ~6M ms collect time, peak GC bucket 1,779 ms vs avg 40.6 ms, peak-to-mean ~44\u00d7). This directly contradicts the SQL over_provisioned_driver_heap_memory recommendation (ref=2, suggested 20g\u219210g): the driver heap is under real GC stress from broadcast staging, and shrinking it would worsen GC pressure and risk broadcast OOM. The correct action is to hold the driver heap at its current 20 GB allocation. This recommendation is a HOLD (suggested_value = current_value = 20g) to explicitly record the conflict resolution: the SQL efficiency recommendation is overridden by the health gate. No saving is realised this visit; the SQL saving of $635/year is deferred to the next clean run. estimated_saving_fraction = 0 (no change, no saving, no cost increase).",
+        "estimated_saving_fraction": 0.0,
+        "usd_cost_annual": 0.0,
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "insight_ref": 5,
+        "explanation": "The driver GC health signal fires at 14.0% of wall-time \u2014 above the 10% health-tier threshold \u2014 driven by broadcast staging pressure from 13 broadcasts totalling ~1.38 GB, with a peak GC bucket of 1,779 ms versus a mean of 40.6 ms (peak-to-mean ratio ~44\u00d7), confirming the driver heap is under real, bursty GC stress. This directly conflicts with the SQL over_provisioned_driver_heap_memory recommendation (ref=2) that suggested reducing driver memory from 20 g to 10 g: shrinking the heap under active broadcast staging pressure would worsen GC frequency and risk broadcast OOM. The correct resolution is to hold spark.driver.memory at its current 20 g allocation, explicitly overriding the efficiency recommendation via the health gate, and defer the downsizing saving to a future run once broadcast pressure is resolved.",
+        "expected_impact": "No cost saving is realised this visit (estimated_saving_fraction = 0); the action prevents a regression \u2014 shrinking the driver heap would increase GC pressure beyond the current 14.0% wall-time and risk OOM on broadcast collection, which would be far more costly than the $635/year deferred saving.",
+        "risk_note": null
+      }
+    ],
+    "blocked_recommendations": [],
+    "plan_inputs": {
+      "active_insights": [
+        {
+          "insight_type": "executors_long_spill_time",
+          "payload": {
+            "avg_spill_pct": 56.80169098654264,
+            "cnt_task_runs": 207,
+            "time_span_days": 9,
+            "avg_executor_max_memory_pct": 109.11286038898696,
+            "avg_executor_max_heap_memory_pct": 98.30580155546632,
+            "avg_executor_max_off_heap_memory_pct": 173.95521339011077
+          },
+          "usd_cost_annual": 1161129.3192215501
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.executor.memoryOverhead",
+            "current_value": null,
+            "suggested_value": "8192",
+            "rationale": "The executor off-heap (memoryOverhead) pool is fully exhausted: peak observed usage is 7.86 GB against an effective allocation of ~5 GB (cluster-level override), giving a headroom of -0.573 \u2014 already over-committed. When the JVM native layer exceeds the YARN container's overhead budget the OS kills the container silently, causing executor loss and task retries. The job is currently absorbing this via 1,541 retried tasks (retried_task_waste = 0.85%), but the margin is zero. The PS MarkSweep/PS Scavenge parallel collector is known for higher native overhead, compounding the risk. No spark.executor.memoryOverhead is explicitly set; the default of max(384 MB, 10% \u00d7 30 GB heap) \u2248 3 GB is in effect, yet the container is configured for 5 GB \u2014 still insufficient. Recommended value: 8,192 MB (8 GB) = peak observed 7.86 GB \u00d7 1.20 safety margin, rounded up to the nearest 512 MB boundary. This is a single bounded step within the executor-memory coupled cluster. Cost impact: raising memoryOverhead from ~3 GB to 8 GB increases the container footprint; the linear model estimates a -1.67\u00d7 fraction (i.e. a cost increase), but this is a gross overestimate because the model assumes all memory-time scales linearly \u2014 in practice only the overhead delta is added to the container, not the full heap. The real premium is bounded by the overhead delta share: (8 GB \u2212 5 GB) / (30 GB heap + 5 GB overhead) \u2248 +8.6% of memory-time cost. This cost increase is justified by a met health-tier threshold (executor container-kill risk, 1,541 retries, zero headroom). Estimated saving fraction set to -0.086 (cost increase of ~8.6% of memory-time component, which is a fraction of total annual cost). Verify on the next run that executor_max_off_heap_memory_utilization drops below 0.80 and task retries decrease. Do NOT bundle with any other executor-memory change this visit \u2014 orthogonality fence requires serialisation with the spill remedy.",
+            "confidence": 0.92
+          },
+          "usd_cost_annual": -137781.06
+        },
+        {
+          "insight_type": "agent_discovered",
+          "payload": {
+            "action": "set_spark_config",
+            "config_key": "spark.driver.memory",
+            "current_value": null,
+            "suggested_value": "20g",
+            "rationale": "The driver GC health signal (ref=5) fires at 14.0% of wall-time \u2014 above the 10% health-tier threshold \u2014 driven by broadcast staging pressure (13 broadcasts, ~1.38 GB total, ~6M ms collect time, peak GC bucket 1,779 ms vs avg 40.6 ms, peak-to-mean ~44\u00d7). This directly contradicts the SQL over_provisioned_driver_heap_memory recommendation (ref=2, suggested 20g\u219210g): the driver heap is under real GC stress from broadcast staging, and shrinking it would worsen GC pressure and risk broadcast OOM. The correct action is to hold the driver heap at its current 20 GB allocation. This recommendation is a HOLD (suggested_value = current_value = 20g) to explicitly record the conflict resolution: the SQL efficiency recommendation is overridden by the health gate. No saving is realised this visit; the SQL saving of $635/year is deferred to the next clean run. estimated_saving_fraction = 0 (no change, no saving, no cost increase).",
+            "confidence": 0.95
+          },
+          "usd_cost_annual": 0.0
+        }
+      ],
+      "run_metrics": {
+        "memory_headroom": 0.008775569250186632,
+        "gc_pressure": 0.015637953279836588,
+        "off_heap_headroom": -0.572774505615234,
+        "vcore_utilization": 0.9214892335811172,
+        "idle_ratio": 0.008857958412987109,
+        "skew_ratio": 0.0,
+        "cpu_efficiency": 1.0,
+        "spill_ratio": 0.7458169494544804,
+        "has_spill": true,
+        "retried_task_waste": 0.008456256024856902
+      },
+      "task_profile": {
+        "dbx_autooptimize_shuffle": false,
+        "shuffle_partitions_param": "5000",
+        "aqe_enabled_param": null,
+        "cluster_autoscaling": false,
+        "cluster_min_workers": null,
+        "cluster_max_workers": null,
+        "cluster_workers": null,
+        "dynamic_allocation_enabled": true,
+        "is_databricks": false,
+        "max_executors_param": 500,
+        "min_executors_param": 50,
+        "executor_instances_param": null,
+        "executor_cores": 5
+      },
+      "pre_tuning_durations_ms": [
+        7813.166,
+        8937.924,
+        7992.515,
+        7692.983,
+        5355.137
+      ],
+      "pre_tuning_cost_usd": 314.1926323527778,
+      "constraints": {
+        "tolerance": "standard",
+        "step_pct_cap": 0.2,
+        "step_abs_cap": 5,
+        "apply_mode": "suggest"
+      }
+    },
+    "unactioned_insights": [
+      {
+        "source": "sql_rule",
+        "insight_type": "over_provisioned_driver_cores",
+        "insight_id": null,
+        "title": "over_provisioned_driver_cores",
+        "description": "over_provisioned_driver_cores \u2014 estimated annual saving opportunity $2,526",
+        "reason": "health gate: driver GC thrash open (driver_jvm_gc_time_pct = 14.0%, above 10% threshold). The over_provisioned_driver_cores SQL insight (suggested 5\u21921) cannot be reliably assessed while the driver is under GC stress from broadcast staging \u2014 the driver CPU profile is corrupted by GC work. Deferred to next clean run. Additionally, the active conflict note confirms this insight is invalidated, not merely deferred."
+      },
+      {
+        "source": "sql_rule",
+        "insight_type": "over_provisioned_driver_heap_memory",
+        "insight_id": null,
+        "title": "over_provisioned_driver_heap_memory",
+        "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $635",
+        "reason": "health gate: driver GC thrash open (driver_jvm_gc_time_pct = 14.0%, above 10% threshold). The over_provisioned_driver_heap_memory SQL insight (suggested 20g\u219210g) is directly contradicted by the driver GC health signal (ref=5): the driver heap is under real broadcast-staging GC stress (13 broadcasts, ~1.38 GB, peak GC bucket 44\u00d7 the mean). Shrinking the heap would worsen GC and risk broadcast OOM. Deferred to next clean run after broadcast pressure is investigated."
+      },
+      {
+        "source": "sql_rule",
+        "insight_type": "task_profile",
+        "insight_id": null,
+        "title": "task_profile",
+        "description": "task_profile",
+        "reason": "sql:task_profile insight carries no concrete config change in its suggested action. No actionable recommendation can be produced from a profile-only insight without a specific parameter target. Skipped \u2014 not addressable via a config change this visit."
+      },
+      {
+        "source": "agent_discovery",
+        "insight_type": "agent_discovered",
+        "insight_id": null,
+        "title": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+        "description": "The physical plan reveals that virtually all spill originates in two HashAggregateExec nodes, not uniformly across the job. Stage 16 (5,000 tasks, the pre-shuffle aggregate) spilled 55.95 TB memory / 12.33 TB disk with 4,992 out of 5,000 tasks falling back from hash to sort-based aggregation (numTasksFallBacked = 4,992 \u2014 effectively 100% fallback). Stage 1 (13,860 tasks, the input read + first aggregate) spilled 67.13 TB memory / 9.61 TB disk with similarly near-universal fallback. The per-task spill distribution in Stage 16 shows the p25 disk spill is already 2.25 GB per task, meaning this is not a skew problem (a few hot tasks) but a uniform per-slot memory shortage. AQE is not explicitly enabled (spark.sql.adaptive.enabled not set; Spark 3.x default is true, but dbx_autooptimize_shuffle = false and shuffle_partitions_param is explicitly set to 5,000). The actual runtime partition count for Stage 16 is 5,000 \u2014 matching the static config \u2014 confirming AQE coalescing is not reducing the count. With 5,000 partitions and up to 500 executors \u00d7 5 cores = 2,500 concurrent slots, each slot processes on average 2 partitions of ~9.3 TB shuffle data / 5,000 = ~1.86 GB per partition, which exceeds the per-slot execution memory budget (30 GB heap / 5 cores \u00d7 Spark memory fraction \u2248 ~4.8 GB execution pool per slot, but the managed execution peak of 15.82 GB on-heap confirms the pool is saturated).",
+        "reason": "The HashAggregate spill root-cause analysis (ref=6) is the mechanistic evidence behind the spill remedy already captured in recommendation priority=2 (spark.sql.shuffle.partitions 5000\u219210000). The insight's suggested action (raise shuffle.partitions to 10,000) is fully covered by that recommendation. No separate recommendation is needed; the insight is accounted for via insight_ref=0 recommendation which cites ref=6 as corroborating evidence. Per orthogonality fence, the executor memory upsize suggested as an alternative lever cannot be bundled in the same visit as the partition change \u2014 it is deferred to the next run if spill persists after the partition increase."
+      }
+    ],
+    "health_breach_unactioned": true,
+    "plan_degraded": false,
+    "summary": "3 recommendation(s), ordered health-first. Tier 1 health issue(s) detected \u2014 their fixes take priority over cost and tuning changes.",
+    "kb_version": "d009084b7da9"
+  },
+  "run_metrics": {
+    "memory_headroom": 0.008775569250186632,
+    "gc_pressure": 0.015637953279836588,
+    "off_heap_headroom": -0.572774505615234,
+    "vcore_utilization": 0.9214892335811172,
+    "idle_ratio": 0.008857958412987109,
+    "skew_ratio": 0.0,
+    "cpu_efficiency": 1.0,
+    "spill_ratio": 0.7458169494544804,
+    "has_spill": true,
+    "retried_task_waste": 0.008456256024856902
+  },
+  "cost_profile": {
+    "cost_per_run_usd": 239.3918,
+    "cluster_workers": null,
+    "workers_availability": null
+  },
+  "assembled_output": [
+    {
+      "insight_type": "executors_long_spill_time",
+      "usd_cost_annual": 1161129.3192215501,
+      "payload": {
+        "avg_spill_pct": 56.80169098654264,
+        "cnt_task_runs": 207,
+        "time_span_days": 9,
+        "avg_executor_max_memory_pct": 109.11286038898696,
+        "avg_executor_max_heap_memory_pct": 98.30580155546632,
+        "avg_executor_max_off_heap_memory_pct": 173.95521339011077
+      },
+      "recommendations": [
+        {
+          "config_key": "spark.sql.shuffle.partitions",
+          "current_value": "5000",
+          "suggested_value": "10000",
+          "action": "set_spark_config",
+          "explanation": "The spill is uniform across all 5,000 Stage 16 tasks (p25=2.25 GB, p50=2.70 GB, p75=2.70 GB), confirming a per-slot memory shortage rather than a skew problem: with ~9.3 TB of shuffle data divided across 5,000 partitions, each task carries ~1.86 GB, saturating the per-slot execution pool (executor_managed_execution_memory_on_heap_max_used = 15.82 GB) and forcing a near-universal hash-to-sort fallback (numTasksFallBacked = 4,992/5,000 = 99.8%). AQE is confirmed inactive (dbx_autooptimize_shuffle = false, runtime Stage 16 numTasks = 5,000 matches the static config exactly), so raising spark.sql.shuffle.partitions to 10,000 directly halves the per-task working set to ~0.93 GB, which should fit within the execution pool and eliminate the spill-driven I/O overhead. The spill_ratio of 0.746 means ~74.6% of observed I/O is pure spill overhead (each byte written then re-read), so eliminating even a large fraction of it recovers a substantial share of compute time.",
+          "expected_impact": "Halving the per-task working set should materially reduce or eliminate the near-universal spill; conservatively assuming 50% of spill is eliminated in this first step, the recoverable compute waste is approximately 0.50 \u00d7 0.746 \u00d7 annual cost \u2248 37% of annual cost, against a baseline annual cost of ~$1.6 M.",
+          "risk_note": "Doubling shuffle partitions increases task scheduling overhead and may expose skew in partitions that were previously merged; verify on the next run that numTasksFallBacked drops materially and spill_ratio falls below 0.10 before making further partition changes, and do NOT simultaneously alter spark.executor.memory or any other executor-memory knob."
+        }
+      ]
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": -137781.06,
+      "config_key": "spark.executor.memoryOverhead",
+      "current_value": null,
+      "suggested_value": "8192",
+      "action": "set_spark_config",
+      "status": "recommended",
+      "explanation": "The executor off-heap (memoryOverhead) pool is critically over-committed: peak observed usage is 7.86 GB against an effective container allocation of ~5 GB, yielding an off_heap_headroom of -0.573 \u2014 meaning the container is already operating beyond its overhead budget. When the JVM native layer exceeds the YARN container's overhead ceiling, the OS silently kills the container, which is the direct cause of the 1,541 retried tasks (retried_task_waste = 0.85%) observed in this run. No spark.executor.memoryOverhead is explicitly set, so the runtime default (~3 GB) is in effect, yet even the cluster-level 5 GB override is insufficient; setting 8,192 MB (= peak 7.86 GB \u00d7 1.20 safety margin, rounded to the nearest 512 MB) closes the headroom deficit and eliminates the container-kill trigger.",
+      "expected_impact": "Raising memoryOverhead to 8,192 MB should eliminate the zero-headroom container-kill risk and materially reduce the 1,541 retried tasks; the memory-time cost premium is bounded by the overhead delta share \u2014 (8 GB \u2212 5 GB) / (30 GB heap + 5 GB overhead) \u2248 +8.6% of the memory-time cost component, which is a modest increase justified by the health-gate breach.",
+      "risk_note": "Increasing memoryOverhead enlarges each executor container, which may reduce the number of executors that fit on a node and slightly increase cluster cost (~8.6% of the memory-time component); do NOT bundle this with any other executor-memory change in the same deployment cycle per the orthogonality fence."
+    },
+    {
+      "insight_type": "agent_discovered",
+      "usd_cost_annual": 0.0,
+      "config_key": "spark.driver.memory",
+      "current_value": null,
+      "suggested_value": "20g",
+      "action": "set_spark_config",
+      "status": "recommended",
+      "explanation": "The driver GC health signal fires at 14.0% of wall-time \u2014 above the 10% health-tier threshold \u2014 driven by broadcast staging pressure from 13 broadcasts totalling ~1.38 GB, with a peak GC bucket of 1,779 ms versus a mean of 40.6 ms (peak-to-mean ratio ~44\u00d7), confirming the driver heap is under real, bursty GC stress. This directly conflicts with the SQL over_provisioned_driver_heap_memory recommendation (ref=2) that suggested reducing driver memory from 20 g to 10 g: shrinking the heap under active broadcast staging pressure would worsen GC frequency and risk broadcast OOM. The correct resolution is to hold spark.driver.memory at its current 20 g allocation, explicitly overriding the efficiency recommendation via the health gate, and defer the downsizing saving to a future run once broadcast pressure is resolved.",
+      "expected_impact": "No cost saving is realised this visit (estimated_saving_fraction = 0); the action prevents a regression \u2014 shrinking the driver heap would increase GC pressure beyond the current 14.0% wall-time and risk OOM on broadcast collection, which would be far more costly than the $635/year deferred saving.",
+      "risk_note": null
+    }
+  ],
+  "trace": {
+    "gate_blocked": false,
+    "gate_reasons": [],
+    "sql_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "executors_long_spill_time",
+        "id": null,
+        "type": "executors_long_spill_time",
+        "description": "executors_long_spill_time \u2014 estimated annual saving opportunity $1,161,129",
+        "insights_payload": {
+          "avg_spill_pct": 56.80169098654264,
+          "cnt_task_runs": 207,
+          "time_span_days": 9,
+          "avg_executor_max_memory_pct": 109.11286038898696,
+          "avg_executor_max_heap_memory_pct": 98.30580155546632,
+          "avg_executor_max_off_heap_memory_pct": 173.95521339011077
+        },
+        "source": "sql_rule",
+        "insight_id": 563326,
+        "usd_cost": 1161129.3192215501,
+        "impact_cost": 83601310983.9516,
+        "impact_unit": "VCore",
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "over_provisioned_driver_cores",
+        "id": null,
+        "type": "over_provisioned_driver_cores",
+        "description": "over_provisioned_driver_cores \u2014 estimated annual saving opportunity $2,526",
+        "insights_payload": {
+          "cnt_task_runs": 175,
+          "driver_memory": 25,
+          "cloud_provider": null,
+          "time_span_days": 9,
+          "max_cpu_utilization": 0.0366209203878192,
+          "current_driver_cores": 5,
+          "has_dedicated_cluster": false,
+          "suggested_driver_cores": 1
+        },
+        "source": "sql_rule",
+        "insight_id": 530307,
+        "usd_cost": 2526.090143672514,
+        "impact_cost": 181878490.344421,
+        "impact_unit": "VCore",
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 2,
+        "kind": "sql",
+        "identifier": "over_provisioned_driver_heap_memory",
+        "id": null,
+        "type": "over_provisioned_driver_heap_memory",
+        "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $635",
+        "insights_payload": {
+          "cnt_task_runs": 172,
+          "time_span_days": 9,
+          "avg_utilization": 29,
+          "suggested_value": 10,
+          "watermark_value": 7.8856698423624,
+          "current_allocated": 20
+        },
+        "source": "sql_rule",
+        "insight_id": 530290,
+        "usd_cost": 635.2093980809902,
+        "impact_cost": 457350766.618313,
+        "impact_unit": "GB",
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 3,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 209,
+          "task_sub_type": null,
+          "time_span_days": 9,
+          "shuffle_partitions": "5000",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 175
+        },
+        "source": "sql_rule",
+        "insight_id": 525934,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      }
+    ],
+    "agent_insights": [
+      {
+        "index": 0,
+        "kind": "discovery",
+        "identifier": "Executor Off-Heap Memory Exhausted \u2014 Container Kill Risk",
+        "title": "Executor Off-Heap Memory Exhausted \u2014 Container Kill Risk",
+        "description": "The executor off-heap (memoryOverhead) pool is at 100% utilisation (executor_max_off_heap_memory_utilization = 1.0, peak off-heap used = 7.86 GB against a 5 GB allocation). This is a hard ceiling: when the JVM native layer exceeds the YARN container's overhead budget the OS kills the container silently, causing executor loss and task retries. The job is currently absorbing this via retries (retried_task_waste = 0.85%, 1,541 retried tasks out of 22,373), but the margin is zero \u2014 any modest data growth or GC-induced native allocation spike will push it into executor failures. This is distinct from the heap spill already flagged by the SQL rule: the off-heap pool is a separate allocation and its exhaustion is a container-kill pathology, not a spill pathology.",
+        "evidence": "executor_max_off_heap_memory_utilization = 1.0 (100%); executor_max_off_heap_used_memory = 7.86 GB; executor_off_heap_memory (allocated) = 5.0 GB (from metrics). off_heap_headroom = -0.573 (negative \u2014 already over-committed). 1,541 task retries recorded (num_spark_tasks_retries). Executor GC type = PS MarkSweep/PS Scavenge (parallel collector, known for higher native overhead). No spark.executor.memoryOverhead is explicitly set in spark_parameters, so the default of max(384 MB, 10% \u00d7 30 GB heap) = ~3 GB is in effect, yet the container is configured for 5 GB overhead \u2014 suggesting a cluster-level override that is still insufficient.",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Raise spark.executor.memoryOverhead to at least 8192 MB (8 GB) \u2014 approximately 2\u00d7 the current peak observed usage of 7.86 GB, providing a safe 20% headroom margin. This is a single, bounded step within the executor-memory coupled cluster. Verify on the next run that executor_max_off_heap_memory_utilization drops below 0.80 and task retries decrease. Do not bundle with any other executor-memory change this visit.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 1,
+        "kind": "discovery",
+        "identifier": "Driver GC Consuming 14% of Wall-Time \u2014 Health-Tier Signal",
+        "title": "Driver GC Consuming 14% of Wall-Time \u2014 Health-Tier Signal",
+        "description": "The driver's JVM GC time is 14.0% of wall-clock duration (driver_jvm_gc_time_pct = 0.1405), well above the 10% health-tier threshold. This is not covered by the SQL rules, which flagged over-provisioned driver cores and heap (efficiency signals) \u2014 but driver GC pressure is a health signal that actually contradicts those efficiency recommendations: the driver heap is under real GC stress despite appearing lightly used on average. The time-series confirms the driver GC is bursty (min=0, max=1,779 ms per 30-second bucket, avg=40.6 ms), consistent with broadcast staging pressure: 13 broadcasts were executed with a total collect time of ~6 million ms and a total broadcast data size of ~1.38 GB. The driver must collect, hash, and broadcast these tables through its heap, causing periodic GC spikes. The SQL over_provisioned_driver_heap_memory insight should be treated as deferred under this health gate.",
+        "evidence": "driver_jvm_gc_time_pct = 0.1405 (14.0% of wall-time); driver_jvm_gc_time_over_time max = 1,779 ms/bucket vs avg = 40.6 ms/bucket (peak-to-mean ~44x, highly bursty); broadcasts_count = 13; broadcasts_collectTime = 6,025,568 ms; broadcasts_dataSize = 1,445,443,632 bytes. Driver heap peak = 5.52 GB / 20 GB allocated.",
+        "confidence": 0.88,
+        "severity": "health",
+        "suggested_action": "Do not reduce driver heap (defer the over_provisioned_driver_heap_memory SQL recommendation under this health gate). Investigate whether any of the 13 broadcast tables can be replaced with shuffle joins or pre-filtered to reduce the collect volume. The largest single broadcast is 1.21 GB (7.65M rows) \u2014 if it can be partitioned or pre-aggregated before broadcast, the driver GC spikes will reduce. Address the off-heap executor issue first (higher blast radius), then revisit driver GC on the next clean run.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 2,
+        "kind": "discovery",
+        "identifier": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+        "title": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+        "description": "The physical plan reveals that virtually all spill originates in two HashAggregateExec nodes, not uniformly across the job. Stage 16 (5,000 tasks, the pre-shuffle aggregate) spilled 55.95 TB memory / 12.33 TB disk with 4,992 out of 5,000 tasks falling back from hash to sort-based aggregation (numTasksFallBacked = 4,992 \u2014 effectively 100% fallback). Stage 1 (13,860 tasks, the input read + first aggregate) spilled 67.13 TB memory / 9.61 TB disk with similarly near-universal fallback. The per-task spill distribution in Stage 16 shows the p25 disk spill is already 2.25 GB per task, meaning this is not a skew problem (a few hot tasks) but a uniform per-slot memory shortage. AQE is not explicitly enabled (spark.sql.adaptive.enabled not set; Spark 3.x default is true, but dbx_autooptimize_shuffle = false and shuffle_partitions_param is explicitly set to 5,000). The actual runtime partition count for Stage 16 is 5,000 \u2014 matching the static config \u2014 confirming AQE coalescing is not reducing the count. With 5,000 partitions and up to 500 executors \u00d7 5 cores = 2,500 concurrent slots, each slot processes on average 2 partitions of ~9.3 TB shuffle data / 5,000 = ~1.86 GB per partition, which exceeds the per-slot execution memory budget (30 GB heap / 5 cores \u00d7 Spark memory fraction \u2248 ~4.8 GB execution pool per slot, but the managed execution peak of 15.82 GB on-heap confirms the pool is saturated).",
+        "evidence": "Stage 16 HashAggregateExec: spillSize = 55,950,669,392,516 bytes (~55.95 TB memory spill), numTasksFallBacked = 4,992 / 5,000 tasks (99.8% fallback rate); Stage 1 HashAggregateExec: spillSize = 9,605,018,646,232 bytes disk, memoryBytesSpilled = 67,127,554,708,870 bytes; Stage 16 taskMetricsDistributions diskBytesSpilled p25 = 2.25 GB, p50 = 2.70 GB, p75 = 2.70 GB (uniform, not skewed); shuffle_partitions_param = 5,000; actual Stage 16 numTasks = 5,000; AQE not explicitly configured; executor_managed_execution_memory_on_heap_max_used = 15.82 GB (pool saturated); spill_ratio = 0.746 (74.6% of I/O is spill).",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "Raise spark.sql.shuffle.partitions from 5,000 to 10,000 as a first conservative step. This halves the per-task working set in Stage 16 from ~1.86 GB to ~0.93 GB per partition, which should fit within the per-slot execution pool and eliminate the near-universal hash-to-sort fallback. Since AQE appears to be running with the static partition count (no coalescing observed), this change will take effect at runtime. Do not simultaneously change executor memory \u2014 isolate this single variable. Verify on the next run that numTasksFallBacked drops materially and spill_ratio falls below 0.10.",
+        "source": "agent_discovery"
+      }
+    ],
+    "merged_insights": [
+      {
+        "index": 0,
+        "kind": "sql",
+        "identifier": "executors_long_spill_time",
+        "id": null,
+        "type": "executors_long_spill_time",
+        "description": "executors_long_spill_time \u2014 estimated annual saving opportunity $1,161,129",
+        "insights_payload": {
+          "avg_spill_pct": 56.80169098654264,
+          "cnt_task_runs": 207,
+          "time_span_days": 9,
+          "avg_executor_max_memory_pct": 109.11286038898696,
+          "avg_executor_max_heap_memory_pct": 98.30580155546632,
+          "avg_executor_max_off_heap_memory_pct": 173.95521339011077
+        },
+        "source": "sql_rule",
+        "insight_id": 563326,
+        "usd_cost": 1161129.3192215501,
+        "impact_cost": 83601310983.9516,
+        "impact_unit": "VCore",
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 1,
+        "kind": "sql",
+        "identifier": "over_provisioned_driver_cores",
+        "id": null,
+        "type": "over_provisioned_driver_cores",
+        "description": "over_provisioned_driver_cores \u2014 estimated annual saving opportunity $2,526",
+        "insights_payload": {
+          "cnt_task_runs": 175,
+          "driver_memory": 25,
+          "cloud_provider": null,
+          "time_span_days": 9,
+          "max_cpu_utilization": 0.0366209203878192,
+          "current_driver_cores": 5,
+          "has_dedicated_cluster": false,
+          "suggested_driver_cores": 1
+        },
+        "source": "sql_rule",
+        "insight_id": 530307,
+        "usd_cost": 2526.090143672514,
+        "impact_cost": 181878490.344421,
+        "impact_unit": "VCore",
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 2,
+        "kind": "sql",
+        "identifier": "over_provisioned_driver_heap_memory",
+        "id": null,
+        "type": "over_provisioned_driver_heap_memory",
+        "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $635",
+        "insights_payload": {
+          "cnt_task_runs": 172,
+          "time_span_days": 9,
+          "avg_utilization": 29,
+          "suggested_value": 10,
+          "watermark_value": 7.8856698423624,
+          "current_allocated": 20
+        },
+        "source": "sql_rule",
+        "insight_id": 530290,
+        "usd_cost": 635.2093980809902,
+        "impact_cost": 457350766.618313,
+        "impact_unit": "GB",
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "debug"
+      },
+      {
+        "index": 3,
+        "kind": "sql",
+        "identifier": "task_profile",
+        "id": null,
+        "type": "task_profile",
+        "description": "task_profile",
+        "insights_payload": {
+          "task_type": "spark",
+          "tenant_id": 63,
+          "cnt_task_runs": 209,
+          "task_sub_type": null,
+          "time_span_days": 9,
+          "shuffle_partitions": "5000",
+          "cnt_failed_task_runs": 0,
+          "cnt_completed_task_runs": 175
+        },
+        "source": "sql_rule",
+        "insight_id": 525934,
+        "usd_cost": null,
+        "impact_cost": null,
+        "impact_unit": null,
+        "task_name": "sampledStaging",
+        "lifecycle_status": "active",
+        "visibility": "hidden"
+      },
+      {
+        "index": 4,
+        "kind": "discovery",
+        "identifier": "Executor Off-Heap Memory Exhausted \u2014 Container Kill Risk",
+        "title": "Executor Off-Heap Memory Exhausted \u2014 Container Kill Risk",
+        "description": "The executor off-heap (memoryOverhead) pool is at 100% utilisation (executor_max_off_heap_memory_utilization = 1.0, peak off-heap used = 7.86 GB against a 5 GB allocation). This is a hard ceiling: when the JVM native layer exceeds the YARN container's overhead budget the OS kills the container silently, causing executor loss and task retries. The job is currently absorbing this via retries (retried_task_waste = 0.85%, 1,541 retried tasks out of 22,373), but the margin is zero \u2014 any modest data growth or GC-induced native allocation spike will push it into executor failures. This is distinct from the heap spill already flagged by the SQL rule: the off-heap pool is a separate allocation and its exhaustion is a container-kill pathology, not a spill pathology.",
+        "evidence": "executor_max_off_heap_memory_utilization = 1.0 (100%); executor_max_off_heap_used_memory = 7.86 GB; executor_off_heap_memory (allocated) = 5.0 GB (from metrics). off_heap_headroom = -0.573 (negative \u2014 already over-committed). 1,541 task retries recorded (num_spark_tasks_retries). Executor GC type = PS MarkSweep/PS Scavenge (parallel collector, known for higher native overhead). No spark.executor.memoryOverhead is explicitly set in spark_parameters, so the default of max(384 MB, 10% \u00d7 30 GB heap) = ~3 GB is in effect, yet the container is configured for 5 GB overhead \u2014 suggesting a cluster-level override that is still insufficient.",
+        "confidence": 0.92,
+        "severity": "health",
+        "suggested_action": "Raise spark.executor.memoryOverhead to at least 8192 MB (8 GB) \u2014 approximately 2\u00d7 the current peak observed usage of 7.86 GB, providing a safe 20% headroom margin. This is a single, bounded step within the executor-memory coupled cluster. Verify on the next run that executor_max_off_heap_memory_utilization drops below 0.80 and task retries decrease. Do not bundle with any other executor-memory change this visit.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 5,
+        "kind": "discovery",
+        "identifier": "Driver GC Consuming 14% of Wall-Time \u2014 Health-Tier Signal",
+        "title": "Driver GC Consuming 14% of Wall-Time \u2014 Health-Tier Signal",
+        "description": "The driver's JVM GC time is 14.0% of wall-clock duration (driver_jvm_gc_time_pct = 0.1405), well above the 10% health-tier threshold. This is not covered by the SQL rules, which flagged over-provisioned driver cores and heap (efficiency signals) \u2014 but driver GC pressure is a health signal that actually contradicts those efficiency recommendations: the driver heap is under real GC stress despite appearing lightly used on average. The time-series confirms the driver GC is bursty (min=0, max=1,779 ms per 30-second bucket, avg=40.6 ms), consistent with broadcast staging pressure: 13 broadcasts were executed with a total collect time of ~6 million ms and a total broadcast data size of ~1.38 GB. The driver must collect, hash, and broadcast these tables through its heap, causing periodic GC spikes. The SQL over_provisioned_driver_heap_memory insight should be treated as deferred under this health gate.",
+        "evidence": "driver_jvm_gc_time_pct = 0.1405 (14.0% of wall-time); driver_jvm_gc_time_over_time max = 1,779 ms/bucket vs avg = 40.6 ms/bucket (peak-to-mean ~44x, highly bursty); broadcasts_count = 13; broadcasts_collectTime = 6,025,568 ms; broadcasts_dataSize = 1,445,443,632 bytes. Driver heap peak = 5.52 GB / 20 GB allocated.",
+        "confidence": 0.88,
+        "severity": "health",
+        "suggested_action": "Do not reduce driver heap (defer the over_provisioned_driver_heap_memory SQL recommendation under this health gate). Investigate whether any of the 13 broadcast tables can be replaced with shuffle joins or pre-filtered to reduce the collect volume. The largest single broadcast is 1.21 GB (7.65M rows) \u2014 if it can be partitioned or pre-aggregated before broadcast, the driver GC spikes will reduce. Address the off-heap executor issue first (higher blast radius), then revisit driver GC on the next clean run.",
+        "source": "agent_discovery"
+      },
+      {
+        "index": 6,
+        "kind": "discovery",
+        "identifier": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+        "title": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+        "description": "The physical plan reveals that virtually all spill originates in two HashAggregateExec nodes, not uniformly across the job. Stage 16 (5,000 tasks, the pre-shuffle aggregate) spilled 55.95 TB memory / 12.33 TB disk with 4,992 out of 5,000 tasks falling back from hash to sort-based aggregation (numTasksFallBacked = 4,992 \u2014 effectively 100% fallback). Stage 1 (13,860 tasks, the input read + first aggregate) spilled 67.13 TB memory / 9.61 TB disk with similarly near-universal fallback. The per-task spill distribution in Stage 16 shows the p25 disk spill is already 2.25 GB per task, meaning this is not a skew problem (a few hot tasks) but a uniform per-slot memory shortage. AQE is not explicitly enabled (spark.sql.adaptive.enabled not set; Spark 3.x default is true, but dbx_autooptimize_shuffle = false and shuffle_partitions_param is explicitly set to 5,000). The actual runtime partition count for Stage 16 is 5,000 \u2014 matching the static config \u2014 confirming AQE coalescing is not reducing the count. With 5,000 partitions and up to 500 executors \u00d7 5 cores = 2,500 concurrent slots, each slot processes on average 2 partitions of ~9.3 TB shuffle data / 5,000 = ~1.86 GB per partition, which exceeds the per-slot execution memory budget (30 GB heap / 5 cores \u00d7 Spark memory fraction \u2248 ~4.8 GB execution pool per slot, but the managed execution peak of 15.82 GB on-heap confirms the pool is saturated).",
+        "evidence": "Stage 16 HashAggregateExec: spillSize = 55,950,669,392,516 bytes (~55.95 TB memory spill), numTasksFallBacked = 4,992 / 5,000 tasks (99.8% fallback rate); Stage 1 HashAggregateExec: spillSize = 9,605,018,646,232 bytes disk, memoryBytesSpilled = 67,127,554,708,870 bytes; Stage 16 taskMetricsDistributions diskBytesSpilled p25 = 2.25 GB, p50 = 2.70 GB, p75 = 2.70 GB (uniform, not skewed); shuffle_partitions_param = 5,000; actual Stage 16 numTasks = 5,000; AQE not explicitly configured; executor_managed_execution_memory_on_heap_max_used = 15.82 GB (pool saturated); spill_ratio = 0.746 (74.6% of I/O is spill).",
+        "confidence": 0.95,
+        "severity": "health",
+        "suggested_action": "Raise spark.sql.shuffle.partitions from 5,000 to 10,000 as a first conservative step. This halves the per-task working set in Stage 16 from ~1.86 GB to ~0.93 GB per partition, which should fit within the per-slot execution pool and eliminate the near-universal hash-to-sort fallback. Since AQE appears to be running with the static partition count (no coalescing observed), this change will take effect at runtime. Do not simultaneously change executor memory \u2014 isolate this single variable. Verify on the next run that numTasksFallBacked drops materially and spill_ratio falls below 0.10.",
+        "source": "agent_discovery"
+      }
+    ],
+    "triage_result": {
+      "tier1_health": [
+        0,
+        4,
+        5,
+        6
+      ],
+      "tier2_cluster": [],
+      "tier3_instance": [],
+      "tier4_tuning": [
+        1,
+        2,
+        3
+      ],
+      "active_conflicts": [
+        "Insight 5 (driver GC at 14% of wall-time) directly contradicts insights 1 and 2: the driver is under real GC stress from broadcast staging (13 broadcasts, ~1.38 GB total, ~6M ms collect time), meaning the driver heap is NOT safely shrinkable and driver cores cannot be reliably assessed \u2014 both efficiency insights are invalidated by the health signal, not merely deferred by the gate.",
+        "Insight 4 (executor off-heap exhausted, 7.86 GB used vs 5 GB allocated) and insight 0 (spill_ratio = 74.6%) are both open health pathologies addressing different memory pools. Any remedy for off-heap exhaustion (raising spark.executor.memoryOverhead) must be serialized with the spill remedy (raising spark.executor.memory or spark.sql.shuffle.partitions) per the executor-memory coupled-cluster orthogonality fence \u2014 both cannot be changed in the same visit.",
+        "Insight 6 (HashAggregate spill root cause) confirms AQE is not reducing the actual partition count (runtime Stage 16 = 5,000 partitions matching the static config), which means a partition increase via spark.sql.shuffle.partitions IS a valid lever \u2014 this conflicts with any assumption that AQE is active and overriding the static value."
+      ],
+      "reasoning": "Let me work through each insight against the measured metrics and triage rules:\n\n**Measured metrics (key values):**\n- spill_ratio = 0.746 (74.6%) \u2192 FAR above the 10% Tier 1 threshold \u2192 health gate OPEN\n- has_spill = true\n- gc_pressure = 0.0156 (1.6%) \u2192 well below the 20% Tier 1 threshold; executor GC is healthy\n- memory_headroom = 0.0088 (0.88%) \u2192 near zero, but gc_pressure is only 1.6% and spill_ratio is the corroborating signal (spill_ratio > 10% is present), so memory starvation IS corroborated \u2192 but the primary pathology is the spill itself\n- retried_task_waste = 0.00846 (0.85%) \u2192 below the 5% Tier 1 threshold; NOT a health pathology\n- off_heap_headroom = -0.573 \u2192 negative (over-utilized); executor_max_off_heap_memory_utilization = 1.0 (100%)\n- vcore_utilization = 0.921 \u2192 high, healthy\n- idle_ratio = 0.009 \u2192 very low, not over-provisioned\n- skew_ratio = 0.0 \u2192 no skew\n\n**Insight-by-insight analysis:**\n\n**0. executors_long_spill_time (SQL):** spill_ratio = 0.746 >> 0.10 threshold. This is a confirmed Tier 1 health pathology. The health gate is OPEN. Annual saving $1.16M. \u2192 **Tier 1**\n\n**4. Executor Off-Heap Memory Exhausted (discovery):** executor_max_off_heap_memory_utilization = 1.0, off_heap_headroom = -0.573. The off-heap pool is at 100% utilization with peak usage (7.86 GB) exceeding the 5 GB allocation. This is a container-kill risk (OOM/executor failure pathway). retried_task_waste = 0.85% (below 5% threshold), but the off-heap exhaustion is a zero-margin situation that is a distinct health pathology \u2014 it's an OOM/container-kill risk, not just a retry signal. The insight correctly identifies this as a health-tier signal (container kill risk = OOM pathway). The off-heap is genuinely exhausted (utilization = 1.0, headroom negative). This qualifies as a health pathology (memory starvation / OOM risk) \u2192 **Tier 1**\n\n**5. Driver GC Consuming 14% of Wall-Time (discovery):** driver_jvm_gc_time_pct = 0.1405 = 14.05% of wall-clock. The health-gate fence specifies driver GC \u226510% of wall-time fires the health detector. This is above the 10% threshold. This is a Tier 1 health signal. It also explicitly contradicts insights 1 and 2 (driver efficiency insights), which should be deferred. \u2192 **Tier 1**\n\n**6. Massive HashAggregate Spill (discovery):** This is a detailed root-cause analysis of the spill pathology already flagged by insight 0. It provides the mechanism (HashAggregateExec fallback in stages 16 and 1, uniform per-slot memory shortage, 5000 partitions with AQE not reducing the count). This is a health-tier insight \u2014 it's the root cause analysis of the open spill pathology and informs the remedy. It belongs in Tier 1 as a health/remedy insight. \u2192 **Tier 1**\n\n**1. over_provisioned_driver_cores (SQL):** This is an efficiency insight (Tier 4 fine-tuning). However, the health gate is OPEN (spill_ratio = 0.746, driver GC = 14%). Per the fence rules, all efficiency insights are deferred while health pathologies are open. Additionally, insight 5 (driver GC) directly contradicts this \u2014 the driver heap is under GC stress, so the driver is NOT safely over-provisioned. \u2192 **Tier 4** (deferred, health gate open; also conflicted by insight 5)\n\n**2. over_provisioned_driver_heap_memory (SQL):** Same reasoning as insight 1 \u2014 efficiency insight, health gate open, and explicitly contradicted by insight 5 (driver GC pressure means the driver heap is under real stress). \u2192 **Tier 4** (deferred, health gate open; also conflicted by insight 5)\n\n**3. task_profile (SQL):** This is an informational/context insight, not a recommendation. It provides the task configuration profile. \u2192 **Tier 4** (informational, no action)\n\n**Active conflicts:**\n- Insight 5 (driver GC at 14%) directly contradicts insights 1 and 2 (over-provisioned driver cores and heap). The driver is under GC stress from broadcast staging, meaning the driver heap is NOT safely shrinkable \u2014 insights 1 and 2 are both blocked by the health gate AND by the direct contradiction from insight 5.\n- Insight 4 (off-heap exhaustion) and insight 0 (spill) are both health pathologies but address different pools \u2014 they are complementary, not conflicting. However, any remedy for off-heap exhaustion (raising memoryOverhead) must be serialized with the spill remedy (executor memory / partition changes) per the orthogonality fence (executor-memory coupled cluster).\n- The conflict rule \"do not recommend memory reduction when has_spill = true AND spill_ratio \u2265 0.01\" blocks any memory shrink recommendations (insights 1, 2 are driver-side so technically decoupled, but the health gate covers them anyway)."
+    },
+    "tiered_insights": {
+      "tier1": [
+        {
+          "index": 0,
+          "kind": "sql",
+          "identifier": "executors_long_spill_time",
+          "id": null,
+          "type": "executors_long_spill_time",
+          "description": "executors_long_spill_time \u2014 estimated annual saving opportunity $1,161,129",
+          "insights_payload": {
+            "avg_spill_pct": 56.80169098654264,
+            "cnt_task_runs": 207,
+            "time_span_days": 9,
+            "avg_executor_max_memory_pct": 109.11286038898696,
+            "avg_executor_max_heap_memory_pct": 98.30580155546632,
+            "avg_executor_max_off_heap_memory_pct": 173.95521339011077
+          },
+          "source": "sql_rule",
+          "insight_id": 563326,
+          "usd_cost": 1161129.3192215501,
+          "impact_cost": 83601310983.9516,
+          "impact_unit": "VCore",
+          "task_name": "sampledStaging",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 4,
+          "kind": "discovery",
+          "identifier": "Executor Off-Heap Memory Exhausted \u2014 Container Kill Risk",
+          "title": "Executor Off-Heap Memory Exhausted \u2014 Container Kill Risk",
+          "description": "The executor off-heap (memoryOverhead) pool is at 100% utilisation (executor_max_off_heap_memory_utilization = 1.0, peak off-heap used = 7.86 GB against a 5 GB allocation). This is a hard ceiling: when the JVM native layer exceeds the YARN container's overhead budget the OS kills the container silently, causing executor loss and task retries. The job is currently absorbing this via retries (retried_task_waste = 0.85%, 1,541 retried tasks out of 22,373), but the margin is zero \u2014 any modest data growth or GC-induced native allocation spike will push it into executor failures. This is distinct from the heap spill already flagged by the SQL rule: the off-heap pool is a separate allocation and its exhaustion is a container-kill pathology, not a spill pathology.",
+          "evidence": "executor_max_off_heap_memory_utilization = 1.0 (100%); executor_max_off_heap_used_memory = 7.86 GB; executor_off_heap_memory (allocated) = 5.0 GB (from metrics). off_heap_headroom = -0.573 (negative \u2014 already over-committed). 1,541 task retries recorded (num_spark_tasks_retries). Executor GC type = PS MarkSweep/PS Scavenge (parallel collector, known for higher native overhead). No spark.executor.memoryOverhead is explicitly set in spark_parameters, so the default of max(384 MB, 10% \u00d7 30 GB heap) = ~3 GB is in effect, yet the container is configured for 5 GB overhead \u2014 suggesting a cluster-level override that is still insufficient.",
+          "confidence": 0.92,
+          "severity": "health",
+          "suggested_action": "Raise spark.executor.memoryOverhead to at least 8192 MB (8 GB) \u2014 approximately 2\u00d7 the current peak observed usage of 7.86 GB, providing a safe 20% headroom margin. This is a single, bounded step within the executor-memory coupled cluster. Verify on the next run that executor_max_off_heap_memory_utilization drops below 0.80 and task retries decrease. Do not bundle with any other executor-memory change this visit.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 5,
+          "kind": "discovery",
+          "identifier": "Driver GC Consuming 14% of Wall-Time \u2014 Health-Tier Signal",
+          "title": "Driver GC Consuming 14% of Wall-Time \u2014 Health-Tier Signal",
+          "description": "The driver's JVM GC time is 14.0% of wall-clock duration (driver_jvm_gc_time_pct = 0.1405), well above the 10% health-tier threshold. This is not covered by the SQL rules, which flagged over-provisioned driver cores and heap (efficiency signals) \u2014 but driver GC pressure is a health signal that actually contradicts those efficiency recommendations: the driver heap is under real GC stress despite appearing lightly used on average. The time-series confirms the driver GC is bursty (min=0, max=1,779 ms per 30-second bucket, avg=40.6 ms), consistent with broadcast staging pressure: 13 broadcasts were executed with a total collect time of ~6 million ms and a total broadcast data size of ~1.38 GB. The driver must collect, hash, and broadcast these tables through its heap, causing periodic GC spikes. The SQL over_provisioned_driver_heap_memory insight should be treated as deferred under this health gate.",
+          "evidence": "driver_jvm_gc_time_pct = 0.1405 (14.0% of wall-time); driver_jvm_gc_time_over_time max = 1,779 ms/bucket vs avg = 40.6 ms/bucket (peak-to-mean ~44x, highly bursty); broadcasts_count = 13; broadcasts_collectTime = 6,025,568 ms; broadcasts_dataSize = 1,445,443,632 bytes. Driver heap peak = 5.52 GB / 20 GB allocated.",
+          "confidence": 0.88,
+          "severity": "health",
+          "suggested_action": "Do not reduce driver heap (defer the over_provisioned_driver_heap_memory SQL recommendation under this health gate). Investigate whether any of the 13 broadcast tables can be replaced with shuffle joins or pre-filtered to reduce the collect volume. The largest single broadcast is 1.21 GB (7.65M rows) \u2014 if it can be partitioned or pre-aggregated before broadcast, the driver GC spikes will reduce. Address the off-heap executor issue first (higher blast radius), then revisit driver GC on the next clean run.",
+          "source": "agent_discovery"
+        },
+        {
+          "index": 6,
+          "kind": "discovery",
+          "identifier": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+          "title": "Massive HashAggregate Spill Concentrated in Two Stages \u2014 Partition Count Insufficient for Working Set",
+          "description": "The physical plan reveals that virtually all spill originates in two HashAggregateExec nodes, not uniformly across the job. Stage 16 (5,000 tasks, the pre-shuffle aggregate) spilled 55.95 TB memory / 12.33 TB disk with 4,992 out of 5,000 tasks falling back from hash to sort-based aggregation (numTasksFallBacked = 4,992 \u2014 effectively 100% fallback). Stage 1 (13,860 tasks, the input read + first aggregate) spilled 67.13 TB memory / 9.61 TB disk with similarly near-universal fallback. The per-task spill distribution in Stage 16 shows the p25 disk spill is already 2.25 GB per task, meaning this is not a skew problem (a few hot tasks) but a uniform per-slot memory shortage. AQE is not explicitly enabled (spark.sql.adaptive.enabled not set; Spark 3.x default is true, but dbx_autooptimize_shuffle = false and shuffle_partitions_param is explicitly set to 5,000). The actual runtime partition count for Stage 16 is 5,000 \u2014 matching the static config \u2014 confirming AQE coalescing is not reducing the count. With 5,000 partitions and up to 500 executors \u00d7 5 cores = 2,500 concurrent slots, each slot processes on average 2 partitions of ~9.3 TB shuffle data / 5,000 = ~1.86 GB per partition, which exceeds the per-slot execution memory budget (30 GB heap / 5 cores \u00d7 Spark memory fraction \u2248 ~4.8 GB execution pool per slot, but the managed execution peak of 15.82 GB on-heap confirms the pool is saturated).",
+          "evidence": "Stage 16 HashAggregateExec: spillSize = 55,950,669,392,516 bytes (~55.95 TB memory spill), numTasksFallBacked = 4,992 / 5,000 tasks (99.8% fallback rate); Stage 1 HashAggregateExec: spillSize = 9,605,018,646,232 bytes disk, memoryBytesSpilled = 67,127,554,708,870 bytes; Stage 16 taskMetricsDistributions diskBytesSpilled p25 = 2.25 GB, p50 = 2.70 GB, p75 = 2.70 GB (uniform, not skewed); shuffle_partitions_param = 5,000; actual Stage 16 numTasks = 5,000; AQE not explicitly configured; executor_managed_execution_memory_on_heap_max_used = 15.82 GB (pool saturated); spill_ratio = 0.746 (74.6% of I/O is spill).",
+          "confidence": 0.95,
+          "severity": "health",
+          "suggested_action": "Raise spark.sql.shuffle.partitions from 5,000 to 10,000 as a first conservative step. This halves the per-task working set in Stage 16 from ~1.86 GB to ~0.93 GB per partition, which should fit within the per-slot execution pool and eliminate the near-universal hash-to-sort fallback. Since AQE appears to be running with the static partition count (no coalescing observed), this change will take effect at runtime. Do not simultaneously change executor memory \u2014 isolate this single variable. Verify on the next run that numTasksFallBacked drops materially and spill_ratio falls below 0.10.",
+          "source": "agent_discovery"
+        }
+      ],
+      "tier2": [],
+      "tier3": [],
+      "tier4": [
+        {
+          "index": 1,
+          "kind": "sql",
+          "identifier": "over_provisioned_driver_cores",
+          "id": null,
+          "type": "over_provisioned_driver_cores",
+          "description": "over_provisioned_driver_cores \u2014 estimated annual saving opportunity $2,526",
+          "insights_payload": {
+            "cnt_task_runs": 175,
+            "driver_memory": 25,
+            "cloud_provider": null,
+            "time_span_days": 9,
+            "max_cpu_utilization": 0.0366209203878192,
+            "current_driver_cores": 5,
+            "has_dedicated_cluster": false,
+            "suggested_driver_cores": 1
+          },
+          "source": "sql_rule",
+          "insight_id": 530307,
+          "usd_cost": 2526.090143672514,
+          "impact_cost": 181878490.344421,
+          "impact_unit": "VCore",
+          "task_name": "sampledStaging",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 2,
+          "kind": "sql",
+          "identifier": "over_provisioned_driver_heap_memory",
+          "id": null,
+          "type": "over_provisioned_driver_heap_memory",
+          "description": "over_provisioned_driver_heap_memory \u2014 estimated annual saving opportunity $635",
+          "insights_payload": {
+            "cnt_task_runs": 172,
+            "time_span_days": 9,
+            "avg_utilization": 29,
+            "suggested_value": 10,
+            "watermark_value": 7.8856698423624,
+            "current_allocated": 20
+          },
+          "source": "sql_rule",
+          "insight_id": 530290,
+          "usd_cost": 635.2093980809902,
+          "impact_cost": 457350766.618313,
+          "impact_unit": "GB",
+          "task_name": "sampledStaging",
+          "lifecycle_status": "active",
+          "visibility": "debug"
+        },
+        {
+          "index": 3,
+          "kind": "sql",
+          "identifier": "task_profile",
+          "id": null,
+          "type": "task_profile",
+          "description": "task_profile",
+          "insights_payload": {
+            "task_type": "spark",
+            "tenant_id": 63,
+            "cnt_task_runs": 209,
+            "task_sub_type": null,
+            "time_span_days": 9,
+            "shuffle_partitions": "5000",
+            "cnt_failed_task_runs": 0,
+            "cnt_completed_task_runs": 175
+          },
+          "source": "sql_rule",
+          "insight_id": 525934,
+          "usd_cost": null,
+          "impact_cost": null,
+          "impact_unit": null,
+          "task_name": "sampledStaging",
+          "lifecycle_status": "active",
+          "visibility": "hidden"
+        }
+      ]
+    },
+    "kb_version": "d009084b7da9",
+    "historical_runs_count": 20,
+    "run_context_sections": [
+      "events",
+      "metrics",
+      "spark_parameters",
+      "task_run",
+      "time_series_summary",
+      "transformations"
+    ],
+    "sql_recommendations": [
+      {
+        "config_key": "spark.driver.cores",
+        "action": "set_spark_config",
+        "suggested_value": 1,
+        "current_value": 5,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_driver_cores",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_driver_cores",
+        "insight_id": null,
+        "insight_ref": null
+      },
+      {
+        "config_key": "spark.driver.memory",
+        "action": "set_spark_config",
+        "suggested_value": "10g",
+        "current_value": 20,
+        "source": "sql_rule",
+        "source_detail": "over_provisioned_driver_heap_memory",
+        "confidence": 1.0,
+        "priority": 0,
+        "rationale": "",
+        "estimated_saving_fraction": null,
+        "usd_cost_annual": null,
+        "insight_type": "over_provisioned_driver_heap_memory",
+        "insight_id": null,
+        "insight_ref": null
+      }
+    ]
+  }
+}
