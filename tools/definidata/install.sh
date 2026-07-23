@@ -123,7 +123,8 @@ fi
 
 if cp -R "$BUILD_DIR" "$DEST" 2>/dev/null; then
     echo ""
-    echo "Installed! Open definiData from your Applications folder or Launchpad."
+    echo "Installed! Opening definiData..."
+    open "$DEST"
 else
     echo ""
     echo "Could not write to /Applications (permission denied)."
