@@ -35,12 +35,36 @@ echo "Installing dependencies..."
 pip install -q --upgrade pip
 pip install -q -r requirements.txt
 
-echo "Checking AWS credentials..."
-if ! python3 -c "import boto3; boto3.client('sts', region_name='eu-north-1').get_caller_identity()" &> /dev/null; then
+AWS_PROFILE_NAME="dev-admin"
+
+echo "Ensuring the $AWS_PROFILE_NAME AWS profile is configured..."
+if command -v aws &> /dev/null && ! aws configure get sso_start_url --profile "$AWS_PROFILE_NAME" &> /dev/null; then
+    aws configure set sso_start_url "https://d3finity.awsapps.com/start/#/?tab=accounts" --profile "$AWS_PROFILE_NAME"
+    aws configure set sso_region "eu-north-1" --profile "$AWS_PROFILE_NAME"
+    aws configure set sso_account_id "412550564892" --profile "$AWS_PROFILE_NAME"
+    aws configure set sso_role_name "PowerUserAccess" --profile "$AWS_PROFILE_NAME"
+    aws configure set region "eu-north-1" --profile "$AWS_PROFILE_NAME"
+    aws configure set output "json" --profile "$AWS_PROFILE_NAME"
+fi
+
+echo "Checking AWS credentials (profile: $AWS_PROFILE_NAME)..."
+if ! python3 -c "import boto3; boto3.Session(profile_name='$AWS_PROFILE_NAME', region_name='eu-north-1').client('sts').get_caller_identity()" &> /dev/null; then
     echo ""
-    echo "Warning: no valid AWS credentials found right now. That's fine for"
-    echo "install - just run 'aws login' (or 'aws sso login') before you open"
-    echo "the app."
+    echo "No valid AWS credentials found for profile $AWS_PROFILE_NAME."
+    if [ -t 0 ]; then
+        read -r -p "Sign in now with 'aws sso login --profile $AWS_PROFILE_NAME'? [y/N] " response || response="n"
+        case "$response" in
+            [yY]|[yY][eE][sS])
+                echo "This will open your browser - please approve the sign-in request there."
+                aws sso login --profile "$AWS_PROFILE_NAME" || echo "Sign-in failed or was cancelled. You can run 'aws sso login --profile $AWS_PROFILE_NAME' yourself later."
+                ;;
+            *)
+                echo "Skipping sign-in. Run 'aws sso login --profile $AWS_PROFILE_NAME' yourself before opening definiData."
+                ;;
+        esac
+    else
+        echo "Run 'aws sso login --profile $AWS_PROFILE_NAME' yourself before opening definiData."
+    fi
 fi
 
 # Skip Streamlit's interactive first-run "email address" prompt.

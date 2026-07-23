@@ -6,16 +6,72 @@ Run via install.sh (native app) or init.sh (browser tab), or directly with:
 """
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
 
 import boto3
 import streamlit as st
-from botocore.exceptions import NoCredentialsError, ClientError
+from botocore.exceptions import (
+    ClientError,
+    LoginError,
+    LoginInsufficientPermissions,
+    NoCredentialsError,
+    SSOTokenLoadError,
+    TokenRetrievalError,
+    UnauthorizedSSOTokenError,
+)
 from PIL import Image
 
+# Error codes that mean "not signed in / session expired", as opposed to
+# e.g. AccessDenied (signed in fine, just lacks IAM permission).
+_AUTH_ERROR_CODES = {
+    "ExpiredToken",
+    "ExpiredTokenException",
+    "InvalidClientTokenId",
+    "UnrecognizedClientException",
+    "AuthFailure",
+}
+
+
+def is_auth_error(e: Exception) -> bool:
+    """True if e means 'you're not signed in to AWS', not some other failure
+    (e.g. LoginInsufficientPermissions means signed in fine but missing an
+    IAM policy - clicking "sign in" again won't fix that, an admin needs to)."""
+    if isinstance(e, LoginInsufficientPermissions):
+        return False
+    if isinstance(e, (NoCredentialsError, TokenRetrievalError, UnauthorizedSSOTokenError, SSOTokenLoadError, LoginError)):
+        return True
+    if isinstance(e, ClientError):
+        return e.response.get("Error", {}).get("Code") in _AUTH_ERROR_CODES
+    return False
+
+
+def find_aws_cli() -> str | None:
+    """Locates the aws CLI. Apps launched by double-clicking (vs. a terminal)
+    get a minimal PATH that often excludes where aws is actually installed
+    (Homebrew, ~/.local/bin, etc.), so PATH alone isn't reliable here."""
+    found = shutil.which("aws")
+    if found:
+        return found
+    for candidate in (
+        os.path.expanduser("~/.local/bin/aws"),
+        "/opt/homebrew/bin/aws",
+        "/usr/local/bin/aws",
+        "/usr/bin/aws",
+    ):
+        if os.path.exists(candidate):
+            return candidate
+    return None
+
 REGION = "eu-north-1"
+AWS_ACCOUNT_ID = "412550564892"
+# Always target this account/profile, regardless of whatever AWS_PROFILE or
+# default profile happens to be set on a given machine.
+AWS_PROFILE = "dev-admin"
+os.environ["AWS_PROFILE"] = AWS_PROFILE
+
 LAMBDA_FUNCTION_NAME = "BedrockAthenaSQLExecutor"
 # Application inference profile tagged Project=definidata-tool, so Bedrock spend
 # is attributable/filterable in Cost Explorer.
@@ -227,7 +283,7 @@ if check_for_update():
 
 def run_query(question: str) -> str:
     """Invokes the Lambda (schema lookup -> SQL generation -> Athena execution)."""
-    lambda_client = boto3.client("lambda", region_name=REGION)
+    lambda_client = boto3.Session(profile_name=AWS_PROFILE, region_name=REGION).client("lambda")
     response = lambda_client.invoke(
         FunctionName=LAMBDA_FUNCTION_NAME,
         Payload=json.dumps({"inputText": question}).encode(),
@@ -239,7 +295,7 @@ def run_query(question: str) -> str:
 
 
 def synthesize_answer(question: str, query_result: str) -> str:
-    bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+    bedrock = boto3.Session(profile_name=AWS_PROFILE, region_name=REGION).client("bedrock-runtime")
     prompt = f"""You are a data analyst assistant.
 The user asked: "{question}"
 
@@ -273,20 +329,50 @@ if ask_clicked:
             with st.spinner("Querying the database..."):
                 query_result = run_query(question)
                 answer = synthesize_answer(question, query_result)
-        except (NoCredentialsError, ClientError) as e:
-            st.session_state.pop("last_result", None)
-            st.error(
-                "AWS authentication failed. Run `aws login` (or `aws sso login`) "
-                f"in a terminal, then reload this page.\n\nDetails: {e}"
-            )
         except Exception as e:
             st.session_state.pop("last_result", None)
-            st.error(f"Something went wrong: {e}")
+            if is_auth_error(e):
+                st.session_state.auth_error = str(e)
+            else:
+                st.session_state.pop("auth_error", None)
+                st.error(f"Something went wrong: {e}")
         else:
+            st.session_state.pop("auth_error", None)
             st.session_state.last_result = {"answer": answer, "query_result": query_result}
 
-# Rendered from session_state (not the transient ask_clicked flag) so that
-# cosmetic-only interactions - dark mode, Show SQL - never clear the answer.
+# Rendered from session_state (not the transient ask_clicked flag) so this
+# stays visible - and the sign-in button stays clickable - across cosmetic
+# reruns like toggling dark mode.
+if st.session_state.get("auth_error"):
+    with st.container(border=True):
+        st.error(
+            "Nothing ran because you're not signed in to AWS (or your session "
+            "expired) - that's the only reason, not a bug in your question."
+        )
+        st.caption(f"Details: {st.session_state.auth_error}")
+        if st.button(f"Sign in with aws sso login (profile: {AWS_PROFILE})"):
+            aws_cli = find_aws_cli()
+            if not aws_cli:
+                st.error(
+                    "Couldn't find the aws CLI on this machine. Install it, or run "
+                    f"`aws sso login --profile {AWS_PROFILE}` yourself in a terminal."
+                )
+            else:
+                try:
+                    with st.spinner("Opening AWS SSO sign-in - approve it in your browser..."):
+                        result = subprocess.run(
+                            [aws_cli, "sso", "login", "--profile", AWS_PROFILE],
+                            capture_output=True, text=True, timeout=180,
+                        )
+                except subprocess.TimeoutExpired:
+                    st.error(f"Sign-in timed out. Try `aws sso login --profile {AWS_PROFILE}` in a terminal instead.")
+                else:
+                    if result.returncode == 0:
+                        st.session_state.pop("auth_error", None)
+                        st.success("Signed in! Try asking your question again.")
+                    else:
+                        st.error(f"Sign-in failed:\n\n{result.stdout}{result.stderr}")
+
 if "last_result" in st.session_state:
     with st.container(border=True):
         st.markdown("### Answer")

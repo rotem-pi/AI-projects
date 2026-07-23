@@ -16,16 +16,19 @@ region `eu-north-1`, AWS account `412550564892`.
   dataframe itself.
 - A few minutes for first-time setup (a from-scratch, cache-free install
   measured at ~30s on a fast connection; expect longer on a slower one).
-- Valid AWS credentials for account `412550564892` with permission to:
+- An AWS SSO `dev-admin` profile (account `412550564892`, region `eu-north-1`)
+  with permission to:
   - `lambda:InvokeFunction` on `arn:aws:lambda:eu-north-1:412550564892:function:BedrockAthenaSQLExecutor`
   - `bedrock:InvokeModel` on `arn:aws:bedrock:eu-north-1:412550564892:application-inference-profile/718rksnz6bq9`
     (and on the underlying `amazon.nova-lite-v1:0` foundation model)
 
-  If you get `AccessDenied` errors, ask your AWS admin to grant the above on
-  your IAM role/permission set.
-- Sign in with `aws login` (or `aws sso login`, if your org uses IAM Identity
-  Center SSO profiles) before running definiData, and again whenever your
-  session expires (`aws login` sessions last up to 12h).
+  `install.sh` auto-configures this profile in `~/.aws/config` if it's
+  missing. If you get `AccessDenied` errors, ask your AWS admin to grant the
+  above on your role.
+- Sign in with `aws sso login --profile dev-admin` before running definiData,
+  and again whenever your session expires. `install.sh` offers to do this for
+  you, and the app itself will prompt you to sign in (with a one-click
+  button) if it detects you aren't.
 
 ## Setup - native macOS app (recommended)
 
@@ -57,9 +60,20 @@ http://localhost:8501) instead of installing an app icon.
 
 ## Usage
 
-Type a question (e.g. "top 5 tenants by activity"), optionally tick
-**Show SQL** to see the generated query and raw rows, then click **Ask**.
+Type a question (e.g. "top 5 tenants by activity") and press Enter or click
+**Ask**. Tick **Show SQL** to see the generated query and raw rows too.
 Toggle **Dark mode** top-right for a dark theme.
+
+If you're not signed in (or your session expired), the app tells you clearly
+that's why nothing ran - not a bug in your question - and gives you a
+**Sign in with aws sso login** button to fix it without leaving the app.
+
+## Auto-update
+
+definiData checks `origin/main` periodically (and on launch). If a newer
+version is available, a banner appears with an **Update & Restart** button
+(or **Update now** in browser mode) that pulls the latest code, reinstalls,
+and restarts the app for you.
 
 ## Notes
 
@@ -68,5 +82,3 @@ Toggle **Dark mode** top-right for a dark theme.
 - The schema documentation used to generate accurate SQL joins lives inside
   the `BedrockAthenaSQLExecutor` Lambda itself, not in this repo - reach out
   if you need it updated for new tables/columns.
-
-<!-- test marker: verifying the definiData auto-update banner (1784786915) -->
