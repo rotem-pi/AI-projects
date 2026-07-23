@@ -281,6 +281,17 @@ if check_for_update():
                 st.code(log, language="text")
 
 
+# Matches the sentinel the Lambda returns when it decides the input isn't
+# actually a database question (greeting, off-topic, gibberish, prompt
+# injection attempt, etc.) - see BedrockAthenaSQLExecutor's generate_sql().
+NOT_A_DB_QUESTION = "NOT_A_DB_QUESTION"
+FALLBACK_ANSWER = (
+    'That doesn\'t look like a question about the dev_app_analytics database. '
+    'Try something like "top 5 tenants by activity" or "how many tasks does '
+    'grammarly.com have".'
+)
+
+
 def run_query(question: str) -> str:
     """Invokes the Lambda (schema lookup -> SQL generation -> Athena execution)."""
     lambda_client = boto3.Session(profile_name=AWS_PROFILE, region_name=REGION).client("lambda")
@@ -328,7 +339,8 @@ if ask_clicked:
         try:
             with st.spinner("Querying the database..."):
                 query_result = run_query(question)
-                answer = synthesize_answer(question, query_result)
+                is_db_question = query_result != NOT_A_DB_QUESTION
+                answer = synthesize_answer(question, query_result) if is_db_question else FALLBACK_ANSWER
         except Exception as e:
             st.session_state.pop("last_result", None)
             if is_auth_error(e):
@@ -338,7 +350,11 @@ if ask_clicked:
                 st.error(f"Something went wrong: {e}")
         else:
             st.session_state.pop("auth_error", None)
-            st.session_state.last_result = {"answer": answer, "query_result": query_result}
+            st.session_state.last_result = {
+                "answer": answer,
+                "query_result": query_result,
+                "is_db_question": is_db_question,
+            }
 
 # Rendered from session_state (not the transient ask_clicked flag) so this
 # stays visible - and the sign-in button stays clickable - across cosmetic
@@ -377,6 +393,6 @@ if "last_result" in st.session_state:
     with st.container(border=True):
         st.markdown("### Answer")
         st.write(st.session_state.last_result["answer"])
-        if show_sql:
+        if show_sql and st.session_state.last_result.get("is_db_question", True):
             st.markdown("### SQL & raw results")
             st.code(st.session_state.last_result["query_result"], language="text")
