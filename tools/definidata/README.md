@@ -68,3 +68,5 @@ Toggle **Dark mode** top-right for a dark theme.
 - The schema documentation used to generate accurate SQL joins lives inside
   the `BedrockAthenaSQLExecutor` Lambda itself, not in this repo - reach out
   if you need it updated for new tables/columns.
+
+<!-- test marker: verifying the definiData auto-update banner (1784786915) -->
