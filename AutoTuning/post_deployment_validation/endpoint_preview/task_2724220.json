@@ -1,0 +1,109 @@
+{
+  "plan": {
+    "knobs": [
+      {
+        "spec": {
+          "config_key": "spark.sql.shuffle.partitions",
+          "insight_type": "executors_long_spill_time",
+          "initial_value": 200,
+          "target_value": 400,
+          "staircase": [
+            320,
+            368,
+            388,
+            400
+          ],
+          "cost_savings_usd_annual": 10138.5621395677,
+          "priority_score": 0.9619129164675239,
+          "duration_delta_pct_est": 5.4,
+          "confidence": "high",
+          "observed_signals": [
+            "confirmed_spill",
+            "ample_memory_headroom"
+          ],
+          "blocked": false,
+          "block_reason": null,
+          "step_cost_savings_usd": 6083.14
+        },
+        "state": null,
+        "step_cost_savings_usd": 6083.14
+      }
+    ],
+    "blocked_knobs": [
+      {
+        "spec": {
+          "config_key": "clusterWorkers",
+          "insight_type": "over_provisioned_cluster_machines",
+          "initial_value": 6,
+          "target_value": 5,
+          "staircase": [
+            5
+          ],
+          "cost_savings_usd_annual": 1511.12158701165,
+          "priority_score": 0.0,
+          "duration_delta_pct_est": 7.0,
+          "confidence": "high",
+          "observed_signals": [
+            "confirmed_spill",
+            "ample_memory_headroom"
+          ],
+          "blocked": true,
+          "block_reason": "Active disk spill detected (29% of shuffle I/O) \u2014 reducing executor count removes the memory capacity needed to keep shuffle data in-memory. Resolve spill first (increase spark.sql.shuffle.partitions or executor memory).",
+          "step_cost_savings_usd": 1511.12
+        },
+        "state": null,
+        "step_cost_savings_usd": 1511.12
+      },
+      {
+        "spec": {
+          "config_key": "__change_instance_type__",
+          "insight_type": "over_provisioned_driver_cores",
+          "initial_value": "8-vCPU driver machine",
+          "target_value": "2-vCPU driver machine",
+          "staircase": [
+            "2-vCPU driver machine"
+          ],
+          "cost_savings_usd_annual": 2657.57898689256,
+          "priority_score": 0.0,
+          "duration_delta_pct_est": 18.0,
+          "confidence": "high",
+          "observed_signals": [
+            "confirmed_spill",
+            "ample_memory_headroom"
+          ],
+          "blocked": true,
+          "block_reason": "Estimated failure probability 12% exceeds the 5% safety threshold (rules: spill_vs_instance_cost_down).",
+          "step_cost_savings_usd": null
+        },
+        "state": null,
+        "step_cost_savings_usd": null
+      }
+    ],
+    "constraints": {
+      "tolerance": "standard",
+      "step_pct_cap": 0.2,
+      "step_abs_cap": 5,
+      "apply_mode": "suggest"
+    },
+    "plan_created_timestamp": "2026-07-26T13:11:38.072953Z"
+  },
+  "inputs": {
+    "app_id": 28507,
+    "task_id": 2738454,
+    "active_insight_types": [
+      "executors_long_spill_time",
+      "over_provisioned_cluster_machines",
+      "task_profile",
+      "over_provisioned_driver_cores"
+    ],
+    "pre_tuning_durations_ms": [
+      33554233.0,
+      34801935.0,
+      2521985.0,
+      44294649.0,
+      745735.0
+    ],
+    "pre_tuning_cost_usd": 42.805861264796825,
+    "baseline_run_count": 5
+  }
+}

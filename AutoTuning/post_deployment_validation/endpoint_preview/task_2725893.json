@@ -1,0 +1,59 @@
+{
+  "plan": {
+    "knobs": [
+      {
+        "spec": {
+          "config_key": "spark.sql.shuffle.partitions",
+          "insight_type": "executors_long_spill_time",
+          "initial_value": 200,
+          "target_value": 400,
+          "staircase": [
+            320,
+            368,
+            388,
+            400
+          ],
+          "cost_savings_usd_annual": 9075.11104510883,
+          "priority_score": 0.8610162281886935,
+          "duration_delta_pct_est": 5.4,
+          "confidence": "high",
+          "observed_signals": [
+            "confirmed_spill",
+            "high_vcore_utilization",
+            "ample_memory_headroom"
+          ],
+          "blocked": false,
+          "block_reason": null,
+          "step_cost_savings_usd": 5445.07
+        },
+        "state": null,
+        "step_cost_savings_usd": 5445.07
+      }
+    ],
+    "blocked_knobs": [],
+    "constraints": {
+      "tolerance": "standard",
+      "step_pct_cap": 0.2,
+      "step_abs_cap": 5,
+      "apply_mode": "suggest"
+    },
+    "plan_created_timestamp": "2026-07-26T13:18:08.321446Z"
+  },
+  "inputs": {
+    "app_id": 7125,
+    "task_id": 2733430,
+    "active_insight_types": [
+      "task_profile",
+      "executors_long_spill_time"
+    ],
+    "pre_tuning_durations_ms": [
+      2521018.0,
+      8957682.0,
+      9402351.0,
+      9380523.0,
+      9116904.0
+    ],
+    "pre_tuning_cost_usd": 55.38249603002307,
+    "baseline_run_count": 5
+  }
+}

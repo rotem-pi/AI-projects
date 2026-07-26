@@ -1,0 +1,11 @@
+{
+  "knobs": [],
+  "blocked_knobs": [],
+  "constraints": {
+    "tolerance": "standard",
+    "step_pct_cap": 0.2,
+    "step_abs_cap": 5,
+    "apply_mode": "suggest"
+  },
+  "plan_created_timestamp": "2026-07-26T13:06:51.836505Z"
+}

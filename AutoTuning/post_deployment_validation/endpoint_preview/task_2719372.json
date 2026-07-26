@@ -1,0 +1,88 @@
+{
+  "plan": {
+    "knobs": [
+      {
+        "spec": {
+          "config_key": "spark.sql.shuffle.partitions",
+          "insight_type": "executors_long_spill_time",
+          "initial_value": 200,
+          "target_value": 400,
+          "staircase": [
+            320,
+            368,
+            388,
+            400
+          ],
+          "cost_savings_usd_annual": 15323.0882207269,
+          "priority_score": 1.4538034365016035,
+          "duration_delta_pct_est": 5.4,
+          "confidence": "high",
+          "observed_signals": [
+            "confirmed_spill",
+            "ample_memory_headroom"
+          ],
+          "blocked": false,
+          "block_reason": null,
+          "step_cost_savings_usd": 9193.85
+        },
+        "state": null,
+        "step_cost_savings_usd": 9193.85
+      }
+    ],
+    "blocked_knobs": [
+      {
+        "spec": {
+          "config_key": "clusterMaxWorkers",
+          "insight_type": "over_provisioned_cluster_machines",
+          "initial_value": 100,
+          "target_value": 55,
+          "staircase": [
+            82,
+            71,
+            61,
+            55
+          ],
+          "cost_savings_usd_annual": 13220.9648529843,
+          "priority_score": 0.0,
+          "duration_delta_pct_est": 12.0,
+          "confidence": "high",
+          "observed_signals": [
+            "confirmed_spill",
+            "ample_memory_headroom"
+          ],
+          "blocked": true,
+          "block_reason": "Active disk spill detected (50% of shuffle I/O) \u2014 reducing executor count removes the memory capacity needed to keep shuffle data in-memory. Resolve spill first (increase spark.sql.shuffle.partitions or executor memory).",
+          "step_cost_savings_usd": 5288.39
+        },
+        "state": null,
+        "step_cost_savings_usd": 5288.39
+      }
+    ],
+    "constraints": {
+      "tolerance": "standard",
+      "step_pct_cap": 0.2,
+      "step_abs_cap": 5,
+      "apply_mode": "suggest"
+    },
+    "plan_created_timestamp": "2026-07-26T13:11:26.912641Z"
+  },
+  "inputs": {
+    "app_id": 21776,
+    "task_id": 2734361,
+    "active_insight_types": [
+      "executors_long_spill_time",
+      "over_provisioned_cluster_machines",
+      "task_profile",
+      "orphaned_node_resources"
+    ],
+    "pre_tuning_durations_ms": [
+      8342032.999999999,
+      8523629.0,
+      8032646.0,
+      7716638.0,
+      9240453.0
+    ],
+    "pre_tuning_cost_usd": 190.82872143082673,
+    "baseline_run_count": 5
+  }
+}

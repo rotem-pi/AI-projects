@@ -1,0 +1,39 @@
+{
+  "knobs": [],
+  "blocked_knobs": [
+    {
+      "spec": {
+        "config_key": "spark.sql.shuffle.partitions",
+        "insight_type": "executors_long_spill_time",
+        "initial_value": 200,
+        "target_value": 400,
+        "staircase": [
+          320,
+          368,
+          388,
+          400
+        ],
+        "cost_savings_usd_annual": 13702.3074835213,
+        "priority_score": 0.0,
+        "duration_delta_pct_est": 12.0,
+        "confidence": "high",
+        "observed_signals": [
+          "low_vcore_utilization",
+          "ample_memory_headroom"
+        ],
+        "blocked": true,
+        "block_reason": "spark.sql.shuffle.partitions is set to 'auto' \u2014 AQE controls partition count at runtime. Set a fixed numeric value to enable tuning.",
+        "step_cost_savings_usd": 8221.38
+      },
+      "state": null,
+      "step_cost_savings_usd": 8221.38
+    }
+  ],
+  "constraints": {
+    "tolerance": "standard",
+    "step_pct_cap": 0.2,
+    "step_abs_cap": 5,
+    "apply_mode": "suggest"
+  },
+  "plan_created_timestamp": "2026-07-26T13:06:53.124092Z"
+}

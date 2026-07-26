@@ -1,0 +1,41 @@
+{
+  "knobs": [
+    {
+      "spec": {
+        "config_key": "spark.sql.shuffle.partitions",
+        "insight_type": "executors_long_spill_time",
+        "initial_value": 8000,
+        "target_value": 16000,
+        "staircase": [
+          10000,
+          12500,
+          14600,
+          15440,
+          16000
+        ],
+        "cost_savings_usd_annual": 45607.9184499357,
+        "priority_score": 4.327126987659933,
+        "duration_delta_pct_est": 5.4,
+        "confidence": "high",
+        "observed_signals": [
+          "confirmed_spill",
+          "high_vcore_utilization",
+          "ample_memory_headroom"
+        ],
+        "blocked": false,
+        "block_reason": null,
+        "step_cost_savings_usd": 11401.98
+      },
+      "state": null,
+      "step_cost_savings_usd": 11401.98
+    }
+  ],
+  "blocked_knobs": [],
+  "constraints": {
+    "tolerance": "standard",
+    "step_pct_cap": 0.2,
+    "step_abs_cap": 5,
+    "apply_mode": "suggest"
+  },
+  "plan_created_timestamp": "2026-07-26T13:06:47.921470Z"
+}

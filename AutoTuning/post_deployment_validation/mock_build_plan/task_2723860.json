@@ -1,0 +1,66 @@
+{
+  "knobs": [
+    {
+      "spec": {
+        "config_key": "spark.task.cpus",
+        "insight_type": "under_utilized_executors_cpu",
+        "initial_value": 2,
+        "target_value": 1,
+        "staircase": [
+          1
+        ],
+        "cost_savings_usd_annual": 73042.7127775387,
+        "priority_score": 7.091525512382399,
+        "duration_delta_pct_est": 3.0,
+        "confidence": "high",
+        "observed_signals": [
+          "confirmed_spill",
+          "high_vcore_utilization",
+          "ample_memory_headroom"
+        ],
+        "blocked": false,
+        "block_reason": null,
+        "step_cost_savings_usd": 73042.71
+      },
+      "state": null,
+      "step_cost_savings_usd": 73042.71
+    },
+    {
+      "spec": {
+        "config_key": "spark.sql.shuffle.partitions",
+        "insight_type": "executors_long_spill_time",
+        "initial_value": 8000,
+        "target_value": 16000,
+        "staircase": [
+          10000,
+          12500,
+          14600,
+          15440,
+          16000
+        ],
+        "cost_savings_usd_annual": 45482.4011545575,
+        "priority_score": 4.258651793497893,
+        "duration_delta_pct_est": 6.8,
+        "confidence": "high",
+        "observed_signals": [
+          "confirmed_spill",
+          "high_vcore_utilization",
+          "ample_memory_headroom"
+        ],
+        "blocked": false,
+        "block_reason": null,
+        "step_cost_savings_usd": 11370.6
+      },
+      "state": null,
+      "step_cost_savings_usd": 11370.6
+    }
+  ],
+  "blocked_knobs": [],
+  "constraints": {
+    "tolerance": "standard",
+    "step_pct_cap": 0.2,
+    "step_abs_cap": 5,
+    "apply_mode": "suggest"
+  },
+  "plan_created_timestamp": "2026-07-26T13:06:46.685191Z"
+}

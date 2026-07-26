@@ -1,0 +1,31 @@
+{
+  "plan": {
+    "knobs": [],
+    "blocked_knobs": [],
+    "constraints": {
+      "tolerance": "standard",
+      "step_pct_cap": 0.2,
+      "step_abs_cap": 5,
+      "apply_mode": "suggest"
+    },
+    "plan_created_timestamp": "2026-07-26T13:17:44.399083Z"
+  },
+  "inputs": {
+    "app_id": 21609,
+    "task_id": 2740195,
+    "active_insight_types": [
+      "executors_long_spill_time",
+      "task_profile",
+      "orphaned_node_resources"
+    ],
+    "pre_tuning_durations_ms": [
+      24632375.0,
+      24366250.0,
+      23925633.0,
+      24942937.0,
+      23642768.0
+    ],
+    "pre_tuning_cost_usd": 205.28180102721876,
+    "baseline_run_count": 5
+  }
+}
