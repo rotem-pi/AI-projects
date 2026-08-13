@@ -12,3 +12,6 @@ AutoTuning/data/fetch_checkpoints/
 AutoTuning/data/xgboost_fetch_checkpoints/
 AutoTuning/experiments/xgboost/data/
 AutoTuning/.claude/
+
+# TestGenerationModel generated data (see TestGenerationModel/.gitignore)
+TestGenerationModel/**/*.csv

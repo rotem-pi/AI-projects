@@ -7,5 +7,6 @@
 - **[AutoTuning/](AutoTuning/)** — Research and validation for Spark/Databricks auto-tuning: design docs, offline scripts, notebooks, and case-study data ([README inside](AutoTuning/README.md)).
 - **[incidents-test-analysis/](incidents-test-analysis/)** — Harness to compare pre– vs post–8f5e1c0 analytic test generation on exported metric runs ([README inside](incidents-test-analysis/README.md)).
 - **[tests-dashbording/](tests-dashbording/)** — Dash dashboard for incidents/tests over `test_runs_base.csv` ([README inside](tests-dashbording/README.md)).
+- **[TestGenerationModel/](TestGenerationModel/)** - Seasonality investigation and a proposed "guarded band" replacement for definity-app's automatic test generation, validated against production data ([README inside](TestGenerationModel/README.md)).
 - **[tools/](tools/)** — Standalone internal tools, each installable on its own.
   - **[definidata/](tools/definidata/)** — definiData: ask the `dev_app_analytics` database questions in plain English (NL-to-SQL via Bedrock + Athena), as a native macOS app or a browser tab ([README inside](tools/definidata/README.md)).

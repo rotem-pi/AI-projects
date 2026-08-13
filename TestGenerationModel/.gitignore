@@ -1,0 +1,5 @@
+# Data pulled from the production DB - regenerate by rerunning the scripts.
+*.csv
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
