@@ -2,8 +2,15 @@ const fs = require("fs");
 const {
   Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
   Table, TableRow, TableCell, WidthType, BorderStyle, ShadingType,
-  LevelFormat, PageBreak,
+  LevelFormat, PageBreak, ExternalHyperlink, UnderlineType,
 } = require("docx");
+
+// definity-app: production code referenced throughout (Motivation, Section 3).
+const DEFINITY_BLOB = "https://github.com/definity-ai/definity-app/blob/main/";
+const DEFINITY_TREE = "https://github.com/definity-ai/definity-app/tree/main/";
+// This investigation's own scripts/report, pushed to the AI-projects repo.
+const REPO_BLOB = "https://github.com/rotem-pi/AI-projects/blob/main/TestGenerationModel/";
+const REPO_TREE = "https://github.com/rotem-pi/AI-projects/tree/main/TestGenerationModel/";
 
 const ACCENT = "1A56DB";
 const DARK = "1F2937";
@@ -20,6 +27,20 @@ const CONTENT_W = 9360;
 
 const t = (text, opts = {}) => new TextRun({ text, font: "Calibri", size: 22, color: DARK, ...opts });
 const code = (text, opts = {}) => new TextRun({ text, font: "Consolas", size: 20, color: "0F4C81", ...opts });
+// A clickable, monospace, git-hosted path or filename. `url` must be the
+// full https://github.com/.../blob-or-tree/... address; `text` is what's
+// displayed (usually the same path, sometimes just the filename).
+const codeLink = (text, url, opts = {}) => new ExternalHyperlink({
+  link: url,
+  children: [new TextRun({
+    text, font: "Consolas", size: 20, color: ACCENT,
+    underline: { type: UnderlineType.SINGLE }, ...opts,
+  })],
+});
+const definityFile = (path, text) => codeLink(text || path, DEFINITY_BLOB + path);
+const definityDir = (path, text) => codeLink(text || path, DEFINITY_TREE + path);
+const repoFile = (path, text) => codeLink(text || path, REPO_BLOB + path);
+const repoDir = (path, text) => codeLink(text || path, REPO_TREE + path);
 
 const p = (children, opts = {}) =>
   new Paragraph({ children: Array.isArray(children) ? children : [t(children)], spacing: { after: 160, line: 276 }, ...opts });
@@ -126,8 +147,8 @@ children.push(new Paragraph({ children: [new PageBreak()] }));
 // 1. Motivation
 children.push(h1("1. Motivation"));
 children.push(p([
-  t("The current test generation pipeline ("), code("backend/app/brain/anomaly/tests_generator.py"),
-  t(" plus "), code("backend/app/tests_gen/"), t(") produces alert bounds by fitting an "),
+  t("The current test generation pipeline ("), definityFile("backend/app/brain/anomaly/tests_generator.py"),
+  t(" plus "), definityDir("backend/app/tests_gen/"), t(") produces alert bounds by fitting an "),
   code("AnalyticProphetTimeSeriesModel"), t(" (Prophet plus hand-tuned changepoint and spike heuristics) as a weak labeler, then running an Optuna grid search to distill those labels into one of four static test types ("),
   code("Const, Range, PctDiff, Trend"), t("), each stored as a "), code("test_type"),
   t(" plus up to three numbers ("), code("var1..var3"), t(")."),
@@ -149,7 +170,7 @@ children.push(p([
   t("Benjamini-Hochberg false discovery rate", { bold: true }),
   t(" procedure, which raises the bar for significance as more tests are run so the reported findings hold up rather than being noise from testing at scale. A pattern only counted as real if it also cleared two further bars: it had to be big enough to matter (at least a 10% swing, not a 2% wiggle), and, for time-of-day specifically, still present after scrambling the data to rule out it being leftover noise from one run bleeding into the next rather than a genuine time-of-day effect. “Material” means a flat rule that ignores the pattern would have to be over 30% wider than a rule that accounts for it, just to avoid false alarms."),
 ]));
-children.push(p([t("Measured across representative samples from "), code("metrics_agg"), t(" (see "), code("analysis_temp/seasonality-check/db/"), t("):")]));
+children.push(p([t("Measured across representative samples from "), code("metrics_agg"), t(" (see "), repoDir("db/", "TestGenerationModel/db/"), t("):")]));
 children.push(makeTable(
   [2400, 2200, 2380, 2380],
   ["Dimension", "Series tested", "Robust seasonal", "Material (>1.3x band cost)"],
@@ -165,7 +186,7 @@ children.push(p([
   t("Conclusion: ", { bold: true, color: ACCENT }),
   t("hour-of-day seasonality is the only dimension with material prevalence, and it is concentrated in the roughly 1.8% of auto tests on high-frequency (3 or more runs per day) series. On those, existing Range tests were found to be "),
   t("5x wider (median)", { bold: true }),
-  t(" than an hour-aware band would need, confirmed quantitatively via a backtest ("), code("backtest_vs_existing_range.py"),
+  t(" than an hour-aware band would need, confirmed quantitatively via a backtest ("), repoFile("db/backtest_vs_existing_range.py", "backtest_vs_existing_range.py"),
   t("): existing tests detect "), t("7%", { bold: true }), t(" of injected +50% anomalies and "), t("17%", { bold: true }), t(" of +100% anomalies on this population."),
 ]));
 children.push(p([
@@ -178,7 +199,7 @@ children.push(p([
 children.push(h1("3. Proposed Architecture: Calibrated Trailing-Median Band"));
 
 children.push(h2("3.1 Suggested Solution"));
-children.push(p([t("The winning architecture", { bold: true, color: ACCENT }), t(" (see "), code("stage3_guarded_band.py"), t(", "), code("stage4_final_eval.py"), t(") replaces the frozen, once-computed test with a band that predicts the next value and sizes its own tolerance from recent history, refreshed on a schedule:")]));
+children.push(p([t("The winning architecture", { bold: true, color: ACCENT }), t(" (see "), repoFile("db/stage3_guarded_band.py", "stage3_guarded_band.py"), t(", "), repoFile("db/stage4_final_eval.py", "stage4_final_eval.py"), t(") replaces the frozen, once-computed test with a band that predicts the next value and sizes its own tolerance from recent history, refreshed on a schedule:")]));
 children.push(numbered([t("Point forecast: ", { bold: true }), t("median of the last 3 values (causal; never uses the point it is predicting).")], "steps3"));
 children.push(numbered([t("Tolerance, asymmetric: ", { bold: true }), t("separately calibrate a down-side and an up-side tolerance from the last 8 weeks of relative prediction errors, at a conformal miss budget of 0.1% per side (0.2% total).")], "steps3"));
 children.push(numbered([t("Rare-spike exclusion: ", { bold: true }), t("before calibrating, drop calibration errors that are more than 8x the window's own 90th-percentile error, but only if such errors are rare (6% or less of the window). Frequent large errors are treated as the series' normal behavior, not anomalies to exclude.")], "steps3"));
@@ -250,7 +271,7 @@ children.push(p([
   t("Rejected: ", { bold: true }),
   t("serving Prophet models directly (a model artifact per series). Vanilla Prophet's native 99.5% interval, benchmarked head-to-head against adaptive baselines under identical leakage-free splits, produced "),
   t("8-20% storm rates", { bold: true }), t(" (series exceeding a 5% false-alert rate), worse than simple adaptive baselines, and 250 KB-per-series model artifacts with no clear serving benefit over a stored-bounds table. See "),
-  code("model_bakeoff.py"), t(" results."),
+  repoFile("db/model_bakeoff.py", "model_bakeoff.py"), t(" results."),
 ]));
 children.push(p("This ruled out the direction of “ship the labeler as the production model” and pointed toward the calibrated, distilled band described in Section 3.1 as the better trade-off between model quality and operational simplicity."));
 
@@ -330,7 +351,7 @@ children.push(h2("4.3 Large-Sample Run-Level Matrix"));
 children.push(p([
   t("A full, non-sampled replay across all approximately 70,000 enabled auto tests proved impractical against the production read replica: two attempts were interrupted by transient replica connection drops during the long single-shot export. Rather than keep retrying the same fragile approach, this was recomputed as a "),
   t("large stratified sample (10,000 series, 5,380 usable, 317,166 runs)", { bold: true }),
-  t(", more than 30x the 279-series sample behind Section 4.2, computed in small checkpointed chunks ("), code("resilient_matrices.py"),
+  t(", more than 30x the 279-series sample behind Section 4.2, computed in small checkpointed chunks ("), repoFile("db/resilient_matrices.py", "resilient_matrices.py"),
   t(") so that any interruption loses at most one chunk rather than the whole run, fetching 180 days of history per series (widened from an initial 88 days specifically so the Const carve-out's full-lifetime check in Section 3.2 has enough history to evaluate) and using the Const-carve-out-corrected "), code("final_band"),
   t(". Note the sampling frame here is drawn uniformly from all enabled auto tests regardless of recent activity, which skews toward sparse-cadence series and is why 4,620 of 10,000 lacked enough recent data to score (a data-availability skip, not a method failure); it is a different composition than the activity-filtered sample in Section 4.2, so the two should be read as directionally consistent rather than identical."),
 ]));
@@ -370,16 +391,19 @@ children.push(numbered([t("Registry allow-list: "), t("confirmed unnecessary for
 // Reproducibility
 children.push(h1("Reproducibility"));
 children.push(p([
-  t("All scripts and per-series result files live in "), code("analysis_temp/seasonality-check/"),
-  t(" and "), code("analysis_temp/seasonality-check/db/"), t(". Key scripts:"),
+  t("All scripts referenced below are pushed to "),
+  repoDir("", "github.com/rotem-pi/AI-projects/.../TestGenerationModel/"),
+  t(". Per-series result CSVs are "), t("not", { italics: true }),
+  t(" committed (they are raw production pulls); rerun the relevant script against the replica to regenerate them - see the folder's own "),
+  repoFile("README.md"), t(" for setup. Key scripts:"),
 ]));
-children.push(bullet([code("model_bakeoff.py"), t(" - architecture comparison (Section 3.3)")]));
-children.push(bullet([code("round2/3_*.py"), t(" - representative sampling, lifetime vs. recent-cadence tiers")]));
-children.push(bullet([code("stage2_*.py"), t(", "), code("stage3_guarded_band.py"), t(", "), code("stage4_final_eval.py"), t(" - progressive refinement of the final design (Section 3)")]));
-children.push(bullet([code("stage5_conversion_matrices.py"), t(" - Section 4.2")]));
-children.push(bullet([code("resilient_matrices.py"), t(" / "), code("aggregate_resilient.py"), t(" - Section 4.3, checkpointed large-sample run")]));
-children.push(bullet([code("visual_side_by_side.py"), t(" - shared DB helpers only (connection, SQL, current-test predictor); not a report generator")]));
-children.push(bullet([code("stage4_final_eval.py"), t(" -> "), code("guarded_band_report.html"), t(": the single consolidated comparison report (illustrative examples with definity task links). An earlier separate 3-case report was merged into this one so there is exactly one report to keep in sync with the model.")]));
+children.push(bullet([repoFile("db/model_bakeoff.py", "model_bakeoff.py"), t(" - architecture comparison (Section 3.3)")]));
+children.push(bullet([repoFile("db/round2_representative.py", "round2_representative.py"), t(" / "), repoFile("db/round3_recent_tiers.py", "round3_recent_tiers.py"), t(" - representative sampling, lifetime vs. recent-cadence tiers")]));
+children.push(bullet([repoDir("db/", "stage2_*.py"), t(", "), repoFile("db/stage3_guarded_band.py", "stage3_guarded_band.py"), t(", "), repoFile("db/stage4_final_eval.py", "stage4_final_eval.py"), t(" - progressive refinement of the final design (Section 3)")]));
+children.push(bullet([repoFile("db/stage5_conversion_matrices.py", "stage5_conversion_matrices.py"), t(" - Section 4.2")]));
+children.push(bullet([repoFile("db/resilient_matrices.py", "resilient_matrices.py"), t(" / "), repoFile("db/aggregate_resilient.py", "aggregate_resilient.py"), t(" - Section 4.3, checkpointed large-sample run")]));
+children.push(bullet([repoFile("db/visual_side_by_side.py", "visual_side_by_side.py"), t(" - shared DB helpers only (connection, SQL, current-test predictor); not a report generator")]));
+children.push(bullet([repoFile("db/stage4_final_eval.py", "stage4_final_eval.py"), t(" -> "), repoFile("db/guarded_band_report.html", "guarded_band_report.html"), t(": the single consolidated comparison report (illustrative examples with definity task links). An earlier separate 3-case report was merged into this one so there is exactly one report to keep in sync with the model.")]));
 
 const doc = new Document({
   numbering: {
