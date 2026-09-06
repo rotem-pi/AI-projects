@@ -16,3 +16,4 @@ data/results/
 data/jobs/
 deploy/.context/
 deploy/.last-image
+deploy/.build.log
