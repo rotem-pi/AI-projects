@@ -123,6 +123,25 @@ details pre{margin:0;padding:0 16px 16px;font-family:var(--mono);font-size:12px;
 .login .code{font-family:var(--mono);font-size:28px;font-weight:500;letter-spacing:.08em}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:8px 14px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
+.how-link{margin-left:4px;color:var(--muted);background:none;border:1px solid var(--line-soft);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
+.how-link:hover{color:var(--ink);border-color:var(--line)}
+dialog#how{border:none;border-radius:10px;padding:0;background:var(--paper);color:var(--ink);max-width:640px;width:calc(100vw - 48px);max-height:calc(100vh - 64px)}
+dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
+.how-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line-soft);position:sticky;top:0;background:var(--paper)}
+.how-head h2{font-size:18px;flex:1}
+.how-close{background:none;border:1px solid var(--line-soft);border-radius:6px;width:30px;height:30px;color:var(--muted);cursor:pointer;font-size:16px;line-height:1}
+.how-close:hover{color:var(--ink)}
+.how-body{padding:6px 22px 22px;overflow-y:auto;font-size:13.5px}
+.how-body h3{font-size:13px;letter-spacing:.03em;text-transform:uppercase;color:var(--muted);margin:20px 0 8px}
+.how-body p{margin:0 0 10px;max-width:64ch}
+.how-flow{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px;padding:0;list-style:none}
+.how-flow li{display:flex;align-items:center;gap:6px}
+.how-flow .node{font-family:var(--mono);font-size:12px;padding:4px 9px;border:1px solid var(--line-soft);border-radius:999px;background:var(--ground);white-space:nowrap}
+.how-flow .arrow{color:var(--muted)}
+.how-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.how-col b{display:block;font-size:13px;margin-bottom:3px}
+.how-col p{font-size:13px;color:var(--muted);margin:0}
+@media (max-width:560px){.how-cols{grid-template-columns:1fr}}
 .recent td:first-child{font-family:var(--mono)}
 @media (max-width:760px){.steps{grid-template-columns:1fr 1fr}.summary,.head{grid-template-columns:1fr}.rec dl{grid-template-columns:1fr}}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
@@ -131,12 +150,65 @@ details pre{margin:0;padding:0 16px 16px;font-family:var(--mono);font-size:12px;
 <body>
 <header class="top">
   <a class="wordmark" href="/"><i></i>Recommendation Agent <small>Spark tuning recommendations, on request</small></a>
+  <button class="how-link" id="how-open" type="button" aria-haspopup="dialog">How this works</button>
   <div class="chips">
     <span class="chip" id="c-aws"><i class="dot wait"></i>AWS <b>checking…</b></span>
     <span class="chip" id="c-fresh" hidden>Athena export <b></b></span>
     <span class="chip" id="c-ttl" hidden>Jobs expire after <b></b></span>
   </div>
 </header>
+
+<dialog id="how">
+  <div class="how-head">
+    <h2>How Recommendation Agent works</h2>
+    <button class="how-close" id="how-close" type="button" aria-label="Close">✕</button>
+  </div>
+  <div class="how-body">
+    <p>You give it a task name. It pulls that task's real run history from Athena, runs
+    it through an LLM agent built on definity's own tuning knowledge, and hands back
+    Spark config changes with the reasoning and the dollar impact behind each one —
+    not a suggestion pulled from memory, but one grounded in this specific run's
+    telemetry.</p>
+
+    <h3>The pipeline</h3>
+    <p>Every analysis runs the same nine steps, in order:</p>
+    <ul class="how-flow">
+      <li><span class="node">Fetch context</span><span class="arrow">→</span></li>
+      <li><span class="node">Entry gate</span><span class="arrow">→</span></li>
+      <li><span class="node">SQL rules</span><span class="arrow">→</span></li>
+      <li><span class="node">Agent discovery</span><span class="arrow">→</span></li>
+      <li><span class="node">Merge insights</span><span class="arrow">→</span></li>
+      <li><span class="node">Triage</span><span class="arrow">→</span></li>
+      <li><span class="node">Plan</span><span class="arrow">→</span></li>
+      <li><span class="node">Safety check</span><span class="arrow">→</span></li>
+      <li><span class="node">Explain</span></li>
+    </ul>
+    <div class="how-cols">
+      <div class="how-col"><b>Fetch context</b><p>Pulls the task's latest completed run, its config history, and up to 20 prior runs from Athena.</p></div>
+      <div class="how-col"><b>Entry gate</b><p>Refuses to analyze anything but a COMPLETED run — no guessing from a run still in progress.</p></div>
+      <div class="how-col"><b>SQL rules</b><p>Deterministic checks (idle time, GC pressure, retries, over-provisioning, …) that definity already runs in production, replayed here.</p></div>
+      <div class="how-col"><b>Agent discovery</b><p>The LLM inspects telemetry the SQL rules don't cover, using definity's own knowledge base — physics of Spark memory/compute/shuffle, known failure playbooks — as its reference.</p></div>
+      <div class="how-col"><b>Merge insights</b><p>Combines the SQL-rule and agent-discovered findings into one list, deduplicated.</p></div>
+      <div class="how-col"><b>Triage</b><p>Ranks findings into health-first tiers and resolves ones that conflict (e.g. two changes to the same executor-memory setting).</p></div>
+      <div class="how-col"><b>Plan</b><p>Turns each surviving finding into a concrete config change, with a dollar-cost estimate priced from this task's own historical run cost — never a guessed percentage.</p></div>
+      <div class="how-col"><b>Safety check</b><p>Blocks or defers anything that violates a hard rule — a cost increase with no measured problem to justify it, two changes to the same coupled setting, a config key that doesn't exist for this Spark version.</p></div>
+      <div class="how-col"><b>Explain</b><p>Writes the plain-language why/how/risk for every change that survives, which is what you see on the results screen.</p></div>
+    </div>
+
+    <h3>What grounds it</h3>
+    <p>The reasoning isn't free-form. Every step above draws on a written knowledge base of
+    Spark internals (how memory, shuffle, driver sizing and cluster autoscaling actually
+    behave) plus a set of hard safety rules the plan can never override — so a change has
+    to earn its place with real evidence and can't contradict itself with another change
+    in the same plan.</p>
+
+    <h3>Data & limits</h3>
+    <p>Task data comes from an Athena export of definity's production tables, which lags
+    live production — the freshest run visible here may be a few hours or a day old (see
+    the "Athena export" indicator above). Every job's dump, working files and results are
+    deleted a few hours after it finishes; download the JSON if you need to keep it.</p>
+  </div>
+</dialog>
 
 <main>
   <div class="steps">
@@ -234,6 +306,9 @@ const usd = v => { if (v == null) return ''; const n = Number(v); return (n<0?'-
 const pct = v => v == null ? '' : Math.round(Number(v)*100) + '%';
 const short = ts => ts ? String(ts).replace('T',' ').slice(0,16) : '';
 function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),2200); }
+$('#how-open').addEventListener('click', ()=>$('#how').showModal());
+$('#how-close').addEventListener('click', ()=>$('#how').close());
+$('#how').addEventListener('click', e=>{ if (e.target === $('#how')) $('#how').close(); });
 async function api(path, opts){ const r = await fetch(path, {headers:{'content-type':'application/json'}, ...opts}); if(!r.ok){ let m = r.statusText; try{ m = (await r.json()).detail || m; }catch(e){} throw new Error(m); } return r.json(); }
 function go(n){ document.querySelectorAll('.step').forEach(b=>{ if(b.dataset.s==n) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); }); document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='s'+n)); window.scrollTo({top:0}); }
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
