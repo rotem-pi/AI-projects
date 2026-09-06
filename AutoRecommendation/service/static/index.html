@@ -123,8 +123,10 @@ details pre{margin:0;padding:0 16px 16px;font-family:var(--mono);font-size:12px;
 .login .code{font-family:var(--mono);font-size:28px;font-weight:500;letter-spacing:.08em}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:8px 14px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
 .toast.on{opacity:1}
-.how-link{margin-left:4px;color:var(--muted);background:none;border:1px solid var(--line-soft);border-radius:999px;padding:4px 10px;font:inherit;font-size:12px;cursor:pointer}
-.how-link:hover{color:var(--ink);border-color:var(--line)}
+.how-link{display:inline-flex;align-items:center;gap:8px;margin-left:6px;color:var(--accent-strong);background:var(--accent-soft);border:1px solid var(--accent);border-radius:999px;padding:8px 16px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;flex:none}
+.how-link:hover{background:var(--accent);color:var(--accent-ink)}
+.how-link .qmark{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:12px;font-weight:700;flex:none}
+.how-link:hover .qmark{background:var(--accent-ink);color:var(--accent-strong)}
 dialog#how{border:none;border-radius:10px;padding:0;background:var(--paper);color:var(--ink);max-width:640px;width:calc(100vw - 48px);max-height:calc(100vh - 64px)}
 dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
 .how-head{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--line-soft);position:sticky;top:0;background:var(--paper)}
@@ -150,7 +152,7 @@ dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
 <body>
 <header class="top">
   <a class="wordmark" href="/"><i></i>Recommendation Agent <small>Spark tuning recommendations, on request</small></a>
-  <button class="how-link" id="how-open" type="button" aria-haspopup="dialog">How this works</button>
+  <button class="how-link" id="how-open" type="button" aria-haspopup="dialog"><span class="qmark">?</span>How this works</button>
   <div class="chips">
     <span class="chip" id="c-aws"><i class="dot wait"></i>AWS <b>checking…</b></span>
     <span class="chip" id="c-fresh" hidden>Athena export <b></b></span>
@@ -201,6 +203,16 @@ dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
     behave) plus a set of hard safety rules the plan can never override — so a change has
     to earn its place with real evidence and can't contradict itself with another change
     in the same plan.</p>
+
+    <h3>Under the hood</h3>
+    <p>The LLM steps (agent discovery, plan, safety check, explain) run on Claude through
+    <b>Amazon Bedrock</b><span id="how-model"></span> — the same AWS account and
+    credentials as the Athena queries above, not a separate API key.</p>
+    <p>The agent's code and its entire knowledge base (the Spark physics docs, the safety
+    fences, the per-subsystem detectors) live in definity-app's own repo, on the
+    <a href="https://github.com/definity-ai/definity-app/tree/auto-recommendations-agent" target="_blank" rel="noopener"><code>auto-recommendations-agent</code></a>
+    branch<span id="how-commit"></span> — none of it is generated or recalled by the LLM
+    from training data.</p>
 
     <h3>Data & limits</h3>
     <p>Task data comes from an Athena export of definity's production tables, which lags
@@ -329,6 +341,12 @@ async function refreshStatus(){
   if (f.latest_enrichment_pit){ $('#c-fresh').hidden=false; $('#c-fresh').querySelector('b').textContent = short(f.latest_enrichment_pit)+' UTC'; $('#fresh2').textContent = 'newest exported run '+short(f.latest_enrichment_pit)+' UTC'; }
   $('#c-ttl').hidden=false; $('#c-ttl').querySelector('b').textContent = STATUS.ttl_hours+' h';
   document.querySelectorAll('.ttl').forEach(e=>e.textContent = STATUS.ttl_hours);
+  if (STATUS.llm_model) $('#how-model').textContent = ` (currently ${STATUS.llm_model})`;
+  const build = STATUS.build || {};
+  if (build.backend_commit) {
+    const sha = build.backend_commit;
+    $('#how-commit').innerHTML = ` — this deployment is pinned to <a href="https://github.com/definity-ai/definity-app/commit/${encodeURIComponent(sha)}" target="_blank" rel="noopener"><code>${esc(sha)}</code></a>, not whatever the branch has moved to since`;
+  }
   const L = STATUS.login;
   if (L && !L.done){ showDevice(L); if(!loginTimer) loginTimer = setInterval(refreshStatus, 3000); }
   else if (loginTimer && (!L || L.done)){ clearInterval(loginTimer); loginTimer=null; if (L && L.ok) toast('AWS session active'); if (L && !L.ok && L.error) $('#l-err').textContent = L.error; }

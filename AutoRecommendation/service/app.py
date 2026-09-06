@@ -400,6 +400,23 @@ async def health() -> dict[str, Any]:
     return {"ok": True, "running": len(_running), "jobs_dir": str(JOBS_DIR)}
 
 
+def _build_info() -> dict[str, str | None]:
+    """harness/backend commit SHAs baked in by deploy/build.sh's BUILD_INFO
+    (absent outside a built image, e.g. running locally via preview_start) —
+    surfaced so the "How this works" panel can link to the exact definity-app
+    commit this deployment's knowledge base and agent code came from, not
+    just a branch name that keeps moving."""
+    path = ROOT / "BUILD_INFO"
+    if not path.exists():
+        return {"harness_commit": None, "backend_commit": None}
+    info: dict[str, str] = {}
+    for line in path.read_text().splitlines():
+        if "=" in line:
+            k, v = line.split("=", 1)
+            info[k.strip()] = v.strip()
+    return {"harness_commit": info.get("harness"), "backend_commit": info.get("backend")}
+
+
 @app.get("/api/status")
 async def status() -> dict[str, Any]:
     aws = await AWS.check()
@@ -411,6 +428,8 @@ async def status() -> dict[str, Any]:
         "max_concurrent": MAX_CONCURRENT,
         "running": len(_running),
         "athena_db": _main._ATHENA_DB,
+        "llm_model": os.environ.get("LLM_MODEL", "eu.anthropic.claude-sonnet-4-6"),
+        "build": _build_info(),
     }
 
 
