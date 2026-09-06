@@ -31,9 +31,9 @@ from dotenv import load_dotenv
 load_dotenv(_REPO_ROOT / ".env")
 
 import main as harness  # Athena helpers + results dir
+from bootstrap_worktree import resolved_backend_path
 
-_BACKEND = _REPO_ROOT.parent.parent / "definity-app" / "backend"
-_BACKEND_PYTHON = _BACKEND / ".venv" / "bin" / "python"
+_BACKEND = resolved_backend_path()  # dedicated worktree pinned to auto-recommendations-agent
 _RUNNER = Path(__file__).parent / "pg_nodes_runner.py"
 
 
@@ -49,7 +49,8 @@ def _run_pg_side(task_id: int, out_path: Path) -> dict:
 
     env = {**os.environ, "DATABASE_URL": database_url}
     result = subprocess.run(
-        [str(_BACKEND_PYTHON), str(_RUNNER), "--task-id", str(task_id), "--out", str(out_path)],
+        ["uv", "run", "--project", str(_BACKEND), "python", str(_RUNNER),
+         "--task-id", str(task_id), "--out", str(out_path)],
         cwd=str(_BACKEND),  # so app.config resolves the backend .env / VERSION
         env=env,
     )

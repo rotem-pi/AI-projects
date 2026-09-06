@@ -1,0 +1,114 @@
+[
+  {
+    "insight_id": 580535,
+    "task_name": "compute",
+    "type": "agent_discovered_autoscaling_cluster_with_dynamic_allocat",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "analysis": "[Agent-generated insight] The cluster is configured for autoscaling (min_workers=1, max_workers=2) but spark.dynamicAllocation.enabled=false and spark.executor.instances is not set. The single executor ran for the full 343-second wall-clock duration, yet executor idle time was 251.9 s out of 343.9 s (73% idle). With dynamic allocation disabled, Spark cannot release the executor during the long idle stretches, so the cluster pays for a fully allocated executor that is doing nothing for nearly three-quarters of the run. The autoscaler can provision workers, but Spark will not use or release them dynamically.",
+      "evidence": "executors_idle_time = 251.87 s out of 343.87 s wall-clock (73% idle); idle_ratio = 0.51; vcore_utilization = 0.256; dynamic_allocation_enabled = false; cluster autoscaling ON (min=1, max=2); executor_instances_param not set.",
+      "severity": "cost",
+      "confidence": 0.82,
+      "kb_version": "e28f1c569f93",
+      "run_task_id": 2762051,
+      "generated_at": "2026-07-28T08:27:09.046387+00:00",
+      "generated_by": "auto-recommendations-agent (LangGraph insights agent)",
+      "readable_name": "[Agent] Autoscaling Cluster with Dynamic Allocation Disabled \u2014 Idle Executor Waste",
+      "suggested_action": "Enable Spark dynamic allocation (spark.dynamicAllocation.enabled=true) and set appropriate spark.dynamicAllocation.minExecutors / maxExecutors bounds aligned with the cluster's min/max worker counts. This allows Spark to release the idle executor during the long non-compute phases, reducing billed vcore-seconds. Alternatively, if the workload is consistently single-executor, lock cluster_min_workers = cluster_max_workers = 1 and disable autoscaling to avoid the overhead of the scaling control plane."
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 580534,
+    "task_name": "compute",
+    "type": "agent_discovered_driver_off_heap_fully_saturated",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "analysis": "[Agent-generated insight] The driver's off-heap memory utilisation reached 100% (max_off_heap_memory_utilization = 1.0), consuming 0.587 GB out of 0.375 GB allocated off-heap. This means the driver's native/overhead region is completely exhausted. While the run completed, this is a fragile state: any increase in broadcast staging, plan complexity, or result collection could cause a driver OOM or silent data truncation on the next run.",
+      "evidence": "metric driver_max_off_heap_memory_utilization = 1.0 (100%); driver_max_off_heap_used_memory = 0.587 GB; driver_off_heap_memory (allocated) = 0.375 GB. Driver heap utilisation is moderate (max 53.7%), so the pressure is specifically in the off-heap/overhead region, not the JVM heap.",
+      "severity": "health",
+      "confidence": 0.88,
+      "kb_version": "e28f1c569f93",
+      "run_task_id": 2762051,
+      "generated_at": "2026-07-28T08:27:09.046387+00:00",
+      "generated_by": "auto-recommendations-agent (LangGraph insights agent)",
+      "readable_name": "[Agent] Driver Off-Heap Fully Saturated",
+      "suggested_action": "Increase the driver's off-heap/overhead allocation. On Databricks this is controlled via spark.driver.memoryOverhead (or the cluster's driver memory overhead setting). A conservative first step would be to raise it from the current ~375 MB to at least 768 MB\u20131 GB, then verify the utilisation drops below 70% on the next run."
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 580536,
+    "task_name": "compute",
+    "type": "agent_discovered_highly_skewed_stage_1_single_task_domina",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "analysis": "[Agent-generated insight] Stage 1 ran 888 tasks reading 615 MB of input, but the task duration distribution is severely skewed: p50 = 250 ms, p75 = 297 ms, p100 = 11,788 ms \u2014 the slowest task is ~47\u00d7 the median. Similarly, inputMetrics_bytesRead shows p50 = 524 KB but p100 = 18.2 MB (~35\u00d7 the median), and inputMetrics_recordsRead p50 = 0 but p100 = 52,235. This single straggler task is stretching the stage wall-time by roughly 40\u00d7 beyond what a balanced stage would take, and it is the dominant contributor to overall job duration.",
+      "evidence": "Stage 1 taskMetricsDistributions: duration [46, 223, 250, 297, 11788] ms (p0/p25/p50/p75/p100); inputMetrics_bytesRead [0, 524288, 524288, 524288, 18213912] bytes; inputMetrics_recordsRead [0, 0, 0, 0, 52235]. 888 tasks total. The straggler task is ~47\u00d7 the median duration and reads ~35\u00d7 the median data volume.",
+      "severity": "performance",
+      "confidence": 0.91,
+      "kb_version": "e28f1c569f93",
+      "run_task_id": 2762051,
+      "generated_at": "2026-07-28T08:27:09.046387+00:00",
+      "generated_by": "auto-recommendations-agent (LangGraph insights agent)",
+      "readable_name": "[Agent] Highly Skewed Stage 1: Single Task Dominates 888-Task Stage",
+      "recommendations": [
+        {
+          "action": "set_cluster_config",
+          "reason": "With dynamic allocation enabled (priority 1 change), the cluster autoscaler needs explicit min/max bounds. Keeping clusterMinWorkers=1 ensures at least one executor is always available to avoid cold-start latency on the next task. The current cluster already has min_workers=1 so this is a confirmation/explicit set rather than a change, but it must be stated alongside the max change so the autoscaler bounds are unambiguous. Saving is captured by the dynamic-allocation enable above; this is a supporting bound.",
+          "config_key": "clusterMinWorkers",
+          "current_value": null,
+          "suggested_value": 1
+        },
+        {
+          "action": "set_cluster_config",
+          "reason": "Retaining clusterMaxWorkers=2 preserves the existing burst capacity. The workload currently runs on a single executor (cluster_workers=1) and vcore_utilization is only 0.256, so there is no evidence that more than 2 workers is needed. Keeping the ceiling at 2 is conservative and consistent with the existing cluster policy. This is a companion to the clusterMinWorkers set above \u2014 both must be explicit when dynamic allocation is enabled on Databricks.",
+          "config_key": "clusterMaxWorkers",
+          "current_value": null,
+          "suggested_value": 2
+        }
+      ],
+      "suggested_action": "Investigate the input data partitioning for Stage 1 (a scan/read stage with 888 partitions). The straggler partition contains ~18 MB vs a median of ~524 KB \u2014 a 35\u00d7 imbalance. Check whether one input file or S3 object is disproportionately large. If using Parquet/Delta, consider repartitioning the source data or lowering spark.sql.files.maxPartitionBytes (currently likely at the default 128 MB) to split the large file into smaller, more balanced partitions. AQE cannot rebalance scan-stage input splits, so this requires a source-side or maxPartitionBytes fix.",
+      "blocked_recommendation": "set_spark_config spark.dynamicAllocation.enabled=true \u2014 blocked: llm safety review: This is a Databricks cluster (confirmed by task_sub_type='Databricks' and clusterUsageTags in spark_parameters). On Databricks, dynamic allocation is already managed by the platform and is effectively always on \u2014 setting spark.dynamicAllocation.enabled=true via Spark conf is a no-op at best and may conflict with Databricks' internal dynamic allocation integration. The correct control plane on Databricks is the cluster autoscaler via clusterMinWorkers/clusterMaxWorkers (recommendations 1 and 2), not spark.dynamicAllocation.enabled. The KB anti-pattern 'Tuning executor scaling through the wrong control plane' explicitly states: 'Recommending spark.dynamicAllocation.enabled=true [on Databricks] is a no-op (it is already on), and user-set spark.dynamicAllocation.minExecutors/maxExecutors are unsupported and ignored or overridden \u2014 the effective scaling bounds come from the cluster's min/max workers.' Applying this change targets the wrong control plane and the mechanism claim in the rationale is incorrect for a Databricks cluster."
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 364743,
+    "task_name": "compute",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "c6gd.xlarge",
+      "worker_types": [
+        "m6gd.xlarge"
+      ],
+      "cnt_task_runs": 18,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 17,
+      "cluster_workers": 1,
+      "shuffle_partitions": "200",
+      "cluster_max_workers": 2,
+      "cluster_min_workers": 1,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "SPOT_WITH_FALLBACK",
+      "cnt_completed_task_runs": 18
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

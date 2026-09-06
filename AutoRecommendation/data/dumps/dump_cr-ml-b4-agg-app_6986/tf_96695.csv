@@ -1,0 +1,38 @@
+key,value
+tf_id,96695
+agent_tf_id,1
+task_id,6986
+env,default
+task_name,cr-ml-b4-agg-app
+app_id,4
+app_name,cr-ml-b4-agg-app
+app_pit,2026-07-20T17:01:04
+output_name,abfss://cr-ml-pre-agg-b4@csicrprod.dfs.core.windows.net/data
+tf_type,file
+status,COMPLETED
+start_time,2026-07-20T17:53:04.749000+00:00
+end_time,2026-07-20T17:53:51.702000+00:00
+duration,46.953
+cnt_test_runs,
+cnt_alerts,
+cnt_breaks,
+cnt_metrics,12
+tf_io_type,output
+error,
+description,save at FormatSparkWriter.scala:28 (InsertIntoHadoopFsRelationCommand)
+query_str,"InsertIntoHadoopFsRelationCommand($VAR_1$, false, Avro, $VAR_2$, Append, [account, ip, ts, b4_url_regex_6000_count, b4_media_extension_count, b4_legacy_aux1_top1500_vuln_files_distinct_count, b4_wp_scan_tls_count, b4_crawler_regex_count, b4_url_words_distinct_count, b4_wp_backup_files_distinct_count, b4_end_path_distinct_count, b4_base_path_distinct_count, b4_windows_ua_distinct_count, b4_url_regex_6001_count, b4_tcp_fingerprinting_distinct_count, b4_url_regex_6004_count, b4_social_media_referer_requests_distinct_count, b4_ecommerce_path_distinct_count, b4_url_regex_4002_count, b4_wp_plugins_distinct_count, b4_search_engine_referer_requests_distinct_count, b4_ua_distinct_count, b4_url_regex_2002_count, b4_scanner_path_distinct_count, b4_cookie_distinct_count, b4_ua_http_existence, b4_document_extension_count, b4_url_regex_6003_count, b4_query_params_distinct_count, b4_hosts_set, b4_url_regex_3000015_count, b4_failed_response_ratio, b4_wp_scan_path_distinct_count, b4_scraping_tools_existence, b4_query_values_distinct_count, b4_executable_extension_count, b4_total_requests, b4_wp_count, b4_tls_fingerprinting_distinct_count, b4_wp_themes_distinct_count, b4_authentication_paths_distinct, b4_host_distinct_count, b4_host_requests_ratio, b4_ua_tls_ratio, b4_ua_length_median])
+:- WriteFiles()
+   :- InMemoryRelation(([account, ip, ts, b4_url_regex_6000_count, b4_media_extension_count, b4_legacy_aux1_top1500_vuln_files_distinct_count, b4_wp_scan_tls_count, b4_crawler_regex_count, b4_url_words_distinct_count, b4_wp_backup_files_distinct_count, b4_end_path_distinct_count, b4_base_path_distinct_count, b4_windows_ua_distinct_count, b4_url_regex_6001_count, b4_tcp_fingerprinting_distinct_count, b4_url_regex_6004_count, b4_social_media_referer_requests_distinct_count, b4_ecommerce_path_distinct_count, b4_url_regex_4002_count, b4_wp_plugins_distinct_count, b4_search_engine_referer_requests_distinct_count, b4_ua_distinct_count, b4_url_regex_2002_count, b4_scanner_path_distinct_count, b4_cookie_distinct_count, b4_ua_http_existence, b4_document_extension_count, b4_url_regex_6003_count, b4_query_params_distinct_count, b4_hosts_set, b4_url_regex_3000015_count, b4_failed_response_ratio, b4_wp_scan_path_distinct_count, b4_scraping_tools_existence, b4_query_values_distinct_count, b4_executable_extension_count, b4_total_requests, b4_wp_count, b4_tls_fingerprinting_distinct_count, b4_wp_themes_distinct_count, b4_authentication_paths_distinct, b4_host_distinct_count, b4_host_requests_ratio, b4_ua_tls_ratio, b4_ua_length_median], $VAR_3$))
+         :- AdaptiveSparkPlan($VAR_4$)
+               :- ShuffleQueryStage(3)
+"
+query_vars,"{""$VAR_1$"":""abfss://cr-ml-pre-agg-b4@csicrprod.dfs.core.windows.net/data/ts=1784552400000/rv=1784566800000/16e320ed-884f-46d7-bc93-b68934a0b24a"",""$VAR_2$"":""[path=abfss://cr-ml-pre-agg-b4@csicrprod.dfs.core.windows.net/data/ts=1784552400000/rv=1784566800000/16e320ed-884f-46d7-bc93-b68934a0b24a]"",""$VAR_3$"":""StorageLevel(disk, memory, deserialized, 1 replicas)"",""$VAR_4$"":""isFinalPlan=true""}"
+labels,
+prev_query,"InsertIntoHadoopFsRelationCommand($VAR_1$, false, Avro, $VAR_2$, Append, [account, ip, ts, b4_url_regex_6000_count, b4_media_extension_count, b4_legacy_aux1_top1500_vuln_files_distinct_count, b4_wp_scan_tls_count, b4_crawler_regex_count, b4_url_words_distinct_count, b4_wp_backup_files_distinct_count, b4_end_path_distinct_count, b4_base_path_distinct_count, b4_windows_ua_distinct_count, b4_url_regex_6001_count, b4_tcp_fingerprinting_distinct_count, b4_url_regex_6004_count, b4_social_media_referer_requests_distinct_count, b4_ecommerce_path_distinct_count, b4_url_regex_4002_count, b4_wp_plugins_distinct_count, b4_search_engine_referer_requests_distinct_count, b4_ua_distinct_count, b4_url_regex_2002_count, b4_scanner_path_distinct_count, b4_cookie_distinct_count, b4_ua_http_existence, b4_document_extension_count, b4_url_regex_6003_count, b4_query_params_distinct_count, b4_hosts_set, b4_url_regex_3000015_count, b4_failed_response_ratio, b4_wp_scan_path_distinct_count, b4_scraping_tools_existence, b4_query_values_distinct_count, b4_executable_extension_count, b4_total_requests, b4_wp_count, b4_tls_fingerprinting_distinct_count, b4_wp_themes_distinct_count, b4_authentication_paths_distinct, b4_host_distinct_count, b4_host_requests_ratio, b4_ua_tls_ratio, b4_ua_length_median])
+:- WriteFiles()
+   :- InMemoryRelation(([account, ip, ts, b4_url_regex_6000_count, b4_media_extension_count, b4_legacy_aux1_top1500_vuln_files_distinct_count, b4_wp_scan_tls_count, b4_crawler_regex_count, b4_url_words_distinct_count, b4_wp_backup_files_distinct_count, b4_end_path_distinct_count, b4_base_path_distinct_count, b4_windows_ua_distinct_count, b4_url_regex_6001_count, b4_tcp_fingerprinting_distinct_count, b4_url_regex_6004_count, b4_social_media_referer_requests_distinct_count, b4_ecommerce_path_distinct_count, b4_url_regex_4002_count, b4_wp_plugins_distinct_count, b4_search_engine_referer_requests_distinct_count, b4_ua_distinct_count, b4_url_regex_2002_count, b4_scanner_path_distinct_count, b4_cookie_distinct_count, b4_ua_http_existence, b4_document_extension_count, b4_url_regex_6003_count, b4_query_params_distinct_count, b4_hosts_set, b4_url_regex_3000015_count, b4_failed_response_ratio, b4_wp_scan_path_distinct_count, b4_scraping_tools_existence, b4_query_values_distinct_count, b4_executable_extension_count, b4_total_requests, b4_wp_count, b4_tls_fingerprinting_distinct_count, b4_wp_themes_distinct_count, b4_authentication_paths_distinct, b4_host_distinct_count, b4_host_requests_ratio, b4_ua_tls_ratio, b4_ua_length_median], $VAR_3$))
+         :- AdaptiveSparkPlan($VAR_4$)
+               :- ShuffleQueryStage(3)
+"
+prev_query_vars,"{""$VAR_1$"":""abfss://cr-ml-pre-agg-b4@csicrprod.dfs.core.windows.net/data/ts=1784548800000/rv=1784563200000/a9586f15-395f-4885-a3a8-65953160c766"",""$VAR_2$"":""[path=abfss://cr-ml-pre-agg-b4@csicrprod.dfs.core.windows.net/data/ts=1784548800000/rv=1784563200000/a9586f15-395f-4885-a3a8-65953160c766]"",""$VAR_3$"":""StorageLevel(disk, memory, deserialized, 1 replicas)"",""$VAR_4$"":""isFinalPlan=true""}"
+inputs,"[""csi_prod_centralus_ingest.gamora-behavioral4-13""]"

@@ -1,0 +1,95 @@
+[
+  {
+    "insight_id": -1,
+    "task_name": "sampledStaging",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 63,
+      "cnt_task_runs": 24,
+      "task_sub_type": null,
+      "time_span_days": 1,
+      "shuffle_partitions": "5000",
+      "cnt_failed_task_runs": 0,
+      "cnt_completed_task_runs": 21
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  },
+  {
+    "insight_id": -2,
+    "task_name": "sampledStaging",
+    "type": "executors_long_spill_time",
+    "impact_cost": 62242077567.8949,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Disk bytes spilled",
+          "metric_ids": [
+            2317058
+          ]
+        },
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            2317067,
+            2317096,
+            2317080
+          ]
+        }
+      ],
+      "task_profile": {
+        "task_type": "spark",
+        "tenant_id": 63,
+        "cnt_task_runs": 24,
+        "task_sub_type": null,
+        "time_span_days": 1,
+        "shuffle_partitions": "5000",
+        "cnt_failed_task_runs": 0,
+        "cnt_completed_task_runs": 21
+      },
+      "avg_spill_pct": 52.087564466573255,
+      "cnt_task_runs": 22,
+      "time_span_days": 1,
+      "avg_executor_max_memory_pct": 108.13276822787601,
+      "avg_executor_max_heap_memory_pct": 98.47118102352728,
+      "avg_executor_max_off_heap_memory_pct": 166.1022914539684
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": -3,
+    "task_name": "sampledStaging",
+    "type": "over_provisioned_driver_cores",
+    "impact_cost": 162912729.06,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver cores",
+          "metric_ids": [
+            2317084,
+            2317102
+          ]
+        }
+      ],
+      "cnt_task_runs": 21,
+      "driver_memory": 25,
+      "cloud_provider": null,
+      "time_span_days": 1,
+      "max_cpu_utilization": 0.0348278579520268,
+      "current_driver_cores": 5,
+      "has_dedicated_cluster": false,
+      "suggested_driver_cores": 1
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  }
+]

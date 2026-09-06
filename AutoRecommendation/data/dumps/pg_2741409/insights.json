@@ -1,0 +1,154 @@
+[
+  {
+    "insight_id": 558828,
+    "task_name": "StagingContent",
+    "type": "orphaned_machine_vcores",
+    "impact_cost": 19904000071.3354,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "stale_vcores": 1,
+      "task_metrics": [
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            2316976,
+            2316989
+          ]
+        },
+        {
+          "title": "Executors heap memory breakdown",
+          "metric_ids": [
+            2317005,
+            2316982,
+            2316968
+          ]
+        }
+      ],
+      "cnt_task_runs": 186,
+      "machine_vcores": 5,
+      "time_span_days": 9,
+      "executor__cores": 4,
+      "shuffle_partitions": "6000",
+      "executor__memory__allocated": 43,
+      "total_wasted_vcore_time_unused": 454957359.3674999,
+      "tenant_machine_memory_to_vcore_ratio": 8.0,
+      "executor__memory_off_heap__max_percentage": 76.26948216280279
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530308,
+    "task_name": "StagingContent",
+    "type": "over_provisioned_driver_cores",
+    "impact_cost": 113094342.001554,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver cores",
+          "metric_ids": [
+            2316993,
+            2317011
+          ]
+        }
+      ],
+      "cnt_task_runs": 183,
+      "driver_memory": 43,
+      "cloud_provider": null,
+      "time_span_days": 9,
+      "max_cpu_utilization": 0.0727669203867517,
+      "current_driver_cores": 5,
+      "has_dedicated_cluster": false,
+      "suggested_driver_cores": 1
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530281,
+    "task_name": "StagingContent",
+    "type": "over_provisioned_driver_heap_memory",
+    "impact_cost": 537198124.507382,
+    "impact_unit": "GB",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver heap memory usage",
+          "metric_ids": [
+            2316978,
+            2317009,
+            2317019
+          ]
+        }
+      ],
+      "cnt_task_runs": 183,
+      "time_span_days": 9,
+      "avg_utilization": 30,
+      "suggested_value": 19,
+      "watermark_value": 14.7342142313719,
+      "current_allocated": 38
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 563317,
+    "task_name": "StagingContent",
+    "type": "over_provisioned_executors",
+    "impact_cost": 12967825944.8262,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "is_dynamic": true,
+      "task_metrics": [
+        {
+          "title": "Executors vCores usage",
+          "metric_ids": [
+            2316984,
+            2317023
+          ]
+        }
+      ],
+      "cnt_task_runs": 100,
+      "time_span_days": 5,
+      "avg_utilization": 69,
+      "spark_executor_cores": 4,
+      "static_executors_conf": 550,
+      "max_executors_suggestion": 835,
+      "avg_task_duration_minutes": 65,
+      "estimated_utilization_pct": 77,
+      "dynamic_max_executors_conf": 9667,
+      "dynamic_min_executors_conf": 0,
+      "has_executor_cores_changed": false,
+      "estimated_cost_reduction_pct": 10,
+      "estimated_duration_impact_pct": 15,
+      "estimated_duration_impact_minutes": 10
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 525959,
+    "task_name": "StagingContent",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 63,
+      "cnt_task_runs": 210,
+      "task_sub_type": null,
+      "time_span_days": 9,
+      "shuffle_partitions": "6000",
+      "cnt_failed_task_runs": 1,
+      "cnt_completed_task_runs": 186
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

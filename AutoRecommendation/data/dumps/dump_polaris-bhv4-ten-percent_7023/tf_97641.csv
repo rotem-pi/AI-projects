@@ -1,0 +1,32 @@
+key,value
+tf_id,97641
+agent_tf_id,14
+task_id,7023
+env,default
+task_name,polaris-bhv4-ten-percent
+app_id,8
+app_name,polaris-bhv4-ten-percent
+app_pit,2026-07-20T21:30:11
+output_name,
+tf_type,head
+status,COMPLETED
+start_time,2026-07-20T21:40:33.734000+00:00
+end_time,2026-07-20T21:40:33.802000+00:00
+duration,0.068
+cnt_test_runs,
+cnt_alerts,
+cnt_breaks,
+cnt_metrics,
+tf_io_type,internal
+error,
+description,first at DeltaUtils.scala:18 (GlobalLimit)
+query_str,"GlobalLimit($VAR_1$)
+:- LocalLimit($VAR_1$)
+   :- Sort([version DESC NULLS LAST], true)
+      :- LocalRelation([version, timestamp, userId, userName, operation, operationParameters, job, notebook, clusterId, readVersion, isolationLevel, isBlindAppend, operationMetrics, userMetadata, engineInfo])
+"
+query_vars,"{""$VAR_1$"":""1""}"
+labels,
+prev_query,
+prev_query_vars,
+inputs,

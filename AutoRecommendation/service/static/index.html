@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recommendation Agent</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23080b12'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='oklch(0.684 0.11 197)' stroke-width='3'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap">
+<style>
+/* Tokens mirror definity-app/frontend/src/theme (base.colors.*, palette.*):
+   "defy" teal as the single accent, navy `primary` ramp for dark grounds,
+   the grey ramp for text/borders, green/orange/red semantics. */
+:root{
+  --ground:oklch(0.98 0.001 200); --paper:#FFFFFF; --ink:#292929; --muted:#666666; --line:#c2c2c2; --line-soft:#e0e0e0;
+  --accent:oklch(0.684 0.11 197); --accent-strong:oklch(0.53 0.09 195); --accent-ink:#FFFFFF; --accent-soft:oklch(0.97 0.02 175);
+  --change:oklch(0.5 0.12 150); --change-soft:#E8F5E9; --blocked:oklch(0.55 0.15 65); --blocked-soft:oklch(0.95 0.04 65); --skip:#858585; --skip-soft:#F6F6F6;
+  --danger:oklch(0.55 0.18 25);
+  --mono:"Roboto Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:Roboto,system-ui,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#080b12; --paper:oklch(0.2155 0.0148 253); --ink:#e0e0e0; --muted:#a3a3a3; --line:#525252; --line-soft:#3d3d3d;
+  --accent:oklch(0.684 0.11 197); --accent-strong:oklch(0.8 0.13 184); --accent-ink:#080b12; --accent-soft:oklch(0.35 0.06 195);
+  --change:oklch(0.62 0.13 160); --change-soft:oklch(0.28 0.08 160); --blocked:oklch(0.72 0.16 65); --blocked-soft:oklch(0.26 0.07 65); --skip:#a3a3a3; --skip-soft:#1F2A40;
+  --danger:oklch(0.7 0.16 25);
+}}
+:root[data-theme="dark"]{
+  --ground:#080b12; --paper:oklch(0.2155 0.0148 253); --ink:#e0e0e0; --muted:#a3a3a3; --line:#525252; --line-soft:#3d3d3d;
+  --accent:oklch(0.684 0.11 197); --accent-strong:oklch(0.8 0.13 184); --accent-ink:#080b12; --accent-soft:oklch(0.35 0.06 195);
+  --change:oklch(0.62 0.13 160); --change-soft:oklch(0.28 0.08 160); --blocked:oklch(0.72 0.16 65); --blocked-soft:oklch(0.26 0.07 65); --skip:#a3a3a3; --skip-soft:#1F2A40;
+  --danger:oklch(0.7 0.16 25);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ground);color:var(--ink);font:14px/1.5 var(--sans)}
+a{color:var(--accent-strong)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+.num{font-variant-numeric:tabular-nums}
+h1,h2,h3{margin:0;text-wrap:balance;font-weight:700}
+.top{display:flex;align-items:center;gap:20px;padding:12px 28px;border-bottom:1px solid var(--line-soft);background:var(--paper)}
+.wordmark{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.01em;color:var(--ink);text-decoration:none}
+.wordmark i{width:14px;height:14px;border-radius:50%;border:3px solid var(--accent);display:inline-block}
+.wordmark small{font-weight:400;font-size:12.5px;color:var(--muted);margin-left:4px}
+.chips{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border:1px solid var(--line-soft);border-radius:999px;font-size:12px;color:var(--muted);background:var(--ground)}
+.chip b{color:var(--ink);font-weight:500}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--change)}
+.dot.bad{background:var(--danger)}.dot.wait{background:var(--blocked)}
+main{max-width:1080px;margin:0 auto;padding:22px 28px 64px}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
+.step{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line-soft);background:var(--paper);border-radius:6px;text-align:left;font:inherit;color:var(--ink)}
+.step .k{font-family:var(--mono);font-size:12px;color:var(--muted);width:18px}
+.step .t{font-weight:500}.step .s{display:block;font-size:12px;color:var(--muted)}
+.step[aria-current="step"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.screen{display:none}.screen.on{display:block}
+.card{background:var(--paper);border:1px solid var(--line-soft);border-radius:8px;padding:20px 22px}
+.stack{display:grid;gap:16px}
+label{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input[type=text]{font:inherit;font-family:var(--mono);padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--ground);color:var(--ink);min-width:320px}
+input:focus-visible,.btn:focus-visible,.step:focus-visible,.sug:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:inherit;font-weight:500;padding:9px 14px;border-radius:6px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.quiet{color:var(--muted)}.btn.danger{color:var(--danger)}
+.btn[disabled]{opacity:.5;cursor:default}
+.hint{color:var(--muted);font-size:13px;max-width:70ch;margin:0}
+.err{color:var(--danger);font-size:13px}
+.suggest{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:26px}
+.sug{font:inherit;font-family:var(--mono);font-size:12.5px;padding:3px 8px;border:1px solid var(--line-soft);border-radius:4px;color:var(--ink);background:var(--ground);cursor:pointer}
+.sug .meta{color:var(--muted);margin-left:4px}
+.didyoumean{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--accent);border-radius:6px;background:var(--accent-soft)}
+.didyoumean .lead{font-size:13px;color:var(--ink)}
+.dym-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dym-row button{font:inherit;font-family:var(--mono);font-size:13px;padding:6px 10px;border:1px solid var(--accent);border-radius:6px;background:var(--paper);color:var(--ink);cursor:pointer}
+.dym-row .app-name{color:var(--muted);font-size:12.5px;font-family:var(--sans)}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+.tablewrap{overflow-x:auto}
+.log{font-family:var(--mono);font-size:12.5px;line-height:1.6;background:var(--ground);border:1px solid var(--line-soft);border-radius:6px;padding:14px 16px;max-height:340px;overflow:auto;white-space:pre-wrap}
+.log .ok{color:var(--change)}.log .bad{color:var(--danger)}
+.bar{height:5px;background:var(--line-soft);border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;width:30%;background:var(--accent);animation:slide 1.6s ease-in-out infinite}
+.bar.done i{width:100%;animation:none}
+@keyframes slide{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+@media (prefers-reduced-motion: reduce){.bar i{animation:none;width:100%}}
+.head{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}
+.head h2{font-size:22px}.head .sub{color:var(--muted);margin-top:4px}
+.metrics{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.metric{padding:6px 10px;border:1px solid var(--line-soft);border-radius:6px;background:var(--ground);font-size:12.5px}
+.metric b{display:block;font-family:var(--mono);font-weight:500;font-size:15px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.summary{display:grid;grid-template-columns:2fr 1fr;gap:16px}
+.summary .big{font-size:22px;font-weight:700;line-height:1.2}
+.summary .big small{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:6px}
+.counts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.count{padding:10px 12px;border-radius:6px;border-left:4px solid}
+.count b{display:block;font-family:var(--mono);font-size:20px;font-weight:500}.count span{font-size:12px}
+.count.change{border-color:var(--change);background:var(--change-soft)}.count.blocked{border-color:var(--blocked);background:var(--blocked-soft)}.count.skip{border-color:var(--skip);background:var(--skip-soft)}
+section.disp{border-left:4px solid var(--line);padding-left:18px}
+section.disp.change{border-color:var(--change)}section.disp.blocked{border-color:var(--blocked)}section.disp.skip{border-color:var(--skip)}
+section.disp h3{font-size:17px;margin-bottom:4px}
+section.disp .lead{color:var(--muted);font-size:13px;margin:0 0 12px;max-width:70ch}
+.rec{background:var(--paper);border:1px solid var(--line-soft);border-radius:8px;padding:16px 18px;display:grid;gap:10px}
+.rec + .rec{margin-top:10px}
+.rec .title{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.rec .key{font-family:var(--mono);font-weight:500;font-size:14.5px}
+.rec .delta{font-family:var(--mono);color:var(--muted)}.rec .delta b{color:var(--ink);font-weight:500}
+.rec .usd{margin-left:auto;font-family:var(--mono);font-weight:500;color:var(--change)}.rec .usd.neg{color:var(--blocked)}
+.rec dl{margin:0;display:grid;grid-template-columns:120px 1fr;gap:6px 14px;font-size:13.5px}
+.rec dt{font-size:11.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);padding-top:3px}
+.rec dd{margin:0;max-width:78ch}.rec dd ul{margin:0;padding-left:18px}
+.rec .meta{font-size:12px;color:var(--muted)}
+.pill{display:inline-block;font-size:11px;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:999px;font-weight:500}
+.pill.change{background:var(--change-soft);color:var(--change)}.pill.blocked{background:var(--blocked-soft);color:var(--blocked)}.pill.skip{background:var(--skip-soft);color:var(--skip)}
+.pill.status-done{background:var(--change-soft);color:var(--change)}.pill.status-failed{background:var(--blocked-soft);color:var(--danger)}.pill.status-running,.pill.status-queued{background:var(--accent-soft);color:var(--accent-strong)}
+.note{display:flex;gap:10px;align-items:flex-start;padding:12px 14px;border:1px dashed var(--line);border-radius:6px;font-size:13px;color:var(--muted)}
+.note b{color:var(--ink);font-weight:500}
+details{border:1px solid var(--line-soft);border-radius:8px;background:var(--paper)}
+details summary{cursor:pointer;padding:12px 16px;font-weight:500}
+details pre{margin:0;padding:0 16px 16px;font-family:var(--mono);font-size:12px;line-height:1.5;overflow:auto;max-height:420px}
+.login{display:grid;gap:12px;border:1px solid var(--accent);border-radius:8px;padding:18px 20px;background:var(--paper)}
+.login .code{font-family:var(--mono);font-size:28px;font-weight:500;letter-spacing:.08em}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--ground);padding:8px 14px;border-radius:6px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+.recent td:first-child{font-family:var(--mono)}
+@media (max-width:760px){.steps{grid-template-columns:1fr 1fr}.summary,.head{grid-template-columns:1fr}.rec dl{grid-template-columns:1fr}}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="wordmark" href="/"><i></i>Recommendation Agent <small>Spark tuning recommendations, on request</small></a>
+  <div class="chips">
+    <span class="chip" id="c-aws"><i class="dot wait"></i>AWS <b>checking…</b></span>
+    <span class="chip" id="c-fresh" hidden>Athena export <b></b></span>
+    <span class="chip" id="c-ttl" hidden>Jobs expire after <b></b></span>
+  </div>
+</header>
+
+<main>
+  <div class="steps">
+    <div class="step" data-s="1" aria-current="step"><span class="k">1</span><span><span class="t">Find task</span><span class="s">by name</span></span></div>
+    <div class="step" data-s="2"><span class="k">2</span><span><span class="t">Choose app</span><span class="s">same name, many apps</span></span></div>
+    <div class="step" data-s="3"><span class="k">3</span><span><span class="t">Running</span><span class="s">about 5 minutes</span></span></div>
+    <div class="step" data-s="4"><span class="k">4</span><span><span class="t">Results</span><span class="s">TL;DR + JSON</span></span></div>
+  </div>
+
+  <div class="screen on" id="s1">
+    <div class="stack">
+      <div class="login" id="login" hidden>
+        <div><b>AWS session needed.</b> Athena and Bedrock run under the <code id="l-profile"></code> profile. Sign in once; the session is shared by everyone using this site until it expires.</div>
+        <div class="row"><button class="btn primary" id="l-start">Sign in to AWS</button><span class="hint" id="l-hint"></span></div>
+        <div id="l-device" hidden>
+          <div class="hint">Open <a id="l-url" target="_blank" rel="noopener"></a> and enter this code:</div>
+          <div class="code" id="l-code"></div>
+          <div class="hint">This page updates by itself once AWS accepts the code.</div>
+        </div>
+        <div class="err" id="l-err"></div>
+      </div>
+      <div class="card stack">
+        <div>
+          <label for="q">Task name</label>
+          <div class="row"><input id="q" type="text" placeholder="e.g. compute" autocomplete="off" spellcheck="false"><button class="btn primary" id="find">Find runs</button></div>
+          <div class="suggest" id="suggest"></div>
+          <p class="hint">Exact task name as it appears in definity; suggestions appear after two characters.</p>
+          <div class="err" id="s1-err"></div>
+          <div id="s1-dym"></div>
+        </div>
+        <div class="note"><span>ⓘ</span><div><b>Data comes from the Athena export, not live production.</b> Runs newer than the export (<span id="fresh2">unknown</span>) are not visible yet. The analysis uses the latest <em>completed</em> exported run.</div></div>
+      </div>
+      <div class="card" id="recent-card" hidden>
+        <label>Recent jobs</label>
+        <div class="tablewrap"><table class="recent"><thead><tr><th>Job</th><th>Task</th><th>App</th><th>Status</th><th>Started</th><th>Expires</th></tr></thead><tbody id="recent"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="screen" id="s2">
+    <div class="card stack">
+      <div class="head">
+        <div><h2 id="c-title"></h2><div class="sub">Newest completed run first. Pick the app you mean.</div></div>
+        <div class="actions"><button class="btn quiet" data-go="1">Back</button></div>
+      </div>
+      <div class="row"><input id="cfilter" type="text" placeholder="filter by app or env" autocomplete="off"></div>
+      <div class="tablewrap"><table id="cands"><thead><tr><th>App</th><th>Env</th><th>Completed runs</th><th>Latest completed run</th><th></th></tr></thead><tbody></tbody></table></div>
+      <div class="err" id="s2-err"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="s3">
+    <div class="card stack">
+      <div class="head">
+        <div><h2 id="j-title"></h2><div class="sub" id="j-sub"></div></div>
+        <div class="actions"><a class="btn quiet" href="/">Start another</a></div>
+      </div>
+      <div class="bar" id="j-bar"><i></i></div>
+      <div class="log" id="log"></div>
+      <div class="err" id="j-err"></div>
+      <p class="hint">You can leave this page; the job link keeps working for <span class="ttl">a few</span> hours after it finishes, then everything about it is deleted.</p>
+      <div class="actions" id="j-actions"></div>
+    </div>
+  </div>
+
+  <div class="screen" id="s4">
+    <div class="stack">
+      <div class="card">
+        <div class="head">
+          <div><h2 id="r-title"></h2><div class="sub" id="r-sub"></div><div class="metrics" id="r-metrics"></div></div>
+          <div class="actions">
+            <a class="btn primary" id="dl" download>Download result.json</a>
+            <button class="btn" id="cp">Copy TL;DR</button>
+            <button class="btn quiet danger" id="del">Delete job</button>
+          </div>
+        </div>
+      </div>
+      <div class="summary">
+        <div class="card"><div class="big" id="r-summary"></div></div>
+        <div class="counts" id="r-counts"></div>
+      </div>
+      <div id="r-body"></div>
+      <div class="note"><span>ⓘ</span><div id="r-prov"></div></div>
+      <details><summary>Raw result.json (what the download contains)</summary><pre id="raw"></pre></details>
+    </div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const val = v => (v == null || v === 'None') ? 'unset' : String(v);
+const usd = v => { if (v == null) return ''; const n = Number(v); return (n<0?'-':'') + '$' + Math.abs(n).toLocaleString(undefined,{maximumFractionDigits:0}) + '/yr'; };
+const pct = v => v == null ? '' : Math.round(Number(v)*100) + '%';
+const short = ts => ts ? String(ts).replace('T',' ').slice(0,16) : '';
+function toast(m){ const t=$('#toast'); t.textContent=m; t.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove('on'),2200); }
+async function api(path, opts){ const r = await fetch(path, {headers:{'content-type':'application/json'}, ...opts}); if(!r.ok){ let m = r.statusText; try{ m = (await r.json()).detail || m; }catch(e){} throw new Error(m); } return r.json(); }
+function go(n){ document.querySelectorAll('.step').forEach(b=>{ if(b.dataset.s==n) b.setAttribute('aria-current','step'); else b.removeAttribute('aria-current'); }); document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id==='s'+n)); window.scrollTo({top:0}); }
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+
+// ── status / AWS sign-in ────────────────────────────────────────────────
+let STATUS = null, loginTimer = null;
+async function refreshStatus(){
+  try { STATUS = await api('/api/status'); } catch(e){ $('#c-aws').innerHTML = `<i class="dot bad"></i>service <b>unreachable</b>`; return; }
+  const a = STATUS.aws;
+  if (a.state === 'ok') {
+    $('#c-aws').innerHTML = `<i class="dot"></i>AWS <b>${esc(a.profile)}</b> · ${esc(a.identity||'signed in')}${a.expires_at?` · until ${esc(short(a.expires_at))} UTC`:''}`;
+    $('#login').hidden = true;
+  } else {
+    $('#c-aws').innerHTML = `<i class="dot bad"></i>AWS <b>${esc(a.profile)}</b> · session expired`;
+    $('#login').hidden = false; $('#l-profile').textContent = a.profile;
+  }
+  const f = STATUS.athena_freshness || {};
+  if (f.latest_enrichment_pit){ $('#c-fresh').hidden=false; $('#c-fresh').querySelector('b').textContent = short(f.latest_enrichment_pit)+' UTC'; $('#fresh2').textContent = 'newest exported run '+short(f.latest_enrichment_pit)+' UTC'; }
+  $('#c-ttl').hidden=false; $('#c-ttl').querySelector('b').textContent = STATUS.ttl_hours+' h';
+  document.querySelectorAll('.ttl').forEach(e=>e.textContent = STATUS.ttl_hours);
+  const L = STATUS.login;
+  if (L && !L.done){ showDevice(L); if(!loginTimer) loginTimer = setInterval(refreshStatus, 3000); }
+  else if (loginTimer && (!L || L.done)){ clearInterval(loginTimer); loginTimer=null; if (L && L.ok) toast('AWS session active'); if (L && !L.ok && L.error) $('#l-err').textContent = L.error; }
+}
+function showDevice(L){ $('#l-device').hidden = !(L.url); if (L.url){ $('#l-url').href = L.url; $('#l-url').textContent = L.url; $('#l-code').textContent = L.code || '…'; } $('#l-hint').textContent = 'Waiting for AWS to confirm…'; }
+$('#l-start').addEventListener('click', async()=>{ $('#l-err').textContent=''; try{ const L = await api('/api/aws/login',{method:'POST'}); if (L.already){ await refreshStatus(); return; } showDevice(L); if(!loginTimer) loginTimer=setInterval(refreshStatus,3000);}catch(e){ $('#l-err').textContent = e.message; } });
+
+// ── screen 1: search ────────────────────────────────────────────────────
+let sugTimer = null;
+$('#q').addEventListener('input', ()=>{ clearTimeout(sugTimer); const q=$('#q').value.trim(); if(q.length<2){ $('#suggest').innerHTML=''; return; } sugTimer=setTimeout(async()=>{ try{ const r = await api('/api/tasks/search?q='+encodeURIComponent(q)); $('#suggest').innerHTML = r.names.map(n=>`<button class="sug" type="button" data-name="${esc(n.task_name)}">${esc(n.task_name)}${n.latest_app_pit?`<span class="meta">· ${esc(short(n.latest_app_pit))}</span>`:''}</button>`).join(''); document.querySelectorAll('.sug').forEach(b=>b.addEventListener('click',()=>{ $('#q').value=b.dataset.name; findRuns(); })); }catch(e){ $('#s1-err').textContent = e.message; } }, 350); });
+$('#q').addEventListener('keydown', e=>{ if(e.key==='Enter') findRuns(); });
+$('#find').addEventListener('click', findRuns);
+let CANDS = [], TASK = '';
+async function findRuns(){
+  TASK = $('#q').value.trim(); if(!TASK) return; $('#s1-err').textContent=''; $('#s1-dym').innerHTML=''; $('#find').disabled=true;
+  try {
+    const r = await api('/api/tasks/candidates?task_name='+encodeURIComponent(TASK));
+    CANDS = r.candidates;
+    if (!CANDS.length){
+      const matches = r.app_matches || [];
+      if (matches.length){
+        $('#s1-dym').innerHTML = `<div class="didyoumean"><div class="lead">No task is named "${esc(TASK)}" — but that matches an <b>app / cluster</b> name. Did you mean:</div>` +
+          matches.map(m=>`<div class="dym-row"><button type="button" data-task="${esc(m.task_name)}" data-app="${esc(m.app_name)}">${esc(m.task_name)}</button><span class="app-meta">under <span class="app-name">${esc(m.app_name)}</span> · ${m.run_count} run(s), latest ${esc(short(m.latest_app_pit))}</span></div>`).join('') + `</div>`;
+        document.querySelectorAll('#s1-dym button').forEach(b=>b.addEventListener('click', ()=>{ $('#q').value = b.dataset.task; $('#s1-dym').innerHTML=''; findRuns().then(()=>{ $('#cfilter').value = b.dataset.app; renderCands(); }); }));
+      } else {
+        $('#s1-err').textContent = `No completed, analyzable runs of "${TASK}" in the Athena export.`;
+      }
+      return;
+    }
+    renderCands(); go(2);
+  }
+  catch(e){ $('#s1-err').textContent = e.message; } finally { $('#find').disabled=false; }
+}
+function renderCands(){
+  const f = $('#cfilter').value.trim().toLowerCase();
+  const rows = CANDS.filter(c => !f || `${c.app_name||''} ${c.env_name||''} ${c.app_id}`.toLowerCase().includes(f));
+  $('#c-title').innerHTML = `${CANDS.length} app${CANDS.length===1?'':'s'} run a task named <code>${esc(TASK)}</code>`;
+  $('#cands tbody').innerHTML = rows.slice(0,200).map((c,i)=>`<tr><td><div>${esc(c.app_name||'(app not in export)')}</div><div class="mono" style="color:var(--muted);font-size:12px">app_id ${c.app_id}${c.app_deleted_at?' · deleted app':''}</div></td><td>${esc(c.env_name||c.env_id)}</td><td class="num">${c.run_count}</td><td class="mono num">${esc(short(c.latest_app_pit))}</td><td><button class="btn ${i===0&&!f?'primary':''}" data-app="${c.app_id}">Analyze</button></td></tr>`).join('') || '<tr><td colspan="5" class="hint">No app matches the filter.</td></tr>';
+  document.querySelectorAll('#cands [data-app]').forEach(b=>b.addEventListener('click',()=>startJob(CANDS.find(c=>String(c.app_id)===b.dataset.app), b)));
+}
+$('#cfilter').addEventListener('input', renderCands);
+async function startJob(c, btn){
+  btn.disabled = true; $('#s2-err').textContent='';
+  try { const j = await api('/api/jobs',{method:'POST', body: JSON.stringify({task_name: TASK, app_id: c.app_id, app_name: c.app_name, env_name: c.env_name})}); history.pushState({}, '', '/jobs/'+j.id); openJob(j.id); }
+  catch(e){ $('#s2-err').textContent = e.message; btn.disabled=false; }
+}
+
+// ── screen 3/4: job ─────────────────────────────────────────────────────
+let JOB = null, pollTimer = null, tick = null;
+function openJob(id){ go(3); clearInterval(pollTimer); pollTimer = setInterval(()=>poll(id), 3000); poll(id); }
+function elapsed(j){ const a = new Date(j.started_at||j.created_at), b = j.finished_at? new Date(j.finished_at) : new Date(); const s = Math.max(0, Math.round((b-a)/1000)); return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`; }
+async function poll(id){
+  try { JOB = await api('/api/jobs/'+id); } catch(e){ clearInterval(pollTimer); $('#j-title').textContent='Job not found'; $('#j-sub').textContent = 'It may have expired and been deleted.'; $('#j-err').textContent=''; $('#log').textContent=''; return; }
+  const j = JOB;
+  $('#j-title').innerHTML = `${j.status==='done'?'Analyzed':j.status==='failed'?'Failed:':'Analyzing'} <code>${esc(j.task_name)}</code>${j.app_name?' · '+esc(j.app_name):j.app_id?' · app '+j.app_id:''}`;
+  $('#j-sub').innerHTML = `Job <span class="mono">${esc(j.id)}</span> · ${j.status} · ${j.started_at?'started '+esc(short(j.started_at))+' UTC · ':''}<b class="num">${elapsed(j)}</b>${j.status==='queued'?' · waiting for a free slot':''}`;
+  $('#log').innerHTML = (j.progress||[]).map(l=>`<div class="${l.startsWith('✓')?'ok':/Traceback|Error/.test(l)?'bad':''}">${esc(l)}</div>`).join('');
+  $('#log').scrollTop = $('#log').scrollHeight;
+  $('#j-bar').classList.toggle('done', j.status==='done' || j.status==='failed');
+  if (j.status === 'done'){ clearInterval(pollTimer); $('#j-actions').innerHTML = `<button class="btn primary" id="open">Open results</button>`; $('#open').addEventListener('click', ()=>showResults(j)); showResults(j); }
+  else if (j.status === 'failed'){ clearInterval(pollTimer); $('#j-err').textContent = j.error || 'failed'; if (j.log_tail) $('#log').innerHTML += `<div class="bad">${esc(j.log_tail)}</div>`; $('#j-actions').innerHTML = `<button class="btn danger" id="jdel">Delete job</button>`; $('#jdel').addEventListener('click', ()=>delJob(j.id)); }
+}
+async function delJob(id){ try{ await api('/api/jobs/'+id,{method:'DELETE'}); toast('Job deleted'); history.pushState({}, '', '/'); go(1); loadRecent(); }catch(e){ toast(e.message); } }
+
+const HOW = {set_spark_config:k=>`Set <code>${esc(k.config_key)}</code> to <code>${esc(val(k.suggested_value))}</code> in the job's Spark configuration (spark-submit <code>--conf</code>, cluster Spark conf, or the SparkSession builder).`, set_cluster_config:k=>`Set <code>${esc(k.config_key)}</code> to <code>${esc(val(k.suggested_value))}</code> in the cluster / job-cluster definition.`, change_instance_type:k=>`Change the instance type for <code>${esc(k.config_key)}</code> to <code>${esc(val(k.suggested_value))}</code> in the cluster definition.`};
+function rec(r, kind){
+  const dl = [];
+  if (kind==='change'){ dl.push(['Why', esc(r.explanation||r.rationale)]); dl.push(['How', (HOW[r.action]||(k=>`Apply <code>${esc(k.action)}</code>`))(r)]); if(r.expected_impact) dl.push(['Impact', esc(r.expected_impact)]); if(r.risk_note) dl.push(['Risk', esc(r.risk_note)]); }
+  else { dl.push(['Intended', esc(r.rationale)]); dl.push(['Blocked because', '<ul>'+(r.blocked_by||[]).map(b=>`<li>${esc(b)}</li>`).join('')+'</ul>']); if(r.risk_note) dl.push(['Planner risk', esc(r.risk_note)]); }
+  const u = r.usd_cost_annual; const neg = typeof u==='number' && u<0;
+  return `<article class="rec"><div class="title"><span class="pill ${kind}">${kind==='change'?'recommended':'blocked'}</span><span class="key">${esc(r.config_key)}</span><span class="delta">${esc(val(r.current_value))} → <b>${esc(val(r.suggested_value))}</b></span>${u!=null?`<span class="usd ${neg?'neg':''}">${usd(u)}</span>`:''}</div><dl>${dl.map(([t,d])=>`<dt>${t}</dt><dd>${d}</dd>`).join('')}</dl><div class="meta">source ${esc(r.source)} · insight ${esc(r.insight_type)} · confidence ${esc(r.confidence)}${r.estimated_saving_fraction!=null?` · est. saving ${pct(r.estimated_saving_fraction)} of run cost`:''}</div></article>`;
+}
+async function showResults(j){
+  let R; try { R = await (await fetch(`/api/jobs/${j.id}/result.json`)).json(); } catch(e){ toast('Could not load result'); return; }
+  const row = R.input||{}, plan = R.plan, cp = R.cost_profile||{}, rm = R.run_metrics||{}, ch = (R.service||{}).chosen||{}, fr = (R.service||{}).athena_freshness||{}, tr = R.trace||{};
+  $('#r-title').innerHTML = `<code>${esc(R.task_name)}</code> · ${esc(ch.app_name||j.app_name||('app '+row.app_id))}`;
+  $('#r-sub').innerHTML = `Latest completed run <span class="mono">task_id ${R.task_id}</span> at ${esc(short(row.app_pit))} UTC · env ${esc(ch.env_name||row.env_id)} · ${tr.historical_runs_count??0} earlier runs used for trends`;
+  const mets = [['Cost per run', cp.cost_per_run_usd!=null?'$'+Number(cp.cost_per_run_usd).toFixed(2):null],['Idle',pct(rm.idle_ratio)],['vCPU util',pct(rm.vcore_utilization)],['Heap headroom',pct(rm.memory_headroom)],['GC pressure',pct(rm.gc_pressure)],['Skew',pct(rm.skew_ratio)],['Duration', row.task__duration? Math.round(row.task__duration/60)+' min':null]];
+  $('#r-metrics').innerHTML = mets.filter(m=>m[1]).map(m=>`<div class="metric">${m[0]}<b class="num">${m[1]}</b></div>`).join('');
+  $('#dl').href = `/api/jobs/${j.id}/result.json`;
+  if (!plan){
+    const reasons = (tr.gate_reasons||[]).map(r=>`<li>${esc(r)}</li>`).join('');
+    $('#r-summary').innerHTML = `Not evaluated<small>The entry gate stopped the run before any recommendation was produced.</small>`;
+    $('#r-counts').innerHTML = '';
+    $('#r-body').innerHTML = `<section class="disp skip"><h3>Why the agent did not run</h3><ul>${reasons||'<li>no reason recorded</li>'}</ul><p class="lead">Typical fixes: pick a run that completed, or wait for the Athena export to catch up.</p></section>`;
+  } else {
+    const total = plan.recommendations.reduce((a,r)=>a+(typeof r.usd_cost_annual==='number'?r.usd_cost_annual:0),0);
+    $('#r-summary').innerHTML = `${esc(plan.summary)}<small>${total?`Estimated annual saving if all recommended changes land: <b>${usd(total)}</b> (per-change estimates may overlap).`:'No priced saving estimate for this run.'}${plan.plan_degraded?' <b>Plan degraded:</b> treat figures as indicative.':''}${plan.health_breach_unactioned?' <b>Health breach not actioned.</b>':''}</small>`;
+    $('#r-counts').innerHTML = `<div class="count change"><b>${plan.recommendations.length}</b><span>to change</span></div><div class="count blocked"><b>${plan.blocked_recommendations.length}</b><span>blocked</span></div><div class="count skip"><b>${plan.unactioned_insights.length}</b><span>not actioned</span></div>`;
+    $('#r-body').innerHTML = `
+      <div class="stack">
+      <section class="disp change"><h3>What to change</h3><p class="lead">Passed the safety review. Each item says why, how to apply it, and what to watch.</p>${plan.recommendations.map(r=>rec(r,'change')).join('') || '<p class="hint">Nothing to change.</p>'}</section>
+      <section class="disp blocked"><h3>Blocked</h3><p class="lead">Proposed, then held back by the safety review this visit. Shown so the reasoning is visible, not as actions to take.</p>${plan.blocked_recommendations.map(r=>rec(r,'blocked')).join('') || '<p class="hint">Nothing was blocked.</p>'}</section>
+      <section class="disp skip"><h3>Not actioned</h3><p class="lead">Insights the agent saw but did not turn into a change, and why.</p>${plan.unactioned_insights.map(u=>`<article class="rec"><div class="title"><span class="pill skip">${esc(u.source)}</span><span class="key" style="font-family:var(--sans)">${esc(u.title)}</span></div><dl><dt>Why not</dt><dd>${esc(u.reason)}</dd></dl></article>`).join('') || '<p class="hint">Every active insight was actioned or blocked.</p>'}</section>
+      </div>`;
+  }
+  $('#r-prov').innerHTML = `<b>Athena export, not live production.</b> Newest exported run ${esc(fr.latest_enrichment_pit||'unknown')}; insights snapshot ${esc(fr.latest_insights_snapshot||'unknown')}. ${(R.service||{}).candidates?`<code>${esc(R.task_name)}</code> runs under ${(R.service.candidates||[]).length} apps; app ${row.app_id} was analyzed. `:''}Model ${esc((R.run_config||{}).llm_model||'')}. Generated ${esc(short(R.saved_at))} UTC. This job and its files are deleted ${esc(short(j.expires_at))} UTC.`;
+  $('#raw').textContent = JSON.stringify(R, null, 2);
+  $('#cp').onclick = async()=>{ try{ const md = await (await fetch(`/api/jobs/${j.id}/tldr.md`)).text(); await navigator.clipboard.writeText(md); toast('TL;DR copied as Markdown'); }catch(e){ toast('Clipboard unavailable'); } };
+  $('#del').onclick = ()=>delJob(j.id);
+  go(4);
+}
+
+// ── recent jobs ─────────────────────────────────────────────────────────
+async function loadRecent(){
+  try { const r = await api('/api/jobs'); $('#recent-card').hidden = !r.jobs.length; $('#recent').innerHTML = r.jobs.map(j=>`<tr><td><a href="/jobs/${esc(j.id)}">${esc(j.id)}</a></td><td><code>${esc(j.task_name)}</code></td><td>${esc(j.app_name||j.app_id||'')}</td><td><span class="pill status-${esc(j.status)}">${esc(j.status)}</span>${j.result?` <span class="hint">${j.result.recommendations} change · ${j.result.blocked} blocked</span>`:''}</td><td class="mono num">${esc(short(j.started_at||j.created_at))}</td><td class="mono num">${esc(short(j.expires_at))}</td></tr>`).join(''); }
+  catch(e){ /* recent list is optional */ }
+}
+document.addEventListener('click', e=>{ const a = e.target.closest('#recent a'); if(a){ e.preventDefault(); const id=a.getAttribute('href').split('/').pop(); history.pushState({}, '', '/jobs/'+id); openJob(id); } });
+window.addEventListener('popstate', route);
+function route(){ const m = location.pathname.match(/^\/jobs\/([a-z0-9]+)/); if (m) openJob(m[1]); else { clearInterval(pollTimer); go(1); loadRecent(); } }
+
+refreshStatus(); setInterval(refreshStatus, 60000); route();
+</script>
+</body>
+</html>

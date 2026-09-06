@@ -2,12 +2,17 @@
 
 Mirrors backend/app/brain/insights/agent/inference_graph.py on the
 auto-recommendations-agent branch (same node names, same edges, same
-routing; merge/stamp/route helpers and _empty_state copied — not imported,
-to avoid the repo module's app.config/app.dal dependencies), with two local
+routing — fetch_context → entry_gate → sql_stream → discovery_stream →
+merge_insights → triage → plan → safety_check → explain → assemble_output;
+merge/route helpers and _empty_state copied — not imported, to avoid the
+repo module's app.config/app.dal dependencies), with two local
 substitutions:
 
-- fetch_context reads the Athena row/history/run-context injected via
-  set_row_override() instead of Postgres (nodes/fetch_context.py);
+- fetch_context reads the Athena row/history/run-sandbox injected via
+  set_row_override() instead of Postgres (nodes/fetch_context.py); the
+  run-sandbox tables are materialized locally instead of from S3 (see
+  agent/local_sandbox.py, imported here for its import-time
+  sandbox_dal.materialize_to_folder patch);
 - sql_stream reads the task's real Athena `insights` rows injected via
   set_insights_override() (nodes/sql_stream.py).
 
@@ -36,7 +41,6 @@ from app.brain.insights.agent.knowledge_base import KnowledgeBase, load_knowledg
 from app.brain.insights.agent.models import (
     AgentInsight,
     FinalPlan,
-    RunContext,
     SqlInsight,
 )
 from app.brain.insights.agent.nodes.assemble_output import assemble_output
@@ -47,26 +51,20 @@ from app.brain.insights.agent.nodes.plan import plan
 from app.brain.insights.agent.nodes.safety import safety_check
 from app.brain.insights.agent.nodes.triage import triage
 from app.brain.insights.agent.state import AgentState
+import agent.local_sandbox  # noqa: F401 — patches sandbox_dal.materialize_to_folder at import time
 from agent.nodes.fetch_context import fetch_context
 from agent.nodes.sql_stream import run_sql_stream
 
 logger = logging.getLogger(__name__)
 
-
-class HarnessState(AgentState):
-    """AgentState plus the legacy inline run_context.
-
-    Since dd494cb3d the branch's fetch_context dumps raw per-run tables to an
-    S3 sandbox (state.run_sandbox) and AgentState no longer declares
-    run_context — but plan.py and tools.py still read
-    state.get("run_context") (None-guarded) until they migrate to the
-    sandbox. The harness's Athena fetch_context keeps supplying it inline, so
-    the graph schema must declare the key for LangGraph to carry it."""
-
-    run_context: RunContext | None
-
-# Matches the repo's settings.llm_model default (app/config.py).
-_DEFAULT_LLM_MODEL = "anthropic:claude-sonnet-4-6"
+# Bedrock inference-profile ID for the same model the repo's settings.llm_model
+# defaults to (app/config.py: "anthropic:claude-sonnet-4-6"). The bare model ID
+# ("anthropic.claude-sonnet-4-6") exists in eu-north-1 but only supports the
+# INFERENCE_PROFILE invocation type, not direct on-demand invocation — the
+# "eu." cross-region inference profile is the one that's actually invokable
+# (confirmed via `aws bedrock list-inference-profiles`). Override via
+# LLM_MODEL if you're on a different region/profile.
+_DEFAULT_LLM_MODEL = "eu.anthropic.claude-sonnet-4-6"
 
 _show_progress: contextvars.ContextVar[bool] = contextvars.ContextVar(
     "show_progress", default=True
@@ -78,7 +76,6 @@ _NODE_LABELS: dict[str, str] = {
     "sql_stream": "SQL rules",
     "discovery_stream": "Agent discovery",
     "merge_insights": "Merge insights",
-    "stamp_kb_version": "Stamp KB version",
     "triage": "Triage",
     "plan": "Plan recommendations",
     "safety_check": "Safety check",
@@ -92,12 +89,13 @@ def _node_summary(name: str, result: dict) -> str:
         if result.get("run_metrics") is None:
             return "no enrichment found"
         parts = []
-        duration_ms = (result.get("latest_enrichment") or {}).get("task__duration")
-        if duration_ms is not None:
-            parts.append(f"duration {duration_ms / 1000:.0f}s")
+        duration_s = (result.get("latest_enrichment") or {}).get("task__duration")
+        if duration_s is not None:  # task_enrichments.task__duration is in seconds
+            parts.append(f"duration {duration_s / 60:.0f}m")
         parts.append(f"{len(result.get('historical_runs', []))} historical run(s)")
-        sections = result.get("run_context") or {}
-        parts.append(f"{len(sections)} run-context section(s)")
+        run_sandbox = result.get("run_sandbox")
+        table_count = len(run_sandbox.tables) if run_sandbox is not None else 0
+        parts.append(f"{table_count} sandbox table(s)")
         return ", ".join(parts)
     if name == "entry_gate":
         if result.get("gate_blocked"):
@@ -112,8 +110,6 @@ def _node_summary(name: str, result: dict) -> str:
         return f"{len(result.get('agent_insights', []))} insight(s)"
     if name == "merge_insights":
         return f"{len(result.get('merged_insights', []))} merged"
-    if name == "stamp_kb_version":
-        return result.get("kb_version", "")
     if name == "triage":
         triage_result = result.get("triage_result")
         if triage_result is not None:
@@ -163,7 +159,7 @@ def _wrap_node(name: str, fn):
     return wrapper
 
 
-# _merge_insights / _stamp_kb_version / routes / _empty_state are copied from
+# _merge_insights / routes / _empty_state are copied from
 # the repo's inference_graph rather than imported: importing that module would
 # pull in app.config and app.dal (settings, psycopg) — the DB-tied
 # dependencies this harness exists to avoid.  Keep them in sync with the repo
@@ -188,32 +184,24 @@ def _merge_insights(state: AgentState) -> dict:
     return {"merged_insights": merged}
 
 
-def _stamp_kb_version(kb: KnowledgeBase):
-    def node(state: AgentState) -> dict:
-        return {"kb_version": kb.version}
-
-    return node
-
-
 def _route_after_entry_gate(state: AgentState) -> str:
     return END if state.get("gate_blocked") else "sql_stream"
 
 
-def _route_after_stamp_kb_version(state: AgentState) -> str:
+def _route_after_merge_insights(state: AgentState) -> str:
     """Skip the reasoning nodes (triage → … → explain) when there is nothing
     to reason about — a clean run costs zero LLM calls past discovery."""
     return "triage" if state.get("merged_insights") else "assemble_output"
 
 
-def _empty_state(task_id: int, env_name: str) -> HarnessState:
-    return HarnessState(
+def _empty_state(task_id: int, env_name: str) -> AgentState:
+    return AgentState(
         task_id=task_id,
         env_name=env_name,
         latest_enrichment=None,
         run_metrics=None,
         task_profile=None,
         historical_runs=[],
-        run_context=None,
         run_sandbox=None,
         gate_blocked=False,
         gate_reasons=[],
@@ -223,22 +211,63 @@ def _empty_state(task_id: int, env_name: str) -> HarnessState:
         merged_insights=[],
         triage_result=None,
         planned_recommendations=[],
+        skipped_insight_reasons={},
+        plan_degraded=False,
         safe_recommendations=[],
         blocked_recommendations=[],
         final_plan=None,
-        kb_version="",
         messages=[],
     )
 
 
 def _build_llm():
-    api_key = os.getenv("ANTHROPIC_API_KEY")
     model = os.getenv("LLM_MODEL", _DEFAULT_LLM_MODEL)
-    if not api_key:
-        raise RuntimeError(
-            "ANTHROPIC_API_KEY is not set. Copy .env.example to .env and fill it in."
-        )
-    return init_chat_model(model, api_key=api_key)
+    # Claude via Amazon Bedrock — reuses the same AWS_PROFILE/AWS_REGION
+    # credential chain already used for Athena (main.py), so no separate
+    # Anthropic API key is needed. The default botocore read_timeout (60s) is
+    # too tight for this agent's longer tool-heavy generations and was
+    # observed to time out under load (mirrors the repo's own _build_llm on
+    # auto-recommendations-agent).
+    #
+    # Passing config= through init_chat_model(model_provider="bedrock_converse", ...)
+    # is NOT enough: ChatBedrockConverse only applies self.config when it
+    # builds its OWN client (validate_environment(), gated on
+    # `self.client is None`), and _get_effective_config() re-derives the
+    # botocore Config from self.timeout/self.max_retries whenever either is
+    # non-None — a later .bind()/retry wrapper setting either of those
+    # silently drops our read_timeout back to botocore's 60s default.
+    # Building the boto3 client ourselves and handing it to
+    # ChatBedrockConverse(client=...) sidesteps validate_environment's
+    # client-building branch entirely, so no later rebind can ever recompute
+    # (and reset) the timeout.
+    from botocore.config import Config
+    from langchain_aws.utils import create_aws_client
+
+    region = os.getenv("AWS_REGION", "eu-north-1")
+    profile = os.getenv("AWS_PROFILE")
+    bedrock_client = create_aws_client(
+        service_name="bedrock-runtime",
+        region_name=region,
+        credentials_profile_name=profile,
+        config=Config(read_timeout=600, connect_timeout=30),
+    )
+    bedrock_llm = init_chat_model(
+        model,
+        model_provider="bedrock_converse",
+        client=bedrock_client,
+        # Deterministic sampling by default: run-to-run recommendation
+        # agreement is a shipping gate (evaluation/consistency_gate.py), and
+        # temperature is the cheapest variance to remove. Override via
+        # LLM_TEMPERATURE.
+        temperature=float(os.getenv("LLM_TEMPERATURE", "0")),
+    )
+    # cached_system_message() (prompts.py) embeds Anthropic-native per-block
+    # cache_control, which ChatBedrockConverse silently drops — it only
+    # inserts cachePoint blocks via this bind-time kwarg. Without it, every
+    # node reprocesses the full KB-laden system prompt from scratch on every
+    # call instead of hitting the cache, which is why multi-insight tasks'
+    # plan step was consistently timing out.
+    return bedrock_llm.bind(cache_control={"type": "default"})
 
 
 def build_inference_graph(llm=None, kb: KnowledgeBase | None = None):
@@ -247,7 +276,7 @@ def build_inference_graph(llm=None, kb: KnowledgeBase | None = None):
     if llm is None:
         llm = _build_llm()
 
-    graph = StateGraph(HarnessState)
+    graph = StateGraph(AgentState)
 
     graph.add_node("fetch_context", _wrap_node("fetch_context", fetch_context))
     graph.add_node("entry_gate", _wrap_node("entry_gate", entry_gate))
@@ -260,9 +289,6 @@ def build_inference_graph(llm=None, kb: KnowledgeBase | None = None):
         ),
     )
     graph.add_node("merge_insights", _wrap_node("merge_insights", _merge_insights))
-    graph.add_node(
-        "stamp_kb_version", _wrap_node("stamp_kb_version", _stamp_kb_version(kb))
-    )
     graph.add_node(
         "triage", _wrap_node("triage", functools.partial(triage, llm=llm, kb=kb))
     )
@@ -285,10 +311,9 @@ def build_inference_graph(llm=None, kb: KnowledgeBase | None = None):
     )
     graph.add_edge("sql_stream", "discovery_stream")
     graph.add_edge("discovery_stream", "merge_insights")
-    graph.add_edge("merge_insights", "stamp_kb_version")
     graph.add_conditional_edges(
-        "stamp_kb_version",
-        _route_after_stamp_kb_version,
+        "merge_insights",
+        _route_after_merge_insights,
         {"triage": "triage", "assemble_output": "assemble_output"},
     )
     graph.add_edge("triage", "plan")

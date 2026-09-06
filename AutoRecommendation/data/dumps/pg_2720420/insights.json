@@ -1,0 +1,123 @@
+[
+  {
+    "insight_id": 563326,
+    "task_name": "sampledStaging",
+    "type": "executors_long_spill_time",
+    "impact_cost": 83601310983.9516,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Disk bytes spilled",
+          "metric_ids": [
+            2317058
+          ]
+        },
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            2317067,
+            2317096,
+            2317080
+          ]
+        }
+      ],
+      "task_profile": {
+        "task_type": "spark",
+        "tenant_id": 63,
+        "cnt_task_runs": 209,
+        "task_sub_type": null,
+        "time_span_days": 9,
+        "shuffle_partitions": "5000",
+        "cnt_failed_task_runs": 0,
+        "cnt_completed_task_runs": 175
+      },
+      "avg_spill_pct": 56.80169098654264,
+      "cnt_task_runs": 207,
+      "time_span_days": 9,
+      "avg_executor_max_memory_pct": 109.11286038898696,
+      "avg_executor_max_heap_memory_pct": 98.30580155546632,
+      "avg_executor_max_off_heap_memory_pct": 173.95521339011077
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530307,
+    "task_name": "sampledStaging",
+    "type": "over_provisioned_driver_cores",
+    "impact_cost": 181878490.344421,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver cores",
+          "metric_ids": [
+            2317084,
+            2317102
+          ]
+        }
+      ],
+      "cnt_task_runs": 175,
+      "driver_memory": 25,
+      "cloud_provider": null,
+      "time_span_days": 9,
+      "max_cpu_utilization": 0.0366209203878192,
+      "current_driver_cores": 5,
+      "has_dedicated_cluster": false,
+      "suggested_driver_cores": 1
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530290,
+    "task_name": "sampledStaging",
+    "type": "over_provisioned_driver_heap_memory",
+    "impact_cost": 457350766.618313,
+    "impact_unit": "GB",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver heap memory usage",
+          "metric_ids": [
+            2317069,
+            2317100,
+            2317110
+          ]
+        }
+      ],
+      "cnt_task_runs": 172,
+      "time_span_days": 9,
+      "avg_utilization": 29,
+      "suggested_value": 10,
+      "watermark_value": 7.8856698423624,
+      "current_allocated": 20
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 525934,
+    "task_name": "sampledStaging",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 63,
+      "cnt_task_runs": 209,
+      "task_sub_type": null,
+      "time_span_days": 9,
+      "shuffle_partitions": "5000",
+      "cnt_failed_task_runs": 0,
+      "cnt_completed_task_runs": 175
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

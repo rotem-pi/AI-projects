@@ -1,0 +1,82 @@
+--no-sync: reusing worktree at /Users/rotempinchover/GitCode/_AI-projects-work/AutoRecommendation/.worktrees/definity-app-auto-recs as-is
+OK — agent code resolved from /Users/rotempinchover/GitCode/_AI-projects-work/AutoRecommendation/.worktrees/definity-app-auto-recs/backend (branch auto-recommendations-agent)
+#0 building with "orbstack" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 3.87kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 ...
+
+#3 [internal] load metadata for ghcr.io/astral-sh/uv:latest
+#3 DONE 0.5s
+
+#2 [internal] load metadata for docker.io/library/python:3.12-slim
+#2 DONE 0.8s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 2B done
+#4 DONE 0.0s
+
+#5 [stage-0  1/13] FROM docker.io/library/python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea
+#5 resolve docker.io/library/python:3.12-slim@sha256:78387bc3881b8273120a12ebe6c1ab22b018ccc2c9adf565ae1ac9b536e184ea 0.0s done
+#5 DONE 0.0s
+
+#6 FROM ghcr.io/astral-sh/uv:latest@sha256:2bb3ebca0a796a155094a27773d290c4b074572e6107f171d88d086682fd2500
+#6 resolve ghcr.io/astral-sh/uv:latest@sha256:2bb3ebca0a796a155094a27773d290c4b074572e6107f171d88d086682fd2500 0.0s done
+#6 DONE 0.0s
+
+#7 [internal] load build context
+#7 transferring context: 83.53kB 0.0s done
+#7 DONE 0.0s
+
+#8 [stage-0  3/13] RUN set -ex     && apt-get update && apt-get upgrade -y     && apt-get install -y --no-install-recommends curl unzip ca-certificates procps     && curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o /tmp/awscli.zip     && unzip -q /tmp/awscli.zip -d /tmp && /tmp/aws/install && rm -rf /tmp/aws /tmp/awscli.zip     && apt-get purge -y unzip && apt-get autoremove -y && apt-get clean -y     && rm -rf /var/lib/apt/lists/*
+#8 CACHED
+
+#9 [stage-0  6/13] RUN uv sync --frozen --no-dev
+#9 CACHED
+
+#10 [stage-0  2/13] COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+#10 CACHED
+
+#11 [stage-0  5/13] COPY backend/pyproject.toml backend/uv.lock ./
+#11 CACHED
+
+#12 [stage-0  4/13] WORKDIR /app/backend
+#12 CACHED
+
+#13 [stage-0  7/13] COPY backend/ ./
+#13 CACHED
+
+#14 [stage-0  8/13] WORKDIR /app/harness
+#14 CACHED
+
+#15 [stage-0  9/13] COPY harness/ ./
+#15 DONE 0.0s
+
+#16 [stage-0 10/13] RUN python -c "import bootstrap_worktree as b; from pathlib import Path;     b.relink_agent_symlinks(Path('/app/backend'));     b.BACKEND_PATH_FILE.parent.mkdir(exist_ok=True);     b.BACKEND_PATH_FILE.write_text('/app/backend\n')"
+#16 DONE 0.2s
+
+#17 [stage-0 11/13] RUN groupadd -r app && useradd -r -g app -d /home/app -m app     && mkdir -p /home/app/.aws /data/jobs     && chown -R app:app /app /home/app /data     && chmod 755 /home/app /home/app/.aws && chmod -R a+rX /app
+#17 DONE 0.8s
+
+#18 [stage-0 12/13] COPY --chown=app:app harness/deploy/aws-config /home/app/.aws/config
+#18 DONE 0.1s
+
+#19 [stage-0 13/13] RUN python -c "import sys; sys.path.insert(0, '/app/backend'); import agent.local_sandbox, service.app"     && echo "harness imports OK"
+#19 1.654 resolved settings: {"version":"0.0.0","commit_hash":null,"branch":null,"is_saas":true,"report_analytics":false,"database_url":"**********","database_username":null,"database_password":null,"database_pool_max":10,"database_pool_min":0,"database_query_timeout":30,"database_migration_query_timeout":0,"database_tcp_keepalives_idle":300,"database_read_replica_url":null,"database_read_replica_max_lag_seconds":10.0,"request_admission_max":0,"request_admission_timeout_seconds":25.0,"definity_backend_pod_role":"app","definity_is_repeated_tasks":true,"applicative_stats_frequency_in_hours":1,"unhealthy_session_threshold_in_seconds":1800,"insights_generation_interval_days":2,"task_queue_embedded_worker":true,"task_queue_concurrency":8,"task_queue_worker_pool_min":1,"task_queue_worker_pool_max":12,"task_queue_schema":"procrastinate","is_mcp":false,"mcp_transport":"streamable-http","agent_rate_max_requests_per_period":25,"agent_rate_period":10,"api_ui_rate_max_requests_per_period":200,"api_ui_rate_period":10,"api_rest_rate_max_requests_per_period":60,"api_rest_rate_period":10,"auth_email_rate_max_requests":5,"auth_email_rate_period":60,"liveness_max_request_duration_seconds":0,"definity_log_conf_path":"logging.file.conf","definity_warning_log_time":2000,"log_json":false,"log_sql_files":false,"secret_key":"**********","algorithm":"HS256","jwt_skip_validation":false,"definity_auth_token":false,"internal_agent_token":null,"api_access_token_expire_minutes":30,"is_validate_password":true,"password_length":12,"google_sso_client_id":null,"google_sso_client_secret":null,"microsoft_sso_client_id":null,"microsoft_sso_client_secret":null,"sso_client_id":null,"sso_client_secret":null,"sso_authorization_endpoint":null,"sso_token_endpoint":null,"sso_userinfo_endpoint":null,"sso_scope":[],"workos_api_key":null,"workos_client_id":null,"aws_access_key_id":null,"aws_secret_access_key":null,"agent_sandbox_s3_bucket":"definity-insights-agent-sandbox","agent_sandbox_s3_region":"eu-north-1","llm_model":"anthropic:claude-sonnet-4-6","llm_api_key":null,"langsmith_api_key":null,"langsmith_project":null,"self_monitoring_definity_export":false,"otel_tracing_enabled":false,"max_task_retry_minutes":10,"minutes_till_unknown":5.0,"heartbeat_debounce_seconds":60,"metrics_max_cnt_values":100,"is_dev_mode":true,"validate_response_schemas":false,"check_routers_coverage":false,"test_generate_test_hours":2,"server_timing_enabled":false}
+#19 3.683 harness imports OK
+#19 DONE 3.7s
+
+#20 exporting to image
+#20 exporting layers
+#20 exporting layers 11.6s done
+#20 exporting manifest sha256:d5d783fded6c47589ade91b2e4c64445fbfc640515e23a878be5cf979b16d3db
+#20 exporting manifest sha256:d5d783fded6c47589ade91b2e4c64445fbfc640515e23a878be5cf979b16d3db 0.0s done
+#20 exporting config sha256:f631b2778a9a8640ef6dee89cd84dae43dae3415f55888a90ec5373c7ac2482f 0.0s done
+#20 exporting attestation manifest sha256:cbe7cdcb4b07094e26ecc3768dfdb06e3aa71c962a20930569eb0a6ad394b55a 0.0s done
+#20 exporting manifest list sha256:bd72a27faf052b6717e233e42d0d43ae2ce4041ba4d670b84ba0eae973e830ea done
+#20 naming to docker.io/library/recommendation-agent:local done
+#20 DONE 11.7s
+built recommendation-agent:local

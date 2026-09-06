@@ -1,0 +1,31 @@
+[
+  {
+    "insight_id": 364512,
+    "task_name": "dq_check_warehouse_fact_feedback_today_earliest_hour_partition_exist",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "c6gd.xlarge",
+      "worker_types": [
+        "m6gd.xlarge"
+      ],
+      "cnt_task_runs": 20,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 17,
+      "cluster_workers": 1,
+      "shuffle_partitions": "200",
+      "cluster_max_workers": 2,
+      "cluster_min_workers": 1,
+      "cnt_failed_task_runs": 2,
+      "workers_availability": "SPOT_WITH_FALLBACK",
+      "cnt_completed_task_runs": 18
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

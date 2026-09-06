@@ -1,0 +1,57 @@
+[
+  {
+    "insight_id": 563322,
+    "task_name": "spark-LoggerParquetConversion",
+    "type": "over_provisioned_executors",
+    "impact_cost": 3220061043.63851,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "is_dynamic": true,
+      "task_metrics": [
+        {
+          "title": "Executors vCores usage",
+          "metric_ids": [
+            2316430,
+            2316469
+          ]
+        }
+      ],
+      "cnt_task_runs": 100,
+      "time_span_days": 5,
+      "avg_utilization": 63,
+      "spark_executor_cores": 7,
+      "max_executors_suggestion": 618,
+      "avg_task_duration_minutes": 11,
+      "estimated_utilization_pct": 72,
+      "dynamic_max_executors_conf": 1200,
+      "dynamic_min_executors_conf": 0,
+      "has_executor_cores_changed": false,
+      "estimated_cost_reduction_pct": 12,
+      "estimated_duration_impact_pct": 16,
+      "estimated_duration_impact_minutes": 2
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 525935,
+    "task_name": "spark-LoggerParquetConversion",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 63,
+      "cnt_task_runs": 208,
+      "task_sub_type": null,
+      "time_span_days": 9,
+      "shuffle_partitions": "11000",
+      "cnt_failed_task_runs": 0,
+      "cnt_completed_task_runs": 199
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

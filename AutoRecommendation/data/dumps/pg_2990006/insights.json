@@ -1,0 +1,249 @@
+[
+  {
+    "insight_id": 580538,
+    "task_name": "compute",
+    "type": "agent_discovered_aqe_disabled_on_a_high_shuffle_spilling_",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "analysis": "[Agent-generated insight] Neither spark.sql.adaptive.enabled nor Databricks' dbx_autooptimizeshuffle is active. The job shuffles ~32 TB (shuffle_bytes_read=32.4 TB, shuffle_bytes_written=31.9 TB) across 1,054,430 tasks in 1,836 stages. Without AQE, Spark cannot coalesce small post-shuffle partitions or split skewed ones at runtime. The static 200-partition setting is the sole control over shuffle granularity, and it is demonstrably too coarse given the spill trend. Enabling AQE would allow Spark to dynamically right-size partitions per stage, reducing both spill pressure and scheduling overhead from the large number of tiny tasks observed in many stages.",
+      "evidence": "aqe_enabled_param=null (not set), dbx_autooptimizeshuffle=false. shuffle_bytes_read=32,354,263,719,362 bytes (~32 TB), shuffle_bytes_written=31,907,717,800,806 bytes (~32 TB). num_spark_stages=1836, num_spark_tasks=1,054,430. Stage 1881 shows 3,911 tasks with median scheduler_delay of 511ms vs median executorRunTime of 32ms \u2014 scheduling overhead dominates many small stages. Stage 1867 (3,856 tasks) and Stage 1869 (200 tasks, 502 GB disk spill) illustrate the wide variance in partition sizing that AQE would address.",
+      "severity": "performance",
+      "confidence": 0.82,
+      "kb_version": "e28f1c569f93",
+      "run_task_id": 2768823,
+      "generated_at": "2026-07-28T08:53:59.523769+00:00",
+      "generated_by": "auto-recommendations-agent (LangGraph insights agent)",
+      "readable_name": "[Agent] AQE Disabled on a High-Shuffle, Spilling Workload \u2014 Static Partition Count Cannot Adapt",
+      "recommendations": [
+        {
+          "action": "set_spark_config",
+          "reason": "HEALTH REMEDY \u2014 passes the health gate. Spill_ratio=0.084 (8.4% of I/O), chronic across all 15 runs (mean 6.9 TB spilled/run, trending +13.7%). AQE is NOT enabled (spark.sql.adaptive.enabled=not_set, dbx_autooptimizeshuffle=false), so spark.sql.shuffle.partitions is the direct, active lever \u2014 not a no-op. Current ratio: 200 partitions / 100 executors = 2.0 (flagged 'Low \u2014 hot partitions likely'). Each of the 200 reduce tasks must process ~32 TB / 200 = ~160 GB of shuffle data, far exceeding the per-slot execution budget (executor_heap=11.5 GB, off-heap=35.6 GB, 16 cores \u2192 per-slot budget \u2248 (11.5 + 35.6) GB / 16 \u2248 2.9 GB). Raising to 800 partitions targets a ratio of 8 partitions/executor and reduces per-task shuffle data to ~40 GB / task, a 4\u00d7 reduction in per-slot working set. Sizing arithmetic: target = max(200, shuffle_bytes / 128 MB) = max(200, 32,354 GB / 0.128 GB) = 252,768 \u2014 but that ceiling is impractical at 100 executors (scheduling overhead). The insight-suggested range of 800\u20131000 is the practical target: 800 gives ratio=8, well above the 'hot partitions' threshold of 5, and reduces per-task data to a manageable ~40 GB. Estimated saving: spill_ratio=0.084 \u00d7 used_vcore_time=1,792,004s \u2248 150,528s of wasted vcore-time per run. Recovering ~50% of that (conservative, since more partitions reduces but does not eliminate spill) \u2248 75,264s/run. At ~20 runs/15 days \u2192 ~365 runs/year, saving \u2248 75,264 \u00d7 365 / 3600 \u2248 7,630 vcore-hours/year. Estimated_saving_fraction \u2248 0.084 \u00d7 0.5 \u00d7 (used/allocated) \u2248 0.084 \u00d7 0.5 \u00d7 0.268 \u2248 0.011 of total allocated cost, but the spill also stretches wall-time and inflates all duration-integrated costs \u2014 the broader saving fraction is bounded by spill_ratio \u2248 0.07\u20130.08. NOTE: This is the ONLY executor-memory cluster change this visit (orthogonality). Insight ref=4 (enable AQE) is in the same executor-memory/partition cluster and is explicitly deferred to the next visit per the conflict resolution below.",
+          "config_key": "spark.sql.shuffle.partitions",
+          "current_value": "200",
+          "suggested_value": 800
+        }
+      ],
+      "suggested_action": "Enable spark.sql.adaptive.enabled=true. On Databricks Runtime this also activates partition coalescing and skew join handling. Pair with the shuffle partition increase (insight 1) \u2014 AQE will coalesce upward from the higher baseline rather than being constrained by 200. Do not set both changes in the same deployment; apply the partition count change first, then enable AQE in the following run."
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 580539,
+    "task_name": "compute",
+    "type": "agent_discovered_fixed_100_executor_cluster_with_dynamic_",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "analysis": "[Agent-generated insight] The cluster runs exactly 100 on-demand workers (clusterMinWorkers=clusterMaxWorkers=100) with dynamic allocation disabled. vcore_utilization is only 26.8% (used_vcore_time=1,792,003s vs allocated vcore_time=6,731,431s), meaning ~73% of paid compute is idle at any given moment. Because autoscaling is off and dynamic allocation is disabled, the cluster cannot shed idle executors between the many short stages (e.g. stages with 1\u201316 tasks running on a 1,600-vcore cluster). This is a cost pathology that is independent of the spill health issue \u2014 the cluster is structurally over-provisioned for the actual parallelism the workload can exploit at its current partition count. Note: the SQL rule already flagged over_provisioned_cluster_machines; this insight specifically identifies the mechanism (dynamic allocation disabled + fixed cluster size) and the interaction with the partition count fix.",
+      "evidence": "dynamic_allocation_enabled=false, cluster_min_workers=100=cluster_max_workers=100. vcore_utilization=0.268. vcores_avg_used_over_time=456.5 vs cluster_total_vcores_over_time avg=1,475. Stages with 1\u201316 tasks observed throughout event log while full 100-executor pool is allocated. 20 runs with identical config (cluster_max_workers change history: changed=false, 20 runs stable).",
+      "severity": "cost",
+      "confidence": 0.85,
+      "kb_version": "e28f1c569f93",
+      "run_task_id": 2768823,
+      "generated_at": "2026-07-28T08:53:59.523769+00:00",
+      "generated_by": "auto-recommendations-agent (LangGraph insights agent)",
+      "readable_name": "[Agent] Fixed 100-Executor Cluster with Dynamic Allocation Disabled \u2014 Idle Capacity Cannot Be Released",
+      "suggested_action": "Health gate: the spill pathology (insight 1) must be resolved first before right-sizing the cluster \u2014 current telemetry is corrupted by spill-driven serialisation. Once spill is reduced, evaluate enabling Databricks cluster autoscaling (clusterMinWorkers ~20, clusterMaxWorkers 100) or enabling spark.dynamicAllocation.enabled with shuffle tracking, so the cluster can release idle executors during the many single-task aggregation stages. Defer this change to a subsequent visit after the partition count fix is validated."
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 580537,
+    "task_name": "compute",
+    "type": "agent_discovered_spill_volume_growing_13_7_over_15_runs_d",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "analysis": "[Agent-generated insight] Disk bytes spilled has increased monotonically from ~6.5 TB to ~7.4 TB over the last 15 runs (+13.7%) with no configuration changes. This is not a one-off event: the trend is directionally consistent across the full history window. The static shuffle partition count (200 partitions across 100 executors = ratio of 2.0) means each partition is absorbing an ever-larger data slice as upstream volume grows. Increasing shuffle partitions is the correct lever \u2014 it reduces per-partition data size and should absorb the growth without requiring a memory increase.",
+      "evidence": "task__disk_bytes_spilled trend: values=[6501096862391, ..., 7389970100769], trend_direction=INCREASING, percentage_change_first_to_last=13.7%, run_count=15. shuffle_partitions_param=200, max_executors=100, partition_to_executor_ratio=2.0 (flagged as 'Low \u2014 hot partitions likely'). AQE not enabled (spark.sql.adaptive.enabled=not_set, dbx_autooptimizeshuffle=false), so static shuffle.partitions is the active control.",
+      "severity": "health",
+      "confidence": 0.88,
+      "kb_version": "e28f1c569f93",
+      "run_task_id": 2768823,
+      "generated_at": "2026-07-28T08:53:59.523769+00:00",
+      "generated_by": "auto-recommendations-agent (LangGraph insights agent)",
+      "readable_name": "[Agent] Spill Volume Growing +13.7% Over 15 Runs \u2014 Data Volume Crossing Threshold",
+      "recommendations": [
+        {
+          "action": "set_cluster_config",
+          "reason": "DEFERRED \u2014 health gate: executor spill open. This is an executor-side efficiency insight. spill_ratio=0.084 corrupts all duration-integrated telemetry (vcore-time, cost integrals). The $28,261 annual saving estimate is an upper bound on corrupted telemetry and cannot be reported as a recoverable saving this visit. The SQL engine's recommendation (clusterMinWorkers=22, clusterMaxWorkers=49) and the agent's mechanism insight (ref=5) are both valid targets for the NEXT visit after the partition count fix is validated and spill is reduced. At that point: enable Databricks cluster autoscaling by setting clusterMinWorkers~20 and clusterMaxWorkers~49 (per SQL engine sizing), which allows the cluster to shed idle executors during the many single-task aggregation stages (stages with 1\u201316 tasks observed throughout 1,836 stages on a 1,600-vcore cluster). vcore_utilization=0.268 means ~73% of paid compute is structurally idle \u2014 the largest recoverable saving in this job, but only addressable on clean telemetry.",
+          "config_key": "clusterMinWorkers",
+          "current_value": null,
+          "suggested_value": 20
+        }
+      ],
+      "suggested_action": "Raise spark.sql.shuffle.partitions from 200 to 800\u20131000 (targeting a ratio of ~8\u201310 partitions per executor). This reduces per-partition shuffle data size, directly attacking the spill root cause without requiring more memory or more executors. Validate on the next run that disk_bytes_spilled decreases proportionally."
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 471036,
+    "task_name": "compute",
+    "type": "captured_cost_savings",
+    "impact_cost": 2595.94376885567,
+    "impact_unit": "savings",
+    "insights_payload": {
+      "time_bounds": {
+        "last_period_end": "2026-06-30T00:24:06.6+00:00",
+        "first_period_end": "2026-05-08T00:23:28.989+00:00",
+        "last_period_start": "2026-06-13T00:24:06.6+00:00",
+        "first_period_start": "2026-04-21T00:23:28.989+00:00"
+      },
+      "task_metrics": [
+        {
+          "title": "Task execution time",
+          "metric_ids": [
+            63208,
+            63247,
+            63241
+          ]
+        }
+      ],
+      "last_period_vcore_time": 111895781,
+      "first_period_vcore_time": 118774692,
+      "last_period_memory_time": 328957688.2831869,
+      "first_period_memory_time": 349172364.6439526,
+      "total_vcore_time_to_reduce": 6878911,
+      "annual_vcore_seconds_impact": 144457131,
+      "total_memory_time_to_reduce": 20214676.360765696,
+      "annual_memory_seconds_impact": 424508203.5760796
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "stale",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 366603,
+    "task_name": "compute",
+    "type": "executors_long_spill_time",
+    "impact_cost": 119523203.258804,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Disk bytes spilled",
+          "metric_ids": [
+            63231
+          ]
+        },
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            63240,
+            63252
+          ]
+        },
+        {
+          "title": "Executors heap memory breakdown",
+          "metric_ids": [
+            63267,
+            63245,
+            63232
+          ]
+        }
+      ],
+      "task_profile": {
+        "task_type": "spark",
+        "tenant_id": 29,
+        "driver_type": "m6gd.4xlarge",
+        "worker_types": [
+          "m6gd.4xlarge"
+        ],
+        "cnt_task_runs": 17,
+        "task_sub_type": "Databricks",
+        "cloud_provider": "AWS",
+        "time_span_days": 17,
+        "cluster_workers": 100,
+        "shuffle_partitions": "200",
+        "cluster_max_workers": 100,
+        "cluster_min_workers": 100,
+        "cnt_failed_task_runs": 0,
+        "workers_availability": "ON_DEMAND",
+        "cnt_completed_task_runs": 17
+      },
+      "avg_spill_pct": 13.285886235719186,
+      "cnt_task_runs": 17,
+      "time_span_days": 17,
+      "avg_executor_max_memory_pct": 88.49659549341602,
+      "avg_executor_max_heap_memory_pct": 37.57834110012401,
+      "avg_executor_max_off_heap_memory_pct": 104.92201915998443
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 366823,
+    "task_name": "compute",
+    "type": "over_provisioned_cluster_machines",
+    "impact_cost": 2181895084.64675,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "is_dynamic": false,
+      "task_metrics": [
+        {
+          "title": "Executors vCores usage",
+          "metric_ids": [
+            63247,
+            63283
+          ]
+        }
+      ],
+      "cnt_task_runs": 17,
+      "time_span_days": 17,
+      "avg_utilization": 27,
+      "cluster_workers": 100,
+      "cluster_max_workers": 100,
+      "cluster_min_workers": 100,
+      "spark_executor_cores": 16,
+      "is_cluster_auto_scale": true,
+      "max_executors_suggestion": 47,
+      "min_executors_suggestion": 21,
+      "avg_task_duration_minutes": 71,
+      "estimated_utilization_pct": 76,
+      "has_executor_cores_changed": false,
+      "estimated_cost_reduction_pct": 65,
+      "estimated_duration_impact_pct": 9,
+      "estimated_duration_impact_minutes": 6
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 364704,
+    "task_name": "compute",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "m6gd.4xlarge",
+      "worker_types": [
+        "m6gd.4xlarge"
+      ],
+      "cnt_task_runs": 17,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 17,
+      "cluster_workers": 100,
+      "shuffle_partitions": "200",
+      "cluster_max_workers": 100,
+      "cluster_min_workers": 100,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 17
+    },
+    "insights_payload_override": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

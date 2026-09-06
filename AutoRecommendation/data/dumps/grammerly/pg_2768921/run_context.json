@@ -1,0 +1,2453 @@
+{
+  "task_run": {
+    "task_id": 2768921,
+    "task_name": "Run_1_write_harmonized_stage_user_assignment_day",
+    "task_type": "spark",
+    "task_sub_type": "Databricks",
+    "status": "COMPLETED",
+    "error": null,
+    "start_time": "2026-07-27T00:39:18.253000+00:00",
+    "end_time": "2026-07-27T00:40:26.379000+00:00",
+    "app_pit": "2026-07-27T00:23:52",
+    "is_retry": false,
+    "parent_task_id": 2768823,
+    "user_task_id": "Databricks Shell",
+    "pipeline_run_id": "10800-2026-07-27 00:23:52",
+    "app_name": "[prod]harmonized_dim_user_assignment_snapshot",
+    "env_name": "prod",
+    "pipeline_status": "COMPLETED",
+    "pipeline_sla_value": 3533.676472,
+    "pipeline_duration_value": 4008.638,
+    "pipeline_task_runs": 16,
+    "pipeline_task_retries": 0
+  },
+  "spark_parameters": [
+    {
+      "key": "definity.agent.version",
+      "value": "0.91.0"
+    },
+    {
+      "key": "definity.server.version",
+      "value": "0.79.1"
+    },
+    {
+      "key": "fs.s3a.ifNoneMatch.star.enabled",
+      "value": "true"
+    },
+    {
+      "key": "fs.s3a.ifNoneMatch.star.encryptedHeadProbe.enabled",
+      "value": "false"
+    },
+    {
+      "key": "java.version",
+      "value": "1.8.0_482"
+    },
+    {
+      "key": "spark.app.id",
+      "value": "app-20260727002418-0000"
+    },
+    {
+      "key": "spark.app.startTime",
+      "value": "1785111826036"
+    },
+    {
+      "key": "spark.databricks.adaptive.repartitioning.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.autotune.maintenance.autoClustering.preserveHierarchicalColumnsAfterReplace",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.autotune.maintenance.liquidAuto.scanMetric.minTableSizeMB",
+      "value": "200"
+    },
+    {
+      "key": "spark.databricks.autotune.maintenance.ucPoNonAuto.scanMetric.sampleRate",
+      "value": "0.05"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.SEC11193UncheckedInsertOverwriteDirPlans",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.hivesimpleudf.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.javamethod.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.other.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.pythonudf.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.pythonudtf.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.reflect.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.scalaudf.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.scripttransformation.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.cloudFiles.adjustBackfillBeginMs",
+      "value": "1d"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterAllTags",
+      "value": "[{\"key\":\"sub_function\",\"value\":\"Data Foundations\"},{\"key\":\"Environment\",\"value\":\"prod\"},{\"key\":\"priority\",\"value\":\"P0\"},{\"key\":\"TechOwner\",\"value\":\"data\"},{\"key\":\"Division\",\"value\":\"DataPlatform\"},{\"key\":\"DatabricksResourceName\",\"value\":\"analytics-engineering\"},{\"key\":\"department\",\"value\":\"Data Platform\"},{\"key\":\"function\",\"value\":\"Data Model\"},{\"key\":\"Repository\",\"value\":\"data/databricks/terraform/databricks/modules/service\"},{\"key\":\"owner\",\"value\":\"Data Engineering\"},{\"key\":\"Product\",\"value\":\"Databricks\"},{\"key\":\"DatabricksResourceType\",\"value\":\"service\"},{\"key\":\"sla\",\"value\":\"11:00\"},{\"key\":\"fa\",\"value\":\"Data\"},{\"key\":\"env\",\"value\":\"prod\"},{\"key\":\"Vendor\",\"value\":\"Databricks\"},{\"key\":\"Creator\",\"value\":\"552e7ab1-1b5c-4141-ae8c-47aa503e6490\"},{\"key\":\"ClusterName\",\"value\":\"job-549513480625996-run-970228892665933-job_cluster\"},{\"key\":\"ClusterId\",\"value\":\"0727-002004-569872fl\"},{\"key\":\"JobId\",\"value\":\"549513480625996\"},{\"key\":\"RunName\",\"value\":\"prodharmonized_dim_user_assignment_snapshot\"},{\"key\":\"Name\",\"value\":\"workerenv-4547565018768595-2b650db3-c8a5-4104-98c3-95e23b193a50-worker\"}]"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterId",
+      "value": "0727-002004-569872fl"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterName",
+      "value": "job-549513480625996-run-970228892665933-job_cluster"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterNumCustomTags",
+      "value": "15"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterNumSparkConfs",
+      "value": "4"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterNumSparkEnvVars",
+      "value": "3"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverContainerId",
+      "value": "1d076c250475475fa1eb6c6678196a36"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverContainerPrivateIp",
+      "value": "10.84.59.183"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverInstanceId",
+      "value": "i-0a5d609b0e855d45c"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverInstancePrivateIp",
+      "value": "10.84.62.100"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.enableCredentialPassthrough",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.enableGlueCatalogCredentialPassthrough",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.enableJdbcAutoStart",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.sparkImageLabel",
+      "value": "release__15.4.x-snapshot-aarch64-photon-scala2.12__databricks__15.4.43__d9ea4dd__34bcd09__jenkins__5a47700__format-3"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.workloadType",
+      "value": "AUTOMATED"
+    },
+    {
+      "key": "spark.databricks.compliance.workspaceRequiresFipsValidatedEncryptionModules",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.connector.snowflakeStrategyAllowEmptyProjection",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.credential.redactor",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.credential.scope.fs.impl",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.dataLineage.2hop.dbnsEndpoint",
+      "value": "http://lineage-proxy-classic.privileged.dbns.databricks.com"
+    },
+    {
+      "key": "spark.databricks.delta.alwaysPropagateUCTableId",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.catalog.update.uc.etagValidation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.checkConstraints.validation.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.delta.commitService.moveOutExternalTablesCommit",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.commitService.moveOutStatsOnLoad",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.conflictDetection.skipConcurrentAppendCheckForInPlaceFileMetadataUpdates",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.dropTable.ShallowCloneProtection.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.dr.tableChangeDetection.ucUpdate.useDrApi",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.dr.uc.etagValidation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.enhancedS3AFileSystem.nativePutIfAbsent.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.generatedColumn.maskValidation.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.delta.generatedColumn.validateOnWrite.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.delta.logStore.cacheUpload.contextPropagatingExecutor.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.logStore.s3.writeCommit.nativePutIfAbsent.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.checkpointPolicy.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.columnMapping.mode.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.enableDeletionVectors.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.enableRowTracking.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.prepareDeltaScan.dedupRelationsByReference",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.deltaSharing.disableViewSharingFunctionAllowlist",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.deltaSharing.o2dDirectoryBasedAccess.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.snapshotHint.useOptimizedGetFileStatus",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.sqlSnapshotReconstruction.removeRepartition",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.table.uc.etagValidation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.uniform.readIcebergEnabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.vacuum.enforceTimeTravelWithinDeletedFileRetentionDuration",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.vacuum.retentionWindowIgnore.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.writePartitionColumnsToParquet",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.writeWithDroppedNullTypeWithSchemaEvolutionThrow",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.cleanUpSparkSessionsOnUCSharedClusters",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.driver.enableUseraddLockRetry",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.notebookGrpcSqlMagicApiEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.notebookGrpcWidgetsApiEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.replPool.autoMode.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.dynamicConf.demoFlag10",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.dynamicConf.demoFlag4",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.fips.accpJvmEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.hive.metastore.client.ignoreEmptyStringLocation",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.instanceId",
+      "value": "i-0a5d609b0e855d45c"
+    },
+    {
+      "key": "spark.databricks.io.cache.autocompression.instance.overrides",
+      "value": "{\"r5dn?\\\\..*\":1.1,\"m5dn?\\\\..*\":1.1,\"i3(en)?\\\\..*\":4,\"Standard_E\\\\d+_v3\":1.1}"
+    },
+    {
+      "key": "spark.databricks.io.cache.enabled.instance.overrides",
+      "value": "{\"fake\":false,\"Standard_D\\\\d+ds_v7\":true,\"Standard_E\\\\d+(i)?ds_v7\":true,\"r8id\\\\..*\":true,\"m8id\\\\..*\":true,\"Standard_D\\\\d+ads_v7\":true,\"Standard_E\\\\d+ads_v7\":true,\"Standard_F\\\\d+a(m)?ds_v7\":true,\"Standard_L\\\\d+(a(o)?)?s_v4\":true,\"c4d?-(standard|highmem)-\\\\d+-lssd\":true}"
+    },
+    {
+      "key": "spark.databricks.io.cache.parquet.crc",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.io.parquet.writeParquetFormatVersion.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.io.parquet.writeSparkImageLabel.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.jdbc.useDialectInSavePartition",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.logging.usage.migration.dualLogPercentProbabilitiesIngestion",
+      "value": "{\"controlPlane\":{},\"dataPlane\":{\"thriftOperation\":{\"lP\":100,\"uP\":100,\"lC\":0},\"thriftOperationStart\":{\"lP\":100,\"uP\":100,\"lC\":0}}}"
+    },
+    {
+      "key": "spark.databricks.logging.usage.migration.dualLogPercentProbabilitiesSparkCore",
+      "value": "{\"driverMetastoreEvent\":{\"lC\":0,\"lP\":100,\"uP\":100},\"metastoreUsage\":{\"lC\":100,\"lP\":100,\"uP\":0},\"mlMlAlgorithm\":{\"lC\":100,\"lP\":100,\"uP\":0},\"pandasOnSparkImported\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkConnectOperationDuration\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkJobEnd\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkOperationDuration\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkStageCompleted\":{\"lC\":100,\"lP\":100,\"uP\":0},\"tahoeEvent\":{\"lC\":0,\"lP\":10,\"uP\":100}}"
+    },
+    {
+      "key": "spark.databricks.optimizer.cumulativeMaxCNFNodeCount",
+      "value": "200"
+    },
+    {
+      "key": "spark.databricks.passthrough.glue.credentialsProviderFactoryClassName",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.alwaysLogFirstNCalls",
+      "value": "1"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.extension.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.internalCallSitePrefixes",
+      "value": "/databricks/python_shell/dbruntime,/databricks/python_shell/lib,/databricks/python_shell/scripts,/databricks/spark/python"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.lumberjack.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.samplingRateFraction",
+      "value": "0.0"
+    },
+    {
+      "key": "spark.databricks.pyspark.udt.allowUnpickle",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.pyspark.udt.importTypeCheck",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.pyspark.udt.log",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.enableClientShutdown",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.ES1890727",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.ES1899676_null_literal_fix.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.retryChangedSession",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.retryClosedSession",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.retryRstStreamClosedStream",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.useSessionIdInProto",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.rewriteViewCatalogInUcOnlyMode",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.additionalCentralizableKeys",
+      "value": "spark.databricks.clusterUsageTags.driverInstancePrivateIp,timezone,use_cached_result"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.internalClassPrefixes",
+      "value": "com.databricks.,jdk.internal.,org.apache.spark.,org.mlflow.spark.,py4j.,shaded1.databricks.,sun.reflect."
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.python.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.scala.additionalFramesToSkip",
+      "value": "org.apache.spark.sql.SQLContext,org.apache.spark.sql.connect.service.SparkConnectConfigHandler$RuntimeConfigWrapper,com.databricks.spark.sqlgateway.history.RuntimeConfGetter,com.databricks.pipelines.graph.PipelineConfEntry,com.databricks.pipelines.util.FeatureFlagUtils$:getCurrentValue"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.scala.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.sql.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.s3.createAtomicIfAbsent.bypassCommitService.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.SC200982.blockSecuritySensitiveFunctionOverride",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.scheduler.failureRateExclusion.minRateFloor",
+      "value": "0.2"
+    },
+    {
+      "key": "spark.databricks.scheduler.failureRateExclusion.minSample",
+      "value": "60"
+    },
+    {
+      "key": "spark.databricks.sparkContextId",
+      "value": "6607783876434763849"
+    },
+    {
+      "key": "spark.databricks.sql.assigned.metastore.id",
+      "value": "43862f49-20d3-4f58-bab4-476789d5de25"
+    },
+    {
+      "key": "spark.databricks.sql.externalUDF.tcp.userTimeout",
+      "value": "-1"
+    },
+    {
+      "key": "spark.databricks.sql.functions.readFiles.inferredPartitionTypes.mode",
+      "value": "inferType"
+    },
+    {
+      "key": "spark.databricks.sql.jdbcDialectForbidQueriesWithForbiddenKeywords",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.sql.jdbcDialectIgnoreQueriesWithForbiddenKeywords",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.sql.jdbcDialectObjectNotFoundCheck",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.sql.materializedViewWithMesa",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.optimizer.lateralJoinPreserveOuterSemantics",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.photon.es1663535.scanFilterRequireAttributes",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.blockLiteralParseableColumnNameAsPolicyParameter.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.blockQueriesWithAmbiguousLiteralParseablePolicyParameters.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.generatedColumnValidation.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.regenerateCteRefOutput.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.syncCteRefOutputTypes.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.syncMaskOutputTypes.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.SC-214978",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.allowSetHmsCatalog",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.client.newErrorClasses.enabled",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.unityCatalog.currentUser.identityMismatch.log",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.enableServiceCredentials",
+      "value": "*****"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.fabricCrawler.enabled",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.unityCatalog.forwardEtagInUpdate",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.lakehouseFederation.preserveUCComments.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.mcsc.initialCatalogParam.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.mcsc.sparkEnvFallback.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.cluster.eventsCollector",
+      "value": "MetricEmittingSAMEventsCollector"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.cluster.eventsCollector.config",
+      "value": "{}"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.crossUserMerge.log",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.crossUserMerge.skip",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.SEC11193DescendIntoChildPlans",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.SEC16443DescendIntoTrustedPlan",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.skipForeignMetadataSyncOnListTablesWithSchemaPattern",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.skipProvisioningStateFailedCheckForRefreshCommands",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.validateSQLUDFDependencies",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.volumes.fuse.server.sslTruststorePath",
+      "value": "/databricks/keys/jetty_ssl_truststore.pem"
+    },
+    {
+      "key": "spark.definity.databricks.job.jobRunAttemptNum",
+      "value": "0"
+    },
+    {
+      "key": "spark.definity.databricks.job.jobRunId",
+      "value": "970228892665933"
+    },
+    {
+      "key": "spark.definity.databricks.job.jobTriggerType",
+      "value": "manual"
+    },
+    {
+      "key": "spark.definity.databricks.task.type",
+      "value": "notebook"
+    },
+    {
+      "key": "spark.delta.sharing.network.asyncQueryTimeout",
+      "value": "1800000"
+    },
+    {
+      "key": "spark.delta.sharing.network.useAsyncQuery",
+      "value": "true"
+    },
+    {
+      "key": "spark.driver.extraJavaOptions",
+      "value": "-Djava.net.preferIPv6Addresses=false -XX:+IgnoreUnrecognizedVMOptions --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/sun.nio.cs=ALL-UNNAMED --add-opens=java.base/sun.security.action=ALL-UNNAMED --add-opens=java.base/sun.util.calendar=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED --add-opens=jdk.jfr/jdk.jfr.internal.consumer=ALL-UNNAMED --add-opens=jdk.jfr/jdk.jfr.internal=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED -Djdk.reflect.useDirectMethodHandle=false -Dconfig.resource=prod-data-platform-read-only.conf -Dmetrics.target=none"
+    },
+    {
+      "key": "spark.driver.host",
+      "value": "10.84.59.183"
+    },
+    {
+      "key": "spark.driver.port",
+      "value": "38583"
+    },
+    {
+      "key": "spark.executor.extraJavaOptions",
+      "value": "-Djava.net.preferIPv6Addresses=false -XX:+IgnoreUnrecognizedVMOptions --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.invoke=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.net=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/sun.nio.cs=ALL-UNNAMED --add-opens=java.base/sun.security.action=ALL-UNNAMED --add-opens=java.base/sun.util.calendar=ALL-UNNAMED --add-opens=java.security.jgss/sun.security.krb5=ALL-UNNAMED --add-opens=jdk.jfr/jdk.jfr.internal.consumer=ALL-UNNAMED --add-opens=jdk.jfr/jdk.jfr.internal=ALL-UNNAMED --add-opens=java.management/sun.management=ALL-UNNAMED --add-opens=java.base/jdk.internal.loader=ALL-UNNAMED -Djdk.reflect.useDirectMethodHandle=false -Djava.io.tmpdir=/local_disk0/tmp -XX:ReservedCodeCacheSize=512m -XX:+UseCodeCacheFlushing -XX:PerMethodRecompilationCutoff=-1 -XX:PerBytecodeRecompilationCutoff=-1 -Djava.security.properties=/databricks/spark/dbconf/java/extra.security -XX:-UseContainerSupport -XX:+PrintFlagsFinal -XX:+PrintGCDateStamps -XX:+PrintGCDetails -verbose:gc -Xss4m -Djava.library.path=/usr/java/packages/lib/aarch64:/lib:/usr/lib:/usr/lib64:/lib64:/usr/lib/aarch64-linux-gnu/jni:/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu:/usr/lib/jni -Djavax.xml.datatype.DatatypeFactory=com.sun.org.apache.xerces.internal.jaxp.datatype.DatatypeFactoryImpl -Djavax.xml.parsers.DocumentBuilderFactory=com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl -Djavax.xml.parsers.SAXParserFactory=com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl -Djavax.xml.validation.SchemaFactory:http://www.w3.org/2001/XMLSchema=com.sun.org.apache.xer"
+    },
+    {
+      "key": "spark.hadoop.fs.s3a.assumed.role.credentials.provider",
+      "value": "*****"
+    },
+    {
+      "key": "spark.master",
+      "value": "spark://10.84.59.183:7077"
+    },
+    {
+      "key": "spark.repl.class.outputDir",
+      "value": "/local_disk0/tmp/repl/spark-6607783876434763849-05bf39dc-c12b-4f84-bedf-ddfe78b70ed9"
+    },
+    {
+      "key": "spark.repl.class.uri",
+      "value": "spark://10.84.59.183:38583/classes"
+    },
+    {
+      "key": "spark.r.sql.derby.temp.dir",
+      "value": "/tmp/Rtmpi0kZDc"
+    },
+    {
+      "key": "spark.sql.legacy.useLegacyXMLParser.migrationValidation.enabled",
+      "value": "false"
+    }
+  ],
+  "events": [
+    {
+      "event_id": 313,
+      "category": "internal",
+      "sub_category": "debug",
+      "name": "Session debug info",
+      "description": "",
+      "start_time_ms": 1785112758253,
+      "end_time_ms": 1785112825856,
+      "payload": "{\"metric.clusterAppsSubmitted\": 1}"
+    },
+    {
+      "event_id": 315,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 488",
+      "description": "executeCollect at OptimizeLocalUnion.scala:96 - attempt=0, id=488, jobId=288, numTasks=1, partitions=1, rootTfId=176, status=succeeded, tfId=178",
+      "start_time_ms": 1785112762745,
+      "end_time_ms": 1785112762799,
+      "payload": "{\"id\": 488, \"tfId\": 178, \"jobId\": 288, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 6706034, \"internal.metrics.executorRunTime\": 26, \"internal.metrics.input.bytesRead\": 23451, \"internal.metrics.input.recordsRead\": 14417, \"internal.metrics.photonizedTaskTimeNs\": 18105874, \"internal.metrics.parquetCacheDiskUsage\": 17716942118, \"internal.metrics.executorDeserializeTime\": 9, \"internal.metrics.parquetCacheMaxDiskUsage\": 776830290079, \"internal.metrics.executorDeserializeCpuTime\": 3254678}, \"numTasks\": 1, \"rootTfId\": 176, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [42.0, 42.0, 42.0, 42.0, 42.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [7.0, 7.0, 7.0, 7.0, 7.0], \"executorRunTime\": [26.0, 26.0, 26.0, 26.0, 26.0], \"inputMetrics_bytesRead\": [23451.0, 23451.0, 23451.0, 23451.0, 23451.0], \"executorDeserializeTime\": [9.0, 9.0, 9.0, 9.0, 9.0], \"inputMetrics_recordsRead\": [14417.0, 14417.0, 14417.0, 14417.0, 14417.0]}}"
+    },
+    {
+      "event_id": 316,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 489",
+      "description": "executeCollect at OptimizeLocalUnion.scala:96 - attempt=0, id=489, jobId=289, numTasks=1, partitions=1, rootTfId=176, status=succeeded, tfId=180",
+      "start_time_ms": 1785112762899,
+      "end_time_ms": 1785112762946,
+      "payload": "{\"id\": 489, \"tfId\": 180, \"jobId\": 289, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 7123659, \"internal.metrics.executorRunTime\": 23, \"internal.metrics.input.bytesRead\": 23447, \"internal.metrics.input.recordsRead\": 14444, \"internal.metrics.photonizedTaskTimeNs\": 17037650, \"internal.metrics.parquetCacheDiskUsage\": 18083180451, \"internal.metrics.executorDeserializeTime\": 10, \"internal.metrics.parquetCacheMaxDiskUsage\": 776379663532, \"internal.metrics.executorDeserializeCpuTime\": 3489108}, \"numTasks\": 1, \"rootTfId\": 176, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [39.0, 39.0, 39.0, 39.0, 39.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 6.0, 6.0], \"executorRunTime\": [23.0, 23.0, 23.0, 23.0, 23.0], \"inputMetrics_bytesRead\": [23447.0, 23447.0, 23447.0, 23447.0, 23447.0], \"executorDeserializeTime\": [10.0, 10.0, 10.0, 10.0, 10.0], \"inputMetrics_recordsRead\": [14444.0, 14444.0, 14444.0, 14444.0, 14444.0]}}"
+    },
+    {
+      "event_id": 317,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 490",
+      "description": "mapPartitionsInternal at PhotonExec.scala:552 - attempt=0, id=490, jobId=290, numTasks=14, partitions=14, rootTfId=176, status=succeeded, tfId=179",
+      "start_time_ms": 1785112763037,
+      "end_time_ms": 1785112767757,
+      "payload": "{\"id\": 490, \"tfId\": 179, \"jobId\": 290, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 248707, \"internal.metrics.executorCpuTime\": 34586670624, \"internal.metrics.executorRunTime\": 46002, \"internal.metrics.input.bytesRead\": 78282, \"internal.metrics.io.requestCount\": 13, \"internal.metrics.input.recordsRead\": 44165643, \"internal.metrics.io.requestBytesCount\": 3960, \"internal.metrics.io.requestMsDuration\": 1805, \"internal.metrics.photonizedTaskTimeNs\": 45916231889, \"internal.metrics.io.responseBytesCount\": 7679, \"internal.metrics.parquetCacheDiskUsage\": 251467849214, \"internal.metrics.executorDeserializeTime\": 53, \"internal.metrics.parquetCacheMaxDiskUsage\": 10883409790189, \"internal.metrics.input.filesystemBytesRead\": 1108, \"internal.metrics.executorDeserializeCpuTime\": 51166617, \"internal.metrics.shuffle.write.bytesWritten\": 1661458294, \"internal.metrics.shuffle.write.recordsWritten\": 44165643}, \"numTasks\": 14, \"rootTfId\": 176, \"partitions\": 14, \"taskMetricsDistributions\": {\"duration\": [32.0, 3138.0, 3617.0, 3644.0, 4710.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [12.0, 13.0, 15.0, 60.0, 252.0], \"executorRunTime\": [14.0, 3120.0, 3553.0, 3626.0, 4694.0], \"inputMetrics_bytesRead\": [4674.0, 5379.0, 5539.0, 5540.0, 8790.0], \"executorDeserializeTime\": [3.0, 3.0, 4.0, 4.0, 5.0], \"inputMetrics_recordsRead\": [296.0, 2858315.0, 2861197.0, 2882826.0, 6009043.0], \"shuffleWriteMetrics_writeBytes\": [6382.0, 105213758.0, 135793428.0, 135924991.0, 136952019.0], \"shuffleWriteMetrics_writeRecords\": [296.0, 2858315.0, 2861197.0, 2882826.0, 6009043.0]}}"
+    },
+    {
+      "event_id": 329,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 501",
+      "description": "write at WriteIntoDeltaCommand.scala:113 - attempt=0, id=501, jobId=300, numTasks=5, parentStages=(500), partitions=5, rootTfId=176, status=succeeded, tfId=179",
+      "start_time_ms": 1785112767802,
+      "end_time_ms": 1785112786190,
+      "payload": "{\"id\": 501, \"tfId\": 179, \"jobId\": 300, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 103, \"internal.metrics.resultSize\": 46028, \"internal.metrics.executorCpuTime\": 30537122132, \"internal.metrics.executorRunTime\": 62983, \"internal.metrics.io.requestCount\": 178, \"internal.metrics.output.bytesWritten\": 1586771744, \"internal.metrics.io.requestBytesCount\": 1586785002, \"internal.metrics.io.requestMsDuration\": 37899, \"internal.metrics.photonizedTaskTimeNs\": 61916343131, \"internal.metrics.output.recordsWritten\": 44165643, \"internal.metrics.executorDeserializeTime\": 141, \"internal.metrics.shuffle.read.recordsRead\": 44165643, \"internal.metrics.executorDeserializeCpuTime\": 61330880, \"internal.metrics.shuffle.read.fetchWaitTime\": 182, \"internal.metrics.shuffle.read.localBytesRead\": 754969130, \"internal.metrics.shuffle.read.remoteBytesRead\": 906489164, \"internal.metrics.shuffle.read.localBlocksFetched\": 6, \"internal.metrics.shuffle.read.remoteReqsDuration\": 3082, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 8}, \"numTasks\": 5, \"rootTfId\": 176, \"partitions\": 5, \"parentStages\": \"(500)\", \"taskMetricsDistributions\": {\"duration\": [3433.0, 9764.0, 15188.0, 16488.0, 16488.0], \"jvmGcTime\": [0.0, 20.0, 20.0, 26.0, 26.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 7.0, 7.0], \"executorRunTime\": [3404.0, 9702.0, 15146.0, 16468.0, 16468.0], \"executorDeserializeTime\": [14.0, 14.0, 23.0, 36.0, 36.0], \"outputMetrics_bytesWritten\": [9004.0, 258109931.0, 358553008.0, 485039767.0, 485039767.0], \"outputMetrics_recordsWritten\": [296.0, 5744656.0, 10793413.0, 10794169.0, 10794169.0], \"shuffleReadMetrics_readBytes\": [6382.0, 272886838.0, 362938459.0, 512789924.0, 512789924.0], \"shuffleReadMetrics_readRecords\": [296.0, 5744656.0, 10793413.0, 10794169.0, 10794169.0]}}"
+    },
+    {
+      "event_id": 338,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 510",
+      "description": "collect at TransactionalWriteEdge.scala:758 - attempt=0, id=510, jobId=309, numTasks=1, partitions=1, rootTfId=176, status=succeeded, tfId=179",
+      "start_time_ms": 1785112786226,
+      "end_time_ms": 1785112786439,
+      "payload": "{\"id\": 510, \"tfId\": 179, \"jobId\": 309, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 877, \"internal.metrics.executorCpuTime\": 135007970, \"internal.metrics.executorRunTime\": 174, \"internal.metrics.executorDeserializeTime\": 28, \"internal.metrics.executorDeserializeCpuTime\": 19403284}, \"numTasks\": 1, \"rootTfId\": 176, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [207.0, 207.0, 207.0, 207.0, 207.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [5.0, 5.0, 5.0, 5.0, 5.0], \"executorRunTime\": [174.0, 174.0, 174.0, 174.0, 174.0], \"executorDeserializeTime\": [28.0, 28.0, 28.0, 28.0, 28.0]}}"
+    },
+    {
+      "event_id": 340,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 512",
+      "description": "executeCollect at DatasetRefCache.scala:73 - attempt=0, id=512, jobId=311, numTasks=187, partitions=187, rootTfId=197, status=succeeded, tfId=197",
+      "start_time_ms": 1785112789075,
+      "end_time_ms": 1785112791731,
+      "payload": "{\"id\": 512, \"tfId\": 197, \"jobId\": 311, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 544536, \"internal.metrics.executorCpuTime\": 2847572377, \"internal.metrics.executorRunTime\": 3606, \"internal.metrics.photonizedTaskTimeNs\": 204589756, \"internal.metrics.executorDeserializeTime\": 1318, \"internal.metrics.resultSerializationTime\": 7, \"internal.metrics.executorDeserializeCpuTime\": 770839769}, \"numTasks\": 187, \"rootTfId\": 197, \"partitions\": 187, \"taskMetricsDistributions\": {\"duration\": [2189.0, 2272.0, 2369.0, 2438.0, 2579.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [2174.0, 2243.0, 2343.0, 2408.0, 2560.0], \"executorRunTime\": [11.0, 15.0, 17.0, 22.0, 38.0], \"executorDeserializeTime\": [3.0, 4.0, 5.0, 7.0, 29.0], \"resultSerializationTime\": [0.0, 0.0, 0.0, 0.0, 3.0]}}"
+    },
+    {
+      "event_id": 341,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 513",
+      "description": "executeCollect at OptimizeLocalUnion.scala:96 - attempt=0, id=513, jobId=312, numTasks=1, partitions=1, rootTfId=197, status=succeeded, tfId=200",
+      "start_time_ms": 1785112789291,
+      "end_time_ms": 1785112791863,
+      "payload": "{\"id\": 513, \"tfId\": 200, \"jobId\": 312, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 8093275, \"internal.metrics.executorRunTime\": 26, \"internal.metrics.input.bytesRead\": 23447, \"internal.metrics.input.recordsRead\": 14444, \"internal.metrics.photonizedTaskTimeNs\": 20302928, \"internal.metrics.parquetCacheDiskUsage\": 19165467483, \"internal.metrics.executorDeserializeTime\": 3, \"internal.metrics.parquetCacheMaxDiskUsage\": 767517702854, \"internal.metrics.executorDeserializeCpuTime\": 3345462}, \"numTasks\": 1, \"rootTfId\": 197, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [2558.0, 2558.0, 2558.0, 2558.0, 2558.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [2529.0, 2529.0, 2529.0, 2529.0, 2529.0], \"executorRunTime\": [26.0, 26.0, 26.0, 26.0, 26.0], \"inputMetrics_bytesRead\": [23447.0, 23447.0, 23447.0, 23447.0, 23447.0], \"executorDeserializeTime\": [3.0, 3.0, 3.0, 3.0, 3.0], \"inputMetrics_recordsRead\": [14444.0, 14444.0, 14444.0, 14444.0, 14444.0]}}"
+    },
+    {
+      "event_id": 342,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 514",
+      "description": "executeCollect at OptimizeLocalUnion.scala:96 - attempt=0, id=514, jobId=313, numTasks=1, partitions=1, rootTfId=197, status=succeeded, tfId=201",
+      "start_time_ms": 1785112791895,
+      "end_time_ms": 1785112795458,
+      "payload": "{\"id\": 514, \"tfId\": 201, \"jobId\": 313, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 6649074, \"internal.metrics.executorRunTime\": 25, \"internal.metrics.input.bytesRead\": 23451, \"internal.metrics.input.recordsRead\": 14417, \"internal.metrics.photonizedTaskTimeNs\": 20053320, \"internal.metrics.parquetCacheDiskUsage\": 19343909962, \"internal.metrics.executorDeserializeTime\": 3, \"internal.metrics.parquetCacheMaxDiskUsage\": 766185948234, \"internal.metrics.executorDeserializeCpuTime\": 3423261}, \"numTasks\": 1, \"rootTfId\": 197, \"partitions\": 1, \"taskMetricsDistributions\": {}}"
+    },
+    {
+      "event_id": 343,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 515",
+      "description": "mapPartitionsInternal at PhotonExec.scala:552 - attempt=0, id=515, jobId=314, numTasks=1, partitions=1, rootTfId=197, status=succeeded, tfId=199",
+      "start_time_ms": 1785112792003,
+      "end_time_ms": 1785112795570,
+      "payload": "{\"id\": 515, \"tfId\": 199, \"jobId\": 314, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 17419, \"internal.metrics.executorCpuTime\": 33407855, \"internal.metrics.executorRunTime\": 44, \"internal.metrics.input.bytesRead\": 2477, \"internal.metrics.input.recordsRead\": 511658, \"internal.metrics.photonizedTaskTimeNs\": 39377636, \"internal.metrics.parquetCacheDiskUsage\": 20127682391, \"internal.metrics.executorDeserializeTime\": 24, \"internal.metrics.parquetCacheMaxDiskUsage\": 766840282429, \"internal.metrics.executorDeserializeCpuTime\": 4136836, \"internal.metrics.shuffle.write.bytesWritten\": 742491, \"internal.metrics.shuffle.write.recordsWritten\": 19116}, \"numTasks\": 1, \"rootTfId\": 197, \"partitions\": 1, \"taskMetricsDistributions\": {}}"
+    },
+    {
+      "event_id": 344,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 517",
+      "description": "write at WriteIntoDeltaCommand.scala:113 - attempt=0, id=517, jobId=315, numTasks=1, parentStages=(516), partitions=1, rootTfId=197, status=succeeded, tfId=199",
+      "start_time_ms": 1785112796054,
+      "end_time_ms": 1785112799659,
+      "payload": "{\"id\": 517, \"tfId\": 199, \"jobId\": 315, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 25, \"internal.metrics.resultSize\": 9274, \"internal.metrics.executorCpuTime\": 128295282, \"internal.metrics.executorRunTime\": 3078, \"internal.metrics.io.requestCount\": 4, \"internal.metrics.output.bytesWritten\": 722766, \"internal.metrics.io.requestBytesCount\": 722766, \"internal.metrics.io.requestMsDuration\": 133, \"internal.metrics.photonizedTaskTimeNs\": 3024461742, \"internal.metrics.output.recordsWritten\": 19116, \"internal.metrics.executorDeserializeTime\": 11, \"internal.metrics.shuffle.read.recordsRead\": 19116, \"internal.metrics.executorDeserializeCpuTime\": 11579226, \"internal.metrics.shuffle.read.remoteBytesRead\": 742491, \"internal.metrics.shuffle.read.remoteReqsDuration\": 2, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 1}, \"numTasks\": 1, \"rootTfId\": 197, \"partitions\": 1, \"parentStages\": \"(516)\", \"taskMetricsDistributions\": {\"duration\": [3097.0, 3097.0, 3097.0, 3097.0, 3097.0], \"jvmGcTime\": [25.0, 25.0, 25.0, 25.0, 25.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [8.0, 8.0, 8.0, 8.0, 8.0], \"executorRunTime\": [3078.0, 3078.0, 3078.0, 3078.0, 3078.0], \"executorDeserializeTime\": [11.0, 11.0, 11.0, 11.0, 11.0], \"outputMetrics_bytesWritten\": [722766.0, 722766.0, 722766.0, 722766.0, 722766.0], \"outputMetrics_recordsWritten\": [19116.0, 19116.0, 19116.0, 19116.0, 19116.0], \"shuffleReadMetrics_readBytes\": [742491.0, 742491.0, 742491.0, 742491.0, 742491.0], \"shuffleReadMetrics_readRecords\": [19116.0, 19116.0, 19116.0, 19116.0, 19116.0]}}"
+    },
+    {
+      "event_id": 347,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 523",
+      "description": "collect at TransactionalWriteEdge.scala:758 - attempt=0, id=523, jobId=318, numTasks=1, partitions=1, rootTfId=197, status=succeeded, tfId=199",
+      "start_time_ms": 1785112799688,
+      "end_time_ms": 1785112799699,
+      "payload": "{\"id\": 523, \"tfId\": 199, \"jobId\": 318, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 877, \"internal.metrics.executorCpuTime\": 2321010, \"internal.metrics.executorRunTime\": 2, \"internal.metrics.executorDeserializeTime\": 1, \"internal.metrics.executorDeserializeCpuTime\": 1381783}, \"numTasks\": 1, \"rootTfId\": 197, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [9.0, 9.0, 9.0, 9.0, 9.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 6.0, 6.0], \"executorRunTime\": [2.0, 2.0, 2.0, 2.0, 2.0], \"executorDeserializeTime\": [1.0, 1.0, 1.0, 1.0, 1.0]}}"
+    },
+    {
+      "event_id": 348,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 524",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707233-85561888:18 - attempt=0, id=524, jobId=319, numTasks=190, partitions=190, rootTfId=202, status=succeeded, tfId=202",
+      "start_time_ms": 1785112801510,
+      "end_time_ms": 1785112801610,
+      "payload": "{\"id\": 524, \"tfId\": 202, \"jobId\": 319, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 50, \"internal.metrics.resultSize\": 552961, \"internal.metrics.executorCpuTime\": 2953293579, \"internal.metrics.executorRunTime\": 3066, \"internal.metrics.photonizedTaskTimeNs\": 98185745, \"internal.metrics.executorDeserializeTime\": 774, \"internal.metrics.resultSerializationTime\": 1, \"internal.metrics.executorDeserializeCpuTime\": 776457897}, \"numTasks\": 190, \"rootTfId\": 202, \"partitions\": 190, \"taskMetricsDistributions\": {\"duration\": [31.0, 38.0, 44.0, 48.0, 70.0], \"jvmGcTime\": [0.0, 0.0, 0.0, 0.0, 25.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [15.0, 20.0, 23.0, 27.0, 36.0], \"executorRunTime\": [12.0, 14.0, 15.0, 17.0, 43.0], \"executorDeserializeTime\": [3.0, 4.0, 4.0, 4.0, 22.0], \"resultSerializationTime\": [0.0, 0.0, 0.0, 0.0, 1.0]}}"
+    },
+    {
+      "event_id": 349,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 525",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707233-85561888:18 - attempt=0, id=525, jobId=320, numTasks=1, partitions=1, rootTfId=202, status=succeeded, tfId=203",
+      "start_time_ms": 1785112801744,
+      "end_time_ms": 1785112801782,
+      "payload": "{\"id\": 525, \"tfId\": 203, \"jobId\": 320, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 6820774, \"internal.metrics.executorRunTime\": 22, \"internal.metrics.input.bytesRead\": 23451, \"internal.metrics.input.recordsRead\": 14417, \"internal.metrics.photonizedTaskTimeNs\": 17498501, \"internal.metrics.parquetCacheDiskUsage\": 19356244452, \"internal.metrics.executorDeserializeTime\": 3, \"internal.metrics.parquetCacheMaxDiskUsage\": 766169734493, \"internal.metrics.executorDeserializeCpuTime\": 3424584}, \"numTasks\": 1, \"rootTfId\": 202, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [31.0, 31.0, 31.0, 31.0, 31.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 6.0, 6.0], \"executorRunTime\": [22.0, 22.0, 22.0, 22.0, 22.0], \"inputMetrics_bytesRead\": [23451.0, 23451.0, 23451.0, 23451.0, 23451.0], \"executorDeserializeTime\": [3.0, 3.0, 3.0, 3.0, 3.0], \"inputMetrics_recordsRead\": [14417.0, 14417.0, 14417.0, 14417.0, 14417.0]}}"
+    },
+    {
+      "event_id": 350,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 526",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707233-85561888:18 - attempt=0, id=526, jobId=321, numTasks=15, partitions=15, rootTfId=202, status=succeeded, tfId=202",
+      "start_time_ms": 1785112801886,
+      "end_time_ms": 1785112804532,
+      "payload": "{\"id\": 526, \"tfId\": 202, \"jobId\": 321, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 44, \"internal.metrics.resultSize\": 203211, \"internal.metrics.executorCpuTime\": 12042589141, \"internal.metrics.executorRunTime\": 23509, \"internal.metrics.input.bytesRead\": 1075696846, \"internal.metrics.io.requestCount\": 61, \"internal.metrics.input.recordsRead\": 44184759, \"internal.metrics.io.requestBytesCount\": 30092, \"internal.metrics.io.requestMsDuration\": 11709, \"internal.metrics.photonizedTaskTimeNs\": 23441353821, \"internal.metrics.io.responseBytesCount\": 1077676342, \"internal.metrics.parquetCacheDiskUsage\": 307158134365, \"internal.metrics.executorDeserializeTime\": 67, \"internal.metrics.parquetCacheMaxDiskUsage\": 11489469839042, \"internal.metrics.input.filesystemBytesRead\": 305645525, \"internal.metrics.executorDeserializeCpuTime\": 59757978, \"internal.metrics.shuffle.write.bytesWritten\": 1090280373, \"internal.metrics.shuffle.write.recordsWritten\": 44184759}, \"numTasks\": 15, \"rootTfId\": 202, \"partitions\": 15, \"taskMetricsDistributions\": {\"duration\": [100.0, 1436.0, 1625.0, 1917.0, 2637.0], \"jvmGcTime\": [0.0, 0.0, 0.0, 0.0, 22.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 14.0, 14.0, 16.0, 17.0], \"executorRunTime\": [81.0, 1419.0, 1608.0, 1899.0, 2619.0], \"inputMetrics_bytesRead\": [8415.0, 58234630.0, 74957372.0, 75670772.0, 128010907.0], \"executorDeserializeTime\": [3.0, 4.0, 4.0, 4.0, 11.0], \"inputMetrics_recordsRead\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0], \"shuffleWriteMetrics_writeBytes\": [15505.0, 59232855.0, 76272925.0, 76999181.0, 128717400.0], \"shuffleWriteMetrics_writeRecords\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0]}}"
+    },
+    {
+      "event_id": 352,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 532",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707233-85561888:18 - attempt=0, id=532, jobId=323, numTasks=200, parentStages=(531), partitions=200, rootTfId=202, status=succeeded, tfId=202",
+      "start_time_ms": 1785112804569,
+      "end_time_ms": 1785112805129,
+      "payload": "{\"id\": 532, \"tfId\": 202, \"jobId\": 323, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 1523044, \"internal.metrics.executorCpuTime\": 9212103532, \"internal.metrics.executorRunTime\": 44152, \"internal.metrics.photonizedTaskTimeNs\": 42683245819, \"internal.metrics.executorDeserializeTime\": 424, \"internal.metrics.shuffle.read.recordsRead\": 44184759, \"internal.metrics.executorDeserializeCpuTime\": 432437631, \"internal.metrics.shuffle.read.fetchWaitTime\": 33996, \"internal.metrics.shuffle.write.bytesWritten\": 8600, \"internal.metrics.shuffle.read.localBytesRead\": 3612829, \"internal.metrics.shuffle.read.remoteBytesRead\": 1086667544, \"internal.metrics.shuffle.write.recordsWritten\": 200, \"internal.metrics.shuffle.read.localBlocksFetched\": 4, \"internal.metrics.shuffle.read.remoteReqsDuration\": 59478, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 761}, \"numTasks\": 200, \"rootTfId\": 202, \"partitions\": 200, \"parentStages\": \"(531)\", \"taskMetricsDistributions\": {\"duration\": [97.0, 181.0, 228.0, 276.0, 553.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 17.0, 19.0, 22.0, 51.0], \"executorRunTime\": [78.0, 161.0, 205.0, 254.0, 531.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 5.0], \"shuffleReadMetrics_readBytes\": [5418542.0, 5442217.0, 5452618.0, 5460328.0, 5491448.0], \"shuffleReadMetrics_readRecords\": [219632.0, 220592.0, 220914.0, 221276.0, 222169.0], \"shuffleWriteMetrics_writeBytes\": [43.0, 43.0, 43.0, 43.0, 43.0], \"shuffleWriteMetrics_writeRecords\": [1.0, 1.0, 1.0, 1.0, 1.0]}}"
+    },
+    {
+      "event_id": 353,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 535",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707233-85561888:18 - attempt=0, id=535, jobId=324, numTasks=1, parentStages=(534), partitions=1, rootTfId=202, status=succeeded, tfId=202",
+      "start_time_ms": 1785112805176,
+      "end_time_ms": 1785112805215,
+      "payload": "{\"id\": 535, \"tfId\": 202, \"jobId\": 324, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 3480, \"internal.metrics.executorCpuTime\": 15065926, \"internal.metrics.executorRunTime\": 24, \"internal.metrics.photonizedTaskTimeNs\": 11544240, \"internal.metrics.executorDeserializeTime\": 4, \"internal.metrics.shuffle.read.recordsRead\": 200, \"internal.metrics.executorDeserializeCpuTime\": 3818626, \"internal.metrics.shuffle.read.fetchWaitTime\": 4, \"internal.metrics.shuffle.read.localBytesRead\": 86, \"internal.metrics.shuffle.read.remoteBytesRead\": 8514, \"internal.metrics.shuffle.read.localBlocksFetched\": 2, \"internal.metrics.shuffle.read.remoteReqsDuration\": 261, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 198}, \"numTasks\": 1, \"rootTfId\": 202, \"partitions\": 1, \"parentStages\": \"(534)\", \"taskMetricsDistributions\": {\"duration\": [35.0, 35.0, 35.0, 35.0, 35.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [7.0, 7.0, 7.0, 7.0, 7.0], \"executorRunTime\": [24.0, 24.0, 24.0, 24.0, 24.0], \"executorDeserializeTime\": [4.0, 4.0, 4.0, 4.0, 4.0], \"shuffleReadMetrics_readBytes\": [8600.0, 8600.0, 8600.0, 8600.0, 8600.0], \"shuffleReadMetrics_readRecords\": [200.0, 200.0, 200.0, 200.0, 200.0]}}"
+    },
+    {
+      "event_id": 354,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 536",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707234-4203664181:18 - attempt=0, id=536, jobId=325, numTasks=1, partitions=1, rootTfId=204, status=succeeded, tfId=205",
+      "start_time_ms": 1785112806128,
+      "end_time_ms": 1785112806165,
+      "payload": "{\"id\": 536, \"tfId\": 205, \"jobId\": 325, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 6519795, \"internal.metrics.executorRunTime\": 21, \"internal.metrics.input.bytesRead\": 23451, \"internal.metrics.input.recordsRead\": 14417, \"internal.metrics.photonizedTaskTimeNs\": 15834207, \"internal.metrics.parquetCacheDiskUsage\": 19356244452, \"internal.metrics.executorDeserializeTime\": 3, \"internal.metrics.parquetCacheMaxDiskUsage\": 765628284253, \"internal.metrics.executorDeserializeCpuTime\": 3496664}, \"numTasks\": 1, \"rootTfId\": 204, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [32.0, 32.0, 32.0, 32.0, 32.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [8.0, 8.0, 8.0, 8.0, 8.0], \"executorRunTime\": [21.0, 21.0, 21.0, 21.0, 21.0], \"inputMetrics_bytesRead\": [23451.0, 23451.0, 23451.0, 23451.0, 23451.0], \"executorDeserializeTime\": [3.0, 3.0, 3.0, 3.0, 3.0], \"inputMetrics_recordsRead\": [14417.0, 14417.0, 14417.0, 14417.0, 14417.0]}}"
+    },
+    {
+      "event_id": 355,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 537",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707234-4203664181:18 - attempt=0, id=537, jobId=326, numTasks=15, partitions=15, rootTfId=204, status=succeeded, tfId=204",
+      "start_time_ms": 1785112806257,
+      "end_time_ms": 1785112807752,
+      "payload": "{\"id\": 537, \"tfId\": 204, \"jobId\": 326, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 200839, \"internal.metrics.executorCpuTime\": 10314960885, \"internal.metrics.executorRunTime\": 11221, \"internal.metrics.input.bytesRead\": 331831, \"internal.metrics.io.requestCount\": 10, \"internal.metrics.input.recordsRead\": 44184759, \"internal.metrics.io.requestBytesCount\": 12066, \"internal.metrics.io.requestMsDuration\": 596, \"internal.metrics.photonizedTaskTimeNs\": 11159233886, \"internal.metrics.io.responseBytesCount\": 205171, \"internal.metrics.parquetCacheDiskUsage\": 307158715935, \"internal.metrics.executorDeserializeTime\": 63, \"internal.metrics.parquetCacheMaxDiskUsage\": 11479617004637, \"internal.metrics.input.filesystemBytesRead\": 119399, \"internal.metrics.executorDeserializeCpuTime\": 61754553, \"internal.metrics.shuffle.write.bytesWritten\": 1090280373, \"internal.metrics.shuffle.write.recordsWritten\": 44184759}, \"numTasks\": 15, \"rootTfId\": 204, \"partitions\": 15, \"taskMetricsDistributions\": {\"duration\": [31.0, 604.0, 785.0, 849.0, 1486.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 13.0, 14.0, 15.0, 21.0], \"executorRunTime\": [8.0, 585.0, 767.0, 832.0, 1467.0], \"inputMetrics_bytesRead\": [2582.0, 18065.0, 21822.0, 21841.0, 39568.0], \"executorDeserializeTime\": [3.0, 4.0, 4.0, 4.0, 7.0], \"inputMetrics_recordsRead\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0], \"shuffleWriteMetrics_writeBytes\": [15505.0, 59232855.0, 76272925.0, 76999181.0, 128717400.0], \"shuffleWriteMetrics_writeRecords\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0]}}"
+    },
+    {
+      "event_id": 356,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 539",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707234-4203664181:18 - attempt=0, id=539, jobId=327, numTasks=200, parentStages=(538), partitions=200, rootTfId=204, status=succeeded, tfId=204",
+      "start_time_ms": 1785112807793,
+      "end_time_ms": 1785112808218,
+      "payload": "{\"id\": 539, \"tfId\": 204, \"jobId\": 327, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 1523396, \"internal.metrics.executorCpuTime\": 8493876174, \"internal.metrics.executorRunTime\": 41780, \"internal.metrics.photonizedTaskTimeNs\": 40361354219, \"internal.metrics.executorDeserializeTime\": 434, \"internal.metrics.shuffle.read.recordsRead\": 44184759, \"internal.metrics.executorDeserializeCpuTime\": 413819796, \"internal.metrics.shuffle.read.fetchWaitTime\": 32405, \"internal.metrics.shuffle.write.bytesWritten\": 8600, \"internal.metrics.shuffle.read.localBytesRead\": 9066667, \"internal.metrics.shuffle.read.remoteBytesRead\": 1081213706, \"internal.metrics.shuffle.write.recordsWritten\": 200, \"internal.metrics.shuffle.read.localBlocksFetched\": 8, \"internal.metrics.shuffle.read.remoteReqsDuration\": 56550, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 757}, \"numTasks\": 200, \"rootTfId\": 204, \"partitions\": 200, \"parentStages\": \"(538)\", \"taskMetricsDistributions\": {\"duration\": [122.0, 195.0, 222.0, 273.0, 407.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 18.0, 28.0, 31.0, 36.0], \"executorRunTime\": [94.0, 170.0, 200.0, 244.0, 384.0], \"executorDeserializeTime\": [1.0, 2.0, 2.0, 2.0, 9.0], \"shuffleReadMetrics_readBytes\": [5418542.0, 5442217.0, 5452618.0, 5460328.0, 5491448.0], \"shuffleReadMetrics_readRecords\": [219632.0, 220592.0, 220914.0, 221276.0, 222169.0], \"shuffleWriteMetrics_writeBytes\": [43.0, 43.0, 43.0, 43.0, 43.0], \"shuffleWriteMetrics_writeRecords\": [1.0, 1.0, 1.0, 1.0, 1.0]}}"
+    },
+    {
+      "event_id": 358,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 547",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707234-4203664181:18 - attempt=0, id=547, jobId=329, numTasks=1, parentStages=(546), partitions=1, rootTfId=204, status=succeeded, tfId=204",
+      "start_time_ms": 1785112808258,
+      "end_time_ms": 1785112808282,
+      "payload": "{\"id\": 547, \"tfId\": 204, \"jobId\": 329, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 3480, \"internal.metrics.executorCpuTime\": 10740068, \"internal.metrics.executorRunTime\": 12, \"internal.metrics.photonizedTaskTimeNs\": 3627836, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.shuffle.read.recordsRead\": 200, \"internal.metrics.executorDeserializeCpuTime\": 1886072, \"internal.metrics.shuffle.read.localBytesRead\": 86, \"internal.metrics.shuffle.read.remoteBytesRead\": 8514, \"internal.metrics.shuffle.read.localBlocksFetched\": 2, \"internal.metrics.shuffle.read.remoteReqsDuration\": 155, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 198}, \"numTasks\": 1, \"rootTfId\": 204, \"partitions\": 1, \"parentStages\": \"(546)\", \"taskMetricsDistributions\": {\"duration\": [19.0, 19.0, 19.0, 19.0, 19.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [5.0, 5.0, 5.0, 5.0, 5.0], \"executorRunTime\": [12.0, 12.0, 12.0, 12.0, 12.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0], \"shuffleReadMetrics_readBytes\": [8600.0, 8600.0, 8600.0, 8600.0, 8600.0], \"shuffleReadMetrics_readRecords\": [200.0, 200.0, 200.0, 200.0, 200.0]}}"
+    },
+    {
+      "event_id": 359,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 548",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707235-646835785:27 - attempt=0, id=548, jobId=330, numTasks=1, partitions=1, rootTfId=206, status=succeeded, tfId=207",
+      "start_time_ms": 1785112809147,
+      "end_time_ms": 1785112809180,
+      "payload": "{\"id\": 548, \"tfId\": 207, \"jobId\": 330, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 6165004, \"internal.metrics.executorRunTime\": 19, \"internal.metrics.input.bytesRead\": 23451, \"internal.metrics.input.recordsRead\": 14417, \"internal.metrics.photonizedTaskTimeNs\": 14456750, \"internal.metrics.parquetCacheDiskUsage\": 19356244452, \"internal.metrics.executorDeserializeTime\": 3, \"internal.metrics.parquetCacheMaxDiskUsage\": 764908584285, \"internal.metrics.executorDeserializeCpuTime\": 3546930}, \"numTasks\": 1, \"rootTfId\": 206, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [28.0, 28.0, 28.0, 28.0, 28.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 6.0, 6.0], \"executorRunTime\": [19.0, 19.0, 19.0, 19.0, 19.0], \"inputMetrics_bytesRead\": [23451.0, 23451.0, 23451.0, 23451.0, 23451.0], \"executorDeserializeTime\": [3.0, 3.0, 3.0, 3.0, 3.0], \"inputMetrics_recordsRead\": [14417.0, 14417.0, 14417.0, 14417.0, 14417.0]}}"
+    },
+    {
+      "event_id": 360,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 549",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707235-646835785:27 - attempt=0, id=549, jobId=331, numTasks=15, partitions=15, rootTfId=206, status=succeeded, tfId=206",
+      "start_time_ms": 1785112809288,
+      "end_time_ms": 1785112812654,
+      "payload": "{\"id\": 549, \"tfId\": 206, \"jobId\": 331, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 199969, \"internal.metrics.executorCpuTime\": 32255060141, \"internal.metrics.executorRunTime\": 36981, \"internal.metrics.input.bytesRead\": 511620430, \"internal.metrics.io.requestCount\": 24, \"internal.metrics.input.recordsRead\": 44184759, \"internal.metrics.io.requestBytesCount\": 22130, \"internal.metrics.io.requestMsDuration\": 4948, \"internal.metrics.photonizedTaskTimeNs\": 36917766489, \"internal.metrics.io.responseBytesCount\": 511545286, \"internal.metrics.parquetCacheDiskUsage\": 308287966103, \"internal.metrics.executorDeserializeTime\": 62, \"internal.metrics.parquetCacheMaxDiskUsage\": 11465164134295, \"internal.metrics.input.filesystemBytesRead\": 255855014, \"internal.metrics.executorDeserializeCpuTime\": 61982501, \"internal.metrics.shuffle.write.bytesWritten\": 1672332498, \"internal.metrics.shuffle.write.recordsWritten\": 44184759}, \"numTasks\": 15, \"rootTfId\": 206, \"partitions\": 15, \"taskMetricsDistributions\": {\"duration\": [26.0, 2282.0, 2848.0, 3007.0, 3356.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 14.0, 14.0, 15.0, 15.0], \"executorRunTime\": [8.0, 2264.0, 2830.0, 2989.0, 3339.0], \"inputMetrics_bytesRead\": [7156.0, 8729.0, 53459419.0, 53482377.0, 53977833.0], \"executorDeserializeTime\": [3.0, 4.0, 4.0, 4.0, 7.0], \"inputMetrics_recordsRead\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0], \"shuffleWriteMetrics_writeBytes\": [25959.0, 102395255.0, 135316605.0, 135429820.0, 136888587.0], \"shuffleWriteMetrics_writeRecords\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0]}}"
+    },
+    {
+      "event_id": 361,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 551",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707235-646835785:27 - attempt=0, id=551, jobId=332, numTasks=200, parentStages=(550), partitions=200, rootTfId=206, status=succeeded, tfId=206",
+      "start_time_ms": 1785112812693,
+      "end_time_ms": 1785112813325,
+      "payload": "{\"id\": 551, \"tfId\": 206, \"jobId\": 332, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 1583300, \"internal.metrics.executorCpuTime\": 20257881951, \"internal.metrics.executorRunTime\": 57085, \"internal.metrics.photonizedTaskTimeNs\": 55790623671, \"internal.metrics.executorDeserializeTime\": 404, \"internal.metrics.shuffle.read.recordsRead\": 44184759, \"internal.metrics.executorDeserializeCpuTime\": 410643321, \"internal.metrics.shuffle.read.fetchWaitTime\": 35327, \"internal.metrics.shuffle.write.bytesWritten\": 8600, \"internal.metrics.shuffle.read.localBytesRead\": 16781536, \"internal.metrics.shuffle.read.remoteBytesRead\": 1655550962, \"internal.metrics.shuffle.write.recordsWritten\": 200, \"internal.metrics.shuffle.read.localBlocksFetched\": 30, \"internal.metrics.shuffle.read.remoteReqsDuration\": 197154, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 2926}, \"numTasks\": 200, \"rootTfId\": 206, \"partitions\": 200, \"parentStages\": \"(550)\", \"taskMetricsDistributions\": {\"duration\": [196.0, 265.0, 296.0, 344.0, 626.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [16.0, 20.0, 22.0, 24.0, 29.0], \"executorRunTime\": [176.0, 242.0, 271.0, 321.0, 606.0], \"executorDeserializeTime\": [1.0, 2.0, 2.0, 2.0, 7.0], \"shuffleReadMetrics_readBytes\": [8320192.0, 8348694.0, 8361608.0, 8373266.0, 8404715.0], \"shuffleReadMetrics_readRecords\": [219586.0, 220593.0, 220963.0, 221257.0, 222378.0], \"shuffleWriteMetrics_writeBytes\": [43.0, 43.0, 43.0, 43.0, 43.0], \"shuffleWriteMetrics_writeRecords\": [1.0, 1.0, 1.0, 1.0, 1.0]}}"
+    },
+    {
+      "event_id": 362,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 554",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707235-646835785:27 - attempt=0, id=554, jobId=333, numTasks=1, parentStages=(553), partitions=1, rootTfId=206, status=succeeded, tfId=206",
+      "start_time_ms": 1785112813363,
+      "end_time_ms": 1785112813398,
+      "payload": "{\"id\": 554, \"tfId\": 206, \"jobId\": 333, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 3480, \"internal.metrics.executorCpuTime\": 10093736, \"internal.metrics.executorRunTime\": 23, \"internal.metrics.photonizedTaskTimeNs\": 15177057, \"internal.metrics.executorDeserializeTime\": 1, \"internal.metrics.shuffle.read.recordsRead\": 200, \"internal.metrics.executorDeserializeCpuTime\": 1763133, \"internal.metrics.shuffle.read.fetchWaitTime\": 11, \"internal.metrics.shuffle.read.localBytesRead\": 86, \"internal.metrics.shuffle.read.remoteBytesRead\": 8514, \"internal.metrics.shuffle.read.localBlocksFetched\": 2, \"internal.metrics.shuffle.read.remoteReqsDuration\": 198, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 198}, \"numTasks\": 1, \"rootTfId\": 206, \"partitions\": 1, \"parentStages\": \"(553)\", \"taskMetricsDistributions\": {\"duration\": [30.0, 30.0, 30.0, 30.0, 30.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 6.0, 6.0], \"executorRunTime\": [23.0, 23.0, 23.0, 23.0, 23.0], \"executorDeserializeTime\": [1.0, 1.0, 1.0, 1.0, 1.0], \"shuffleReadMetrics_readBytes\": [8600.0, 8600.0, 8600.0, 8600.0, 8600.0], \"shuffleReadMetrics_readRecords\": [200.0, 200.0, 200.0, 200.0, 200.0]}}"
+    },
+    {
+      "event_id": 363,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 555",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707236-2295605918:18 - attempt=0, id=555, jobId=334, numTasks=1, partitions=1, rootTfId=208, status=succeeded, tfId=209",
+      "start_time_ms": 1785112814227,
+      "end_time_ms": 1785112814260,
+      "payload": "{\"id\": 555, \"tfId\": 209, \"jobId\": 334, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 8630, \"internal.metrics.executorCpuTime\": 6959957, \"internal.metrics.executorRunTime\": 19, \"internal.metrics.input.bytesRead\": 23451, \"internal.metrics.input.recordsRead\": 14417, \"internal.metrics.photonizedTaskTimeNs\": 14333090, \"internal.metrics.parquetCacheDiskUsage\": 19356244452, \"internal.metrics.executorDeserializeTime\": 3, \"internal.metrics.parquetCacheMaxDiskUsage\": 759196798301, \"internal.metrics.executorDeserializeCpuTime\": 3439541}, \"numTasks\": 1, \"rootTfId\": 208, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [29.0, 29.0, 29.0, 29.0, 29.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [7.0, 7.0, 7.0, 7.0, 7.0], \"executorRunTime\": [19.0, 19.0, 19.0, 19.0, 19.0], \"inputMetrics_bytesRead\": [23451.0, 23451.0, 23451.0, 23451.0, 23451.0], \"executorDeserializeTime\": [3.0, 3.0, 3.0, 3.0, 3.0], \"inputMetrics_recordsRead\": [14417.0, 14417.0, 14417.0, 14417.0, 14417.0]}}"
+    },
+    {
+      "event_id": 364,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 556",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707236-2295605918:18 - attempt=0, id=556, jobId=335, numTasks=15, partitions=15, rootTfId=208, status=succeeded, tfId=208",
+      "start_time_ms": 1785112814344,
+      "end_time_ms": 1785112814402,
+      "payload": "{\"id\": 556, \"tfId\": 208, \"jobId\": 335, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 188619, \"internal.metrics.executorCpuTime\": 281719820, \"internal.metrics.executorRunTime\": 297, \"internal.metrics.input.bytesRead\": 66022, \"internal.metrics.input.recordsRead\": 44184759, \"internal.metrics.photonizedTaskTimeNs\": 224026568, \"internal.metrics.parquetCacheDiskUsage\": 308288411739, \"internal.metrics.executorDeserializeTime\": 60, \"internal.metrics.parquetCacheMaxDiskUsage\": 11434412726373, \"internal.metrics.executorDeserializeCpuTime\": 61192169}, \"numTasks\": 15, \"rootTfId\": 208, \"partitions\": 15, \"taskMetricsDistributions\": {\"duration\": [22.0, 33.0, 38.0, 42.0, 50.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 13.0, 13.0, 14.0, 17.0], \"executorRunTime\": [5.0, 16.0, 20.0, 22.0, 33.0], \"inputMetrics_bytesRead\": [2425.0, 4133.0, 5005.0, 5005.0, 5005.0], \"executorDeserializeTime\": [3.0, 4.0, 4.0, 4.0, 6.0], \"inputMetrics_recordsRead\": [296.0, 2217554.0, 2859008.0, 2885648.0, 6011778.0]}}"
+    },
+    {
+      "event_id": 365,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 558",
+      "description": "wrapper at /root/.ipykernel/8527/command-6417242127707236-2295605918:18 - attempt=0, id=558, jobId=336, numTasks=1, parentStages=(557), partitions=1, rootTfId=208, status=succeeded, tfId=208",
+      "start_time_ms": 1785112814541,
+      "end_time_ms": 1785112814704,
+      "payload": "{\"id\": 558, \"tfId\": 208, \"jobId\": 336, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 1948, \"internal.metrics.executorCpuTime\": 106401347, \"internal.metrics.executorRunTime\": 117, \"internal.metrics.executorDeserializeTime\": 38, \"internal.metrics.executorDeserializeCpuTime\": 36573538}, \"numTasks\": 1, \"rootTfId\": 208, \"partitions\": 1, \"parentStages\": \"(557)\", \"taskMetricsDistributions\": {\"duration\": [161.0, 161.0, 161.0, 161.0, 161.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [6.0, 6.0, 6.0, 6.0, 6.0], \"executorRunTime\": [117.0, 117.0, 117.0, 117.0, 117.0], \"executorDeserializeTime\": [38.0, 38.0, 38.0, 38.0, 38.0]}}"
+    }
+  ],
+  "metrics": [
+    {
+      "metric_type": "meta_numCopiedRows",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "meta_numDeletedRows",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 19116.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "meta_numFiles",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 1.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "meta_numOutputBytes",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 722766.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "meta_numOutputRows",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 19116.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "meta_numPartitions",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 1.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "broadcasts_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "broadcasts_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "cached_data_max_disk_size",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "cached_data_max_memory_size",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "definity_driver_overhead",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 15.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "definity_executors_overhead",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "disk_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_cores",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 16.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_cpu_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.214995374653099,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 44.26220703125,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_jvm_gc_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.435,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_jvm_gc_time_pct",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.643462568229221,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_max_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.584273486036446,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_max_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 25.8612340018153,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_max_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.579364967519365,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_max_off_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_max_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 25.8612340018153,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 44.63720703125,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "driver_off_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.375,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 68.126,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:40:26.379000+00:00"
+    },
+    {
+      "metric_type": "executor_cores",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 16.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 11.478515625,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_off_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 27.7411127388477,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_on_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_off_heap_memory_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 27.7411127388477,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_on_heap_memory_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0503324111923575,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_off_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_on_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0503324111923575,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_max_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.333512880495054,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_max_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 3.82823280990124,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_max_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.682925895305736,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.799952443601284,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_max_off_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 28.464714050293,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_max_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 32.1395330280066,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 47.0615234375,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executor_off_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 35.5830078125,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_deserialize_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 3.162,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_idle_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 26.1259999275208,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:40:26.379000+00:00"
+    },
+    {
+      "metric_type": "executors_java_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 42861.42,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_jvm_gc_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.172,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_other_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_python_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_run_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 331.248,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_serialize_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.007,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_shuffle_read_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 101.925,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_shuffle_write_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 42861.42,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 331.248,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time_of_retried_tasks",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "executors_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 106857.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "fs_list_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "fs_open_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 23810.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "getting_result_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "hosts_max_disk_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 130329600000.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "hosts_max_disk_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.139549436900287,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "hosts_total_disk_used_max",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 12345717030912.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "input_bytes_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1587983488.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "input_records_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 221531727.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "memory_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "memory_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 317322.699536621,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_changed_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:18.253000+00:00"
+    },
+    {
+      "metric_type": "num_executors",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 100.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 658.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:18.253000+00:00"
+    },
+    {
+      "metric_type": "num_spark_jobs",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 26.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 27.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages_retries",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1072.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks_retries",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "num_tfs",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 7.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:40:26.379000+00:00"
+    },
+    {
+      "metric_type": "output_bytes_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1587494510.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "output_records_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 44184759.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "s3_get_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 23810.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "s3_head_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 154.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "s3_list_objects_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 572.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "s3_put_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2215.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "scheduler_delay",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 460.228,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "shuffle_bytes_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5515119829.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "shuffle_bytes_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5515119829.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "shuffle_records_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 176739636.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "shuffle_records_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 176739636.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "skew_score",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "sla",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 30036.760194,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:41:13.712546+00:00"
+    },
+    {
+      "metric_type": "task_idle_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 20.1489999294281,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:40:26.379000+00:00"
+    },
+    {
+      "metric_type": "tasks_duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 794.645,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "tasks_result_size_bytes",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 6924485.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "used_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 563.658,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 107939.0,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "vcore_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.00522200502135465,
+      "tf_id": null,
+      "end_time": "2026-07-27T00:39:20.953000+00:00"
+    },
+    {
+      "metric_type": "duration",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 12.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 6.781,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "num_spark_jobs",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 6.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 6.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 192.0,
+      "tf_id": 71299038,
+      "end_time": "2026-07-27T00:39:47.094000+00:00"
+    }
+  ],
+  "test_runs": [
+    {
+      "test_id": 207497,
+      "test_type": "PctDiff",
+      "metric_type": "memory_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.0,
+      "lower_bound": 0.0,
+      "upper_bound": 0.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 173337,
+      "test_type": "PctDiff",
+      "metric_type": "broadcasts_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.0,
+      "lower_bound": 0.0,
+      "upper_bound": 0.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 181056,
+      "test_type": "PctDiff",
+      "metric_type": "sla",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 30036.760194,
+      "lower_bound": 69115.5864,
+      "upper_bound": 103673.37959999999,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 203097,
+      "test_type": "PctDiff",
+      "metric_type": "duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 68.126,
+      "lower_bound": 42.264963,
+      "upper_bound": 114.271937,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 146148,
+      "test_type": "Range",
+      "metric_type": "vcore_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.00522200502135465,
+      "lower_bound": 0.0,
+      "upper_bound": 0.95,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 202538,
+      "test_type": "Range",
+      "metric_type": "duration",
+      "asset_type": "tf",
+      "asset_value": "",
+      "run_value": 12.0,
+      "lower_bound": 1.8,
+      "upper_bound": 62.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 129280,
+      "test_type": "Range",
+      "metric_type": "meta_numOutputRows",
+      "asset_type": "table",
+      "asset_value": "",
+      "run_value": 19116.0,
+      "lower_bound": 15000.0,
+      "upper_bound": 56000.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": 71299038
+    },
+    {
+      "test_id": 131763,
+      "test_type": "Range",
+      "metric_type": "meta_numPartitions",
+      "asset_type": "table",
+      "asset_value": "",
+      "run_value": 1.0,
+      "lower_bound": 0.99,
+      "upper_bound": 1.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": 71299038
+    },
+    {
+      "test_id": 143430,
+      "test_type": "Range",
+      "metric_type": "driver_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.0,
+      "lower_bound": 0.0,
+      "upper_bound": 1.1,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 146053,
+      "test_type": "Range",
+      "metric_type": "meta_numOutputBytes",
+      "asset_type": "table",
+      "asset_value": "",
+      "run_value": 722766.0,
+      "lower_bound": 620000.0,
+      "upper_bound": 1900000.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": 71299038
+    }
+  ],
+  "transformations": [
+    {
+      "tf_id": 71298904,
+      "tf_type": "command",
+      "output_name": null,
+      "status": "COMPLETED",
+      "error": null,
+      "description": "spark.sql(f\"\"\"\nCREATE TABLE IF NOT EXISTS {targ... (CreateTable)",
+      "start_time": "2026-07-27T00:39:20.574000+00:00",
+      "end_time": "2026-07-27T00:39:20.615000+00:00",
+      "duration_seconds": 0.041,
+      "query": "CreateTable([columndefinition(), columndefinition(), columndefinition(), columndefinition(), columndefinition(), columndefinition(), columndefinition(), columndefinition(), columndefinition(), columndefinition()], $VAR_1$, TableSpec(Map(delta.autoOptimize.optimizeWrite -> true, delta.autoOptimize.autoCompact -> true),Some(DELTA),Map(),Some(s3://grammarly-service-prod-data-platform/tables/harmonized_stage_user_assignment_day/1.0/_table),Some(Owner: Data Platform),None,false,Set(),None,None,None), true)\n:- ResolvedIdentifier(service, prod_data_platform.harmonized_stage_user_assignment_day)\n",
+      "query_vars": "{\"$VAR_1$\": \"[identity(event_dt), identity(assignment_type)]\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": null
+    },
+    {
+      "tf_id": 71298915,
+      "tf_type": "replace",
+      "output_name": "prod_data_platform.harmonized_stage_user_assignment_day",
+      "status": "COMPLETED",
+      "error": null,
+      "description": "df.write \\\n  .format(\"delta\") \\\n  .mode(\"overwr... (ReplaceTableAsSelect)",
+      "start_time": "2026-07-27T00:39:22.222000+00:00",
+      "end_time": "2026-07-27T00:39:47.094000+00:00",
+      "duration_seconds": 24.872,
+      "query": "ReplaceTableAsSelect($VAR_1$, TableSpec(Map(),Some(delta),Map(),None,None,None,false,Set(),None,None,None), $VAR_2$, true, true)\n   :- ResolvedIdentifier(service, prod_data_platform.harmonized_stage_user_assignment_day)\n   :- Project([event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment])\n      :- Filter(((event_dt = $VAR_3$) AND (assignment_type IN ($VAR_4$, $VAR_5$, $VAR_6$))))\n         :- SubqueryAlias(service.prod_data_platform.stage_user_assignment_day)\n            :- LogicalRelation(parquet, [event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment], service.prod_data_platform.stage_user_assignment_day, false)\n",
+      "query_vars": "{\"$VAR_1$\": \"[identity(event_dt), identity(assignment_type)]\", \"$VAR_2$\": \"[replaceWhere=event_dt = '2026-07-25' AND assignment_type IN ('Assignment', 'Exception', 'None')]\", \"$VAR_3$\": \"'2026-07-25'\", \"$VAR_4$\": \"'Assignment'\", \"$VAR_5$\": \"'Exception'\", \"$VAR_6$\": \"'None'\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": "prod_data_platform.stage_user_assignment_day"
+    },
+    {
+      "tf_id": 71299038,
+      "tf_type": "replace",
+      "output_name": "prod_data_platform.harmonized_stage_user_assignment_day",
+      "status": "COMPLETED",
+      "error": null,
+      "description": "df.write \\\n  .format(\"delta\") \\\n  .mode(\"overwr... (ReplaceTableAsSelect)",
+      "start_time": "2026-07-27T00:39:48.479000+00:00",
+      "end_time": "2026-07-27T00:40:00.146000+00:00",
+      "duration_seconds": 11.667,
+      "query": "ReplaceTableAsSelect($VAR_1$, TableSpec(Map(),Some(delta),Map(),None,None,None,false,Set(),None,None,None), $VAR_2$, true, true)\n   :- ResolvedIdentifier(service, prod_data_platform.harmonized_stage_user_assignment_day)\n   :- Project([event_dt, assignment_type, container_id, $VAR_3$ AS assignment_order, original_user_id AS original_user_id, assigned_user_id AS assigned_user_id, $VAR_4$ AS start_ts, date_add($VAR_4$, extractansiintervaldays($VAR_5$)) AS end_ts, $VAR_6$ AS is_first_day_assignment, $VAR_6$ AS is_last_day_assignment])\n      :- Filter((((event_dt = $VAR_4$) AND (assignment_type = $VAR_7$)) AND is_last_day_assignment))\n         :- SubqueryAlias(service.prod_data_platform.stage_user_assignment_day)\n            :- LogicalRelation(parquet, [event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment], service.prod_data_platform.stage_user_assignment_day, false)\n",
+      "query_vars": "{\"$VAR_1$\": \"[identity(event_dt), identity(assignment_type)]\", \"$VAR_2$\": \"[replaceWhere=event_dt = '2026-07-25' AND assignment_type = 'Assignment (Multi)']\", \"$VAR_3$\": \"1\", \"$VAR_4$\": \"'2026-07-25'\", \"$VAR_5$\": \"INTERVAL '1' DAY\", \"$VAR_6$\": \"true\", \"$VAR_7$\": \"'Assignment (Multi)'\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": "prod_data_platform.stage_user_assignment_day"
+    },
+    {
+      "tf_id": 71299070,
+      "tf_type": "collectToPython",
+      "output_name": null,
+      "status": "COMPLETED",
+      "error": null,
+      "description": "dups = spark.sql(f\"\"\"\nWITH dups AS (\n  SELECT\n ... (GlobalLimit)",
+      "start_time": "2026-07-27T00:40:01.842000+00:00",
+      "end_time": "2026-07-27T00:40:05.247000+00:00",
+      "duration_seconds": 3.405,
+      "query": "Aggregate([coalesce(sum($VAR_1$), $VAR_2$) AS `coalesce(sum(1), 0)`])\n:- Project()\n   :- Filter(((container_count IS NOT NULL) AND (container_count > $VAR_3$)))\n      :- Aggregate([container_id], [sum($VAR_1$) AS container_count])\n         :- Project([container_id])\n            :- Filter((((is_last_day_assignment AND (is_last_day_assignment IS NOT NULL)) AND (event_dt IS NOT NULL)) AND (event_dt = $VAR_4$)))\n               :- LogicalRelation(parquet, [event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment], service.prod_data_platform.harmonized_stage_user_assignment_day, false)\n",
+      "query_vars": "{\"$VAR_1$\": \"1\", \"$VAR_2$\": \"0L\", \"$VAR_3$\": \"1L\", \"$VAR_4$\": \"DATE '2026-07-25'\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": "prod_data_platform.harmonized_stage_user_assignment_day"
+    },
+    {
+      "tf_id": 71299082,
+      "tf_type": "collectToPython",
+      "output_name": null,
+      "status": "COMPLETED",
+      "error": null,
+      "description": "dups = spark.sql(f\"\"\"\nWITH dups AS (\n  SELECT\n ... (GlobalLimit)",
+      "start_time": "2026-07-27T00:40:06.223000+00:00",
+      "end_time": "2026-07-27T00:40:08.310000+00:00",
+      "duration_seconds": 2.087,
+      "query": "Aggregate([coalesce(sum($VAR_1$), $VAR_2$) AS `coalesce(sum(1), 0)`])\n:- Project()\n   :- Filter(((container_count IS NOT NULL) AND (container_count > $VAR_3$)))\n      :- Aggregate([container_id], [sum($VAR_1$) AS container_count])\n         :- Project([container_id])\n            :- Filter((((is_first_day_assignment AND (is_first_day_assignment IS NOT NULL)) AND (event_dt IS NOT NULL)) AND (event_dt = $VAR_4$)))\n               :- LogicalRelation(parquet, [event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment], service.prod_data_platform.harmonized_stage_user_assignment_day, false)\n",
+      "query_vars": "{\"$VAR_1$\": \"1\", \"$VAR_2$\": \"0L\", \"$VAR_3$\": \"1L\", \"$VAR_4$\": \"DATE '2026-07-25'\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": "prod_data_platform.harmonized_stage_user_assignment_day"
+    },
+    {
+      "tf_id": 71299089,
+      "tf_type": "collectToPython",
+      "output_name": null,
+      "status": "COMPLETED",
+      "error": null,
+      "description": "dups = spark.sql(f\"\"\"\nWITH dups AS (\n  SELECT\n ... (GlobalLimit)",
+      "start_time": "2026-07-27T00:40:09.235000+00:00",
+      "end_time": "2026-07-27T00:40:13.427000+00:00",
+      "duration_seconds": 4.192,
+      "query": "Aggregate([coalesce(sum($VAR_1$), $VAR_2$) AS `coalesce(sum(1), 0)`])\n:- Project()\n   :- Filter(((container_count IS NOT NULL) AND (container_count > $VAR_3$)))\n      :- Aggregate([assignment_type, container_id, original_user_id, assigned_user_id, start_ts, end_ts], [sum($VAR_1$) AS container_count])\n         :- Project([assignment_type, container_id, original_user_id, assigned_user_id, start_ts, end_ts])\n            :- Filter(((event_dt IS NOT NULL) AND (event_dt = $VAR_4$)))\n               :- LogicalRelation(parquet, [event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment], service.prod_data_platform.harmonized_stage_user_assignment_day, false)\n",
+      "query_vars": "{\"$VAR_1$\": \"1\", \"$VAR_2$\": \"0L\", \"$VAR_3$\": \"1L\", \"$VAR_4$\": \"DATE '2026-07-25'\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": "prod_data_platform.harmonized_stage_user_assignment_day"
+    },
+    {
+      "tf_id": 71299095,
+      "tf_type": "collectToPython",
+      "output_name": null,
+      "status": "COMPLETED",
+      "error": null,
+      "description": "dups = spark.sql(f\"\"\"\nWITH dups AS (\n  SELECT\n ... (GlobalLimit)",
+      "start_time": "2026-07-27T00:40:14.312000+00:00",
+      "end_time": "2026-07-27T00:40:14.725000+00:00",
+      "duration_seconds": 0.413,
+      "query": "Aggregate([coalesce(sum($VAR_1$), $VAR_2$) AS `coalesce(sum(1), 0)`])\n:- Project()\n   :- Filter(((container_count IS NOT NULL) AND (container_count > $VAR_2$)))\n      :- Aggregate([container_id], [sum($VAR_1$) AS container_count])\n         :- Project([container_id])\n            :- Filter((((((event_dt IS NOT NULL) AND (start_ts IS NOT NULL)) AND (end_ts IS NOT NULL)) AND (event_dt = $VAR_3$)) AND (start_ts > end_ts)))\n               :- LogicalRelation(parquet, [event_dt, assignment_type, container_id, assignment_order, original_user_id, assigned_user_id, start_ts, end_ts, is_first_day_assignment, is_last_day_assignment], service.prod_data_platform.harmonized_stage_user_assignment_day, false)\n",
+      "query_vars": "{\"$VAR_1$\": \"1\", \"$VAR_2$\": \"0L\", \"$VAR_3$\": \"DATE '2026-07-25'\"}",
+      "labels": {
+        "caller_type": "pyspark"
+      },
+      "input_datasets": "prod_data_platform.harmonized_stage_user_assignment_day"
+    }
+  ],
+  "time_series_summary": [
+    {
+      "metric_type": "active_tasks_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 860.0,
+      "avg_value": 293.6666666666667
+    },
+    {
+      "metric_type": "app_vcores_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 203.0,
+      "max_value": 1054.0,
+      "avg_value": 710.5833333333334
+    },
+    {
+      "metric_type": "cluster_total_vcores_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 1600.0,
+      "avg_value": 1066.6666666666667
+    },
+    {
+      "metric_type": "driver_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 44.2568359375,
+      "max_value": 44.26220703125,
+      "avg_value": 44.260416666666664
+    },
+    {
+      "metric_type": "driver_jvm_gc_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 277.0,
+      "avg_value": 92.33333333333333
+    },
+    {
+      "metric_type": "driver_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 44.6318359375,
+      "max_value": 44.63720703125,
+      "avg_value": 44.635416666666664
+    },
+    {
+      "metric_type": "driver_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 163879.99999999997,
+      "avg_value": 61276.66666666669
+    },
+    {
+      "metric_type": "driver_used_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 23.063009031116962,
+      "max_value": 25.86123400181532,
+      "avg_value": 24.18437864134709
+    },
+    {
+      "metric_type": "driver_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 23.063009031116962,
+      "max_value": 25.86123400181532,
+      "avg_value": 24.18437864134709
+    },
+    {
+      "metric_type": "executor_avg_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 3.921495036211576,
+      "max_value": 20.388897374960713,
+      "avg_value": 11.287749535278671
+    },
+    {
+      "metric_type": "executor_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 11.478515625,
+      "max_value": 11.478515625,
+      "avg_value": 11.478515625
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_off_heap_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 1610342528.0,
+      "max_value": 29786792992.0,
+      "avg_value": 14923041392.0
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_on_heap_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 48409575.0,
+      "max_value": 54044015.0,
+      "avg_value": 51491207.0
+    },
+    {
+      "metric_type": "executor_max_java_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 12.30062484741211,
+      "max_value": 32.8302001953125,
+      "avg_value": 20.872767130533855
+    },
+    {
+      "metric_type": "executor_max_used_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 3.794545128941536,
+      "max_value": 3.8282328099012375,
+      "avg_value": 3.8077348793546357
+    },
+    {
+      "metric_type": "executor_max_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 10.763529546558857,
+      "max_value": 32.139533028006554,
+      "avg_value": 18.944162885348003
+    },
+    {
+      "metric_type": "executor_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 47.0615234375,
+      "max_value": 47.0615234375,
+      "avg_value": 47.0615234375
+    },
+    {
+      "metric_type": "executors_allocated_vcore_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 12000000.0,
+      "max_value": 48000000.0,
+      "avg_value": 36000000.0
+    },
+    {
+      "metric_type": "executors_deserialize_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 2931.0,
+      "avg_value": 1054.0
+    },
+    {
+      "metric_type": "executors_java_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 23022950.00000004,
+      "avg_value": 8217693.333333369
+    },
+    {
+      "metric_type": "executors_jvm_gc_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 103.0,
+      "avg_value": 57.333333333333336
+    },
+    {
+      "metric_type": "executors_run_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 222063.0,
+      "avg_value": 110416.0
+    },
+    {
+      "metric_type": "executors_serialize_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 7.0,
+      "avg_value": 2.3333333333333335
+    },
+    {
+      "metric_type": "executors_shuffle_read_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 101743.0,
+      "avg_value": 33975.0
+    },
+    {
+      "metric_type": "executors_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 23022950.00000004,
+      "avg_value": 8217693.333333369
+    },
+    {
+      "metric_type": "executors_used_vcore_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 222063.0,
+      "avg_value": 110416.0
+    },
+    {
+      "metric_type": "hosts_max_disk_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 120227012608.0,
+      "max_value": 130329600000.0,
+      "avg_value": 126451134464.0
+    },
+    {
+      "metric_type": "hosts_total_disk_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 11318153535488.0,
+      "max_value": 12345717030912.0,
+      "avg_value": 11993414032042.666
+    },
+    {
+      "metric_type": "input_bytes_read_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 1587858308.0,
+      "avg_value": 529320013.6666667
+    },
+    {
+      "metric_type": "output_bytes_written_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 1586771744.0,
+      "avg_value": 529164836.6666667
+    },
+    {
+      "metric_type": "plugin_messages_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 140.0,
+      "avg_value": 51.333333333333336
+    },
+    {
+      "metric_type": "s3_list_objects_requests_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 54.0,
+      "avg_value": 19.666666666666668
+    },
+    {
+      "metric_type": "s3_requests_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 23624.0,
+      "avg_value": 7897.666666666667
+    },
+    {
+      "metric_type": "scheduler_delay_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 459401.0,
+      "avg_value": 153409.33333333334
+    },
+    {
+      "metric_type": "shuffle_bytes_read_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 3853661535.0,
+      "avg_value": 1838373276.3333333
+    },
+    {
+      "metric_type": "shuffle_bytes_written_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 3853661535.0,
+      "avg_value": 1838373276.3333333
+    },
+    {
+      "metric_type": "tasks_duration_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 684402.0,
+      "avg_value": 264881.6666666667
+    },
+    {
+      "metric_type": "vcores_avg_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 3.75,
+      "avg_value": 2.4166666666666665
+    },
+    {
+      "metric_type": "vcores_max_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 1600.0,
+      "max_value": 1600.0,
+      "avg_value": 1600.0
+    },
+    {
+      "metric_type": "vcores_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 3,
+      "min_value": 0.0,
+      "max_value": 12.0,
+      "avg_value": 6.333333333333333
+    }
+  ]
+}

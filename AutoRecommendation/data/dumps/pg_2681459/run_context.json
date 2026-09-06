@@ -1,0 +1,76 @@
+{
+  "task_run": {
+    "task_id": 2681459,
+    "task_name": "sampledStaging",
+    "task_type": "spark",
+    "task_sub_type": null,
+    "status": "RUNNING",
+    "error": null,
+    "start_time": "2026-07-15T11:04:29.853000+00:00",
+    "end_time": null,
+    "app_pit": "2026-07-15T01:00:00",
+    "is_retry": false,
+    "parent_task_id": null,
+    "user_task_id": "HourlyAggregation",
+    "pipeline_run_id": "28803-2026-07-15 01:00:00",
+    "app_name": "SSP_logger",
+    "env_name": "dev",
+    "pipeline_status": "RUNNING",
+    "pipeline_sla_value": null,
+    "pipeline_duration_value": 575.76,
+    "pipeline_task_runs": 2,
+    "pipeline_task_retries": 0
+  },
+  "spark_parameters": [
+    {
+      "key": "spark.app.startTime",
+      "value": "1784113468535"
+    },
+    {
+      "key": "spark.definity.pipeline.pit",
+      "value": "2026/07/15/01"
+    },
+    {
+      "key": "spark.driver.extraJavaOptions",
+      "value": "-Djob.name=sampledStaging,-DreportTime=2026/07/15/01,-DjobType=HOURLY,-DoutputTimeZone=PST,-Dobservium.product.name=SSP-Sampling,-Dobservium.db.properties.file=observium_db.properties,-Ddc=VA2POND"
+    },
+    {
+      "key": "spark.driver.host",
+      "value": "va2aggr1714.va2.pubmatic.local"
+    },
+    {
+      "key": "spark.driver.port",
+      "value": "25900"
+    },
+    {
+      "key": "spark.org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter.param.PROXY_URI_BASES",
+      "value": "http://va2aggr0042.va2.pubmatic.local:8088/proxy/application_1776928353058_320937,http://va2aggr0062.va2.pubmatic.local:8088/proxy/application_1776928353058_320937"
+    },
+    {
+      "key": "spark.yarn.app.container.log.dir",
+      "value": "/data8/hadoop/yarn/log/application_1776928353058_320937/container_e58_1776928353058_320937_01_000001"
+    },
+    {
+      "key": "spark.yarn.app.id",
+      "value": "application_1776928353058_320937"
+    }
+  ],
+  "metrics": [
+    {
+      "metric_type": "num_changed_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-15T11:04:29.853000+00:00"
+    },
+    {
+      "metric_type": "num_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 103.0,
+      "tf_id": null,
+      "end_time": "2026-07-15T11:04:29.853000+00:00"
+    }
+  ]
+}

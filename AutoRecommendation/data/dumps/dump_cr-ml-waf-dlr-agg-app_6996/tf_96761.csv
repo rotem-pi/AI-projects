@@ -1,0 +1,33 @@
+key,value
+tf_id,96761
+agent_tf_id,0
+task_id,6996
+env,default
+task_name,cr-ml-waf-dlr-agg-app
+app_id,5
+app_name,cr-ml-waf-dlr-agg-app
+app_pit,2026-07-20T18:08:38
+output_name,
+tf_type,head
+status,COMPLETED
+start_time,2026-07-20T18:10:47.889000+00:00
+end_time,2026-07-20T18:27:46.975000+00:00
+duration,1019.086
+cnt_test_runs,
+cnt_alerts,
+cnt_breaks,
+cnt_metrics,
+tf_io_type,internal
+error,
+description,first at WafDlrFeedAggApp.scala:340 (GlobalLimit)
+query_str,"Aggregate([approx_count_distinct(struct(account, ip)) AS pre_agg_finger_print])
+:- Project([account, ip])
+   :- InMemoryRelation(([account, ip, ts, waf_dlr_legacy_regexes_count, waf_dlr_security_scanner_user_agent_distinct_urls_rules, waf_dlr_security_scanner_files_distinct_urls_rules, waf_dlr_security_scanner_headers_distinct_urls_rules, waf_dlr_security_scanner_poc_testing_distinct_urls_rules, waf_dlr_Bot_Anomaly_Scraper_path_distinct, waf_dlr_wordpress_unique_hosts_targeted, waf_dlr_total_requests, waf_dlr_hosts_set, waf_dlr_RC_Summary_x_minute_avg_activity, waf_dlr_RC_Burst_x_minute_avg_activity, waf_dlr_RC_Summary_x_minute_avg_activity_deny, waf_dlr_RC_Burst_x_minute_avg_activity_deny, waf_dlr_dos_path_count_unique, waf_dlr_dos_query_count_unique, waf_dlr_dos_user_agent_count_unique, waf_dlr_dos_tls_fp_hash_v3_count_unique, waf_dlr_max_threshold_burst_ratio, waf_dlr_Accounts_targeted_with_dos, waf_dlr_Accounts_allowed_with_dos, waf_dlr_Accounts_4xx_with_dos, waf_dlr_Accounts_4x4_with_dos, waf_dlr_Accounts_5xx_with_dos, waf_dlr_xss_distinct_count, waf_dlr_cmd_distinct_count, waf_dlr_attacktool_distinct_count, waf_dlr_protocolattack_distinct_count, waf_dlr_sql_distinct_count, waf_dlr_platformattack_distinct_count, waf_dlr_rfi_distinct_count, waf_dlr_lfi_distinct_count, waf_dlr_policy_distinct_count, waf_dlr_out_distinct_count, waf_dlr_basic_ASE_category_count, waf_dlr_specific_ASE_rules_count, waf_dlr_cmd_count, waf_dlr_sql_count, waf_dlr_lfi_count, waf_dlr_rfi_count, waf_dlr_xss_count, waf_dlr_accurate_noam_rule_3000182_count, waf_dlr_accurate_noam_rule_3000182_count_unique, waf_dlr_accurate_noam_rule_3000400_count, waf_dlr_accurate_noam_rule_3000400_count_unique, waf_dlr_accurate_noam_rule_3000944_count, waf_dlr_accurate_noam_rule_3000944_count_unique, waf_dlr_accurate_noam_rule_3000904_count, waf_dlr_accurate_noam_rule_3000904_count_unique, waf_dlr_accurate_noam_rule_3000191_count, waf_dlr_accurate_noam_rule_3000191_count_unique, waf_dlr_accurate_noam_rule_3000217_count, waf_dlr_accurate_noam_rule_3000217_count_unique, waf_dlr_accurate_noam_rule_3000215_count, waf_dlr_accurate_noam_rule_3000215_count_unique, waf_dlr_accurate_noam_rule_3000213_count, waf_dlr_accurate_noam_rule_3000213_count_unique, waf_dlr_accurate_noam_rule_3000190_count, waf_dlr_accurate_noam_rule_3000190_count_unique, waf_dlr_xss_deny_count, waf_dlr_sql_deny_count, waf_dlr_lfi_deny_count, waf_dlr_rfi_deny_count, waf_dlr_cmd_deny_count, waf_dlr_ase_threat_intel_score, waf_dlr_unique_product_triggered, waf_dlr_bot_requests_count, waf_dlr_ase_custom_deny_count, waf_dlr_legacy_WSCR3_DLR_ScraperBotNets_bot_rules_request_count, waf_dlr_cloud_rules_existance, waf_dlr_host_distinct_count, waf_dlr_bot_scraper_anomaly_clean_ratio], $VAR_3$))
+         :- AdaptiveSparkPlan($VAR_4$)
+               :- ShuffleQueryStage(6)
+"
+query_vars,"{""$VAR_1$"":""'account'"",""$VAR_2$"":""'ip'"",""$VAR_3$"":""StorageLevel(disk, memory, deserialized, 1 replicas)"",""$VAR_4$"":""isFinalPlan=true""}"
+labels,
+prev_query,
+prev_query_vars,
+inputs,"[""csi_prod_centralus_ingest.gamora-waf-triggers-dlr-14""]"

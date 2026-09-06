@@ -1,0 +1,29 @@
+[
+  {
+    "insight_id": 404340,
+    "task_name": "landing_job",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "m7gd.large",
+      "worker_types": [
+        "m7gd.large"
+      ],
+      "cnt_task_runs": 8,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 15,
+      "cluster_workers": 6,
+      "shuffle_partitions": "200",
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 7
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

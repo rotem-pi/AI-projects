@@ -1,0 +1,141 @@
+# Recommendation Agent on dev-eks — internal-only, same ALB conventions as
+# definity-app's tools/manual_tuning and tools/autotune_panel (group "main",
+# internal scheme, the *.dev.definity.run ACM certificate, external-dns picks
+# up the host). Applied by deploy/deploy.sh, which also sets the image tag.
+#
+# No Secret: the pod holds no credentials at rest. A user signs the pod into
+# AWS from the site (SSO device-code flow); the token cache lives in the
+# aws-sso emptyDir and the session is shared by everyone on the site. Job
+# workdirs (dump, run sandbox, result.json, tldr.md) live in the jobs emptyDir
+# and are swept REC_AGENT_TTL_HOURS after each job finishes — a pod restart
+# wipes both volumes, which is the intended "nothing survives the session".
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: recommendation-agent
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recommendation-agent-env
+  namespace: recommendation-agent
+data:
+  # Same non-secret values the harness's .env carries for laptop runs.
+  LLM_MODEL: eu.anthropic.claude-sonnet-4-6
+  ATHENA_DB: dev_app_analytics
+  ATHENA_TABLE: task_enrichments
+  S3_OUTPUT: s3://definity-athena-results/notebooks/
+  VCORE_PRICE: "0.05"
+  MEMORY_PRICE: "0.005"
+  SAFETY_REVIEW_RECURSION_LIMIT: "24"
+  PLAN_RECURSION_LIMIT: "128"
+  DISCOVERY_RECURSION_LIMIT: "64"
+  TRIAGE_RECURSION_LIMIT: "32"
+  PLAN_FORCE_FINALIZE_MODEL_CALLS: "24"
+  DATABASE_POOL_MIN: "0"
+  REC_AGENT_TTL_HOURS: "4"
+  REC_AGENT_MAX_CONCURRENT: "2"
+  REC_AGENT_JOB_TIMEOUT_MIN: "30"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: recommendation-agent
+  namespace: recommendation-agent
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate   # jobs are process-local; two pods would not share them
+  selector:
+    matchLabels:
+      app: recommendation-agent
+  template:
+    metadata:
+      labels:
+        app: recommendation-agent
+    spec:
+      containers:
+      - name: app
+        image: 412550564892.dkr.ecr.eu-north-1.amazonaws.com/recommendation-agent:latest
+        ports:
+        - containerPort: 8765
+        envFrom:
+        - configMapRef:
+            name: recommendation-agent-env
+        resources:
+          requests:
+            cpu: 500m
+            memory: 1536Mi
+          limits:
+            memory: 3Gi
+        volumeMounts:
+        - name: jobs
+          mountPath: /data/jobs
+        - name: aws-sso
+          mountPath: /home/app/.aws/sso
+        - name: aws-cli-cache
+          mountPath: /home/app/.aws/cli
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8765
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8765
+          initialDelaySeconds: 60
+          periodSeconds: 30
+      volumes:
+      - name: jobs
+        emptyDir:
+          sizeLimit: 15Gi   # ~190 MB per job (three sandbox materializations), 4 h TTL
+      - name: aws-sso
+        emptyDir: {}
+      - name: aws-cli-cache
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: recommendation-agent
+  namespace: recommendation-agent
+spec:
+  type: NodePort
+  selector:
+    app: recommendation-agent
+  ports:
+  - port: 8765
+    targetPort: 8765
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: recommendation-agent
+  namespace: recommendation-agent
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:412550564892:certificate/10fc6cf6-85b1-4c70-82b7-406a75b14df9
+    alb.ingress.kubernetes.io/group.name: main
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/scheme: internal
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS13-1-2-2021-06
+    alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    # Athena lookups take 10-20 s and result downloads are ~240 KB; the default
+    # 60 s idle timeout is enough, but match the siblings so the group's
+    # attribute stays consistent.
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=1000
+    kubernetes.io/ingress.class: alb
+spec:
+  rules:
+  - host: recommendation-agent.dev.definity.run
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: recommendation-agent
+            port:
+              number: 8765

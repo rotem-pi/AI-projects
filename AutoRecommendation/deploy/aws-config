@@ -1,0 +1,9 @@
+# Non-secret: which SSO portal / account / role the pod signs into via the
+# device-code flow started from the site. The token itself is never baked in.
+[profile dev-admin]
+sso_start_url = https://d3finity.awsapps.com/start/#/?tab=accounts
+sso_region = eu-north-1
+sso_account_id = 412550564892
+sso_role_name = PowerUserAccess
+region = eu-north-1
+output = json

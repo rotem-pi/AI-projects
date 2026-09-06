@@ -1,0 +1,113 @@
+[
+  {
+    "insight_id": 366982,
+    "task_name": "DMP2_AUDIENCES_3P_OFFLINE",
+    "type": "orphaned_machine_vcores",
+    "impact_cost": 495957856.087982,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "stale_vcores": 2,
+      "task_metrics": [
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            566740281,
+            566740292
+          ]
+        },
+        {
+          "title": "Executors heap memory breakdown",
+          "metric_ids": [
+            566740304,
+            572141480,
+            572141467
+          ]
+        }
+      ],
+      "cnt_task_runs": 195,
+      "machine_vcores": 4,
+      "time_span_days": 17,
+      "executor__cores": 2,
+      "shuffle_partitions": null,
+      "executor__memory__allocated": 19,
+      "total_wasted_vcore_time_unused": 56506308.597563945,
+      "tenant_machine_memory_to_vcore_ratio": 8.0,
+      "executor__memory_off_heap__max_percentage": 157.52582522599315
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 366733,
+    "task_name": "DMP2_AUDIENCES_3P_OFFLINE",
+    "type": "over_provisioned_executor_heap_memory",
+    "impact_cost": 6272040168.91904,
+    "impact_unit": "GB",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Executor heap memory usage",
+          "metric_ids": [
+            566740281,
+            566740304,
+            566740290
+          ]
+        }
+      ],
+      "cnt_task_runs": 68,
+      "time_span_days": 17,
+      "avg_utilization": 43,
+      "suggested_value": 21,
+      "watermark_value": 16.3381307572126,
+      "current_allocated": 32
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 362515,
+    "task_name": "DMP2_AUDIENCES_3P_OFFLINE",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 3,
+      "cnt_task_runs": 225,
+      "task_sub_type": null,
+      "time_span_days": 17,
+      "cnt_failed_task_runs": 16,
+      "cnt_completed_task_runs": 195
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  },
+  {
+    "insight_id": 470776,
+    "task_name": "DMP2_AUDIENCES_3P_OFFLINE",
+    "type": "task_retries_cost",
+    "impact_cost": 633400533.528327,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Pipeline Tasks Count",
+          "metric_ids": [
+            566735475,
+            566888435,
+            566888434
+          ]
+        }
+      ],
+      "cnt_task_runs": 225,
+      "total_retries": 43,
+      "time_span_days": 16
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  }
+]

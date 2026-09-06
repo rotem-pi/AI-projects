@@ -1,0 +1,31 @@
+[
+  {
+    "insight_id": 363630,
+    "task_name": "DQ_check_harmonized_user_assignment_snapshot_day",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "m6gd.xlarge",
+      "worker_types": [
+        "m6gd.xlarge"
+      ],
+      "cnt_task_runs": 17,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 16,
+      "cluster_workers": 16,
+      "shuffle_partitions": "200",
+      "cluster_max_workers": 32,
+      "cluster_min_workers": 16,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 17
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

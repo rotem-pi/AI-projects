@@ -1,0 +1,30 @@
+key,value
+tf_id,99969
+agent_tf_id,5
+task_id,7095
+env,default
+task_name,polaris-bhv4-100
+app_id,2
+app_name,polaris-bhv4-100
+app_pit,2026-07-21T06:02:07
+output_name,
+tf_type,count
+status,COMPLETED
+start_time,2026-07-21T06:23:31.441000+00:00
+end_time,2026-07-21T06:30:08.465000+00:00
+duration,397.024
+cnt_test_runs,
+cnt_alerts,
+cnt_breaks,
+cnt_metrics,
+tf_io_type,internal
+error,
+description,count at DeltaUtils.scala:16 (Aggregate)
+query_str,"Aggregate([count($VAR_1$) AS count])
+:- LocalRelation()
+"
+query_vars,"{""$VAR_1$"":""1""}"
+labels,
+prev_query,
+prev_query_vars,
+inputs,

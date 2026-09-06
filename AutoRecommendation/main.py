@@ -1,9 +1,9 @@
 """CLI entry point for AutoRecommendation.
 
 Usage:
-    python main.py --sample 10                      # fetch 10 random rows from Athena and run
-    python main.py --sample 10 --json               # same, JSON output per task
-    python main.py --task-id 2481696                # run one specific task_id from Athena
+    ./run.sh main.py --sample 10                      # fetch 10 random rows from Athena and run
+    ./run.sh main.py --sample 10 --json               # same, JSON output per task
+    ./run.sh main.py --task-id 2481696                # run one specific task_id from Athena
 
 Mirrors the inference graph of definity-app's auto-recommendations-agent
 branch (backend/app/brain/insights/agent) — same nodes, prompts, KB, tools
@@ -44,10 +44,21 @@ from pathlib import Path
 from typing import Any
 
 # Make definity-app's backend importable as "app.*" so the agent modules
-# (models, state, tools, nodes/plan, etc.) resolve from the repo without duplication.
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "definity-app" / "backend"))
+# (models, state, tools, nodes/plan, etc.) resolve from the repo without
+# duplication. The path is resolved by bootstrap_worktree.py (a dedicated,
+# harness-managed worktree pinned to auto-recommendations-agent — see that
+# module's docstring for why), not assumed from directory layout — run
+# `python bootstrap_worktree.py` once (or use ./run.sh, which does this
+# automatically) before running this file directly.
+from bootstrap_worktree import resolved_backend_path
+
+sys.path.insert(0, str(resolved_backend_path()))
 
 # csv is still used for Athena CSV result parsing and batch_summary writing
+# Athena result CSVs carry whole JSON columns (events.payload cast to VARCHAR
+# can exceed 128 KB); csv's default field limit made those queries raise
+# "field larger than field limit" and the sandbox silently dropped the table.
+csv.field_size_limit(sys.maxsize)
 
 from dotenv import load_dotenv
 
@@ -57,12 +68,11 @@ from agent.cost_utils import DEFAULT_MEMORY_PRICE, DEFAULT_VCORE_PRICE, compute_
 import app.brain.insights.agent.constants as _agent_constants
 from app.brain.insights.agent.constants import HISTORICAL_RUNS_FETCH_LIMIT
 
-# The branch removed these from constants.py when fetch_context moved the raw
-# per-run tables to the S3 sandbox (dd494cb3d); this harness still builds an
-# inline run_context from Athena, so the old per-table caps live here now
-# (same values the branch shipped before the sandbox change).
-RUN_CONTEXT_ROWS_PER_TABLE_LIMIT = 300
-RUN_CONTEXT_TEXT_MAX_CHARS = 2000
+# Row/text caps for the raw per-table Athena queries that feed the local run
+# sandbox (agent/local_sandbox.py) — same values the branch used for its old
+# pre-joined run-context sections, before the S3-sandbox change (dd494cb3d).
+SANDBOX_ROWS_PER_TABLE_LIMIT = 300
+SANDBOX_TEXT_MAX_CHARS = 2000
 
 # Optional .env overrides for the agent's per-node ReAct iteration budgets
 # (e.g. SAFETY_REVIEW_RECURSION_LIMIT=24). A wandering agent that exhausts
@@ -100,9 +110,10 @@ from app.brain.insights.recommendations.agent import (
     PAYLOAD_ACTION,
     PAYLOAD_CONFIG_KEY,
     PAYLOAD_CURRENT_VALUE,
+    PAYLOAD_RECOMMENDATIONS,
     PAYLOAD_SUGGESTED_VALUE,
 )
-from app.brain.insights.tuning.run_metrics import compute_run_metrics
+from app.brain.insights.tuning.entities.run_metrics import compute_run_metrics
 
 _VCORE_PRICE = float(os.getenv("VCORE_PRICE", DEFAULT_VCORE_PRICE))
 _MEMORY_PRICE = float(os.getenv("MEMORY_PRICE", DEFAULT_MEMORY_PRICE))
@@ -176,6 +187,15 @@ _ATHENA_COLUMNS = """
 """.strip()
 
 
+# The same columns qualified for queries that join task_enrichments (aliased
+# `e`) to the Athena `tasks` mirror (aliased `t`) for the run status — the
+# enrichment export has no status column, and the entry gate only lets
+# COMPLETED runs through (agent/nodes/entry_gate.py). tasks is unique per
+# task_id in the export, so a plain LEFT JOIN adds no rows.
+_ATHENA_COLUMNS_E = ", ".join(f"e.{c.strip()}" for c in _ATHENA_COLUMNS.split(","))
+_COMPLETED_STATUS = "COMPLETED"
+
+
 # ── Athena helpers ─────────────────────────────────────────────────────────
 
 _sso_login_checked = False
@@ -192,9 +212,19 @@ def _ensure_aws_sso_login(session) -> None:
     try:
         session.client("sts").get_caller_identity()
     except (NoCredentialsError, TokenRetrievalError, UnauthorizedSSOTokenError, ClientError) as exc:
+        # AWS_SSO_AUTO_LOGIN=0: never shell out to `aws sso login` from here —
+        # a long-running service owns the (device-code) login flow itself and
+        # needs the failure surfaced, not an interactive prompt on its stdout.
+        if os.getenv("AWS_SSO_AUTO_LOGIN", "1") == "0":
+            raise
         print(f"  AWS SSO session invalid/expired ({exc.__class__.__name__}) — "
               f"running `aws sso login --profile {_AWS_PROFILE}`…")
-        subprocess.run(["aws", "sso", "login", "--profile", _AWS_PROFILE], check=True)
+        cmd = ["aws", "sso", "login", "--profile", _AWS_PROFILE]
+        # Headless hosts (containers) can't open a browser: the device-code
+        # flow prints a URL + code for the user to approve elsewhere.
+        if os.getenv("AWS_SSO_USE_DEVICE_CODE") == "1":
+            cmd.append("--use-device-code")
+        subprocess.run(cmd, check=True)
         session.client("sts").get_caller_identity()
 
     _sso_login_checked = True
@@ -283,18 +313,20 @@ def _fetch_athena_sample_with_history(n: int, min_runs: int) -> list[dict[str, A
     group into a "current" row plus real historical runs.
 
     Mirrors the (app_id, task_name) grouping and recency ordering that
-    backend/app/dal/sql/insights/agent_historical_enrichments.sql uses
-    against Postgres (start_time DESC); Athena's task_enrichments exposes the
-    same point-in-time as app_pit (timestamp(3)), so it's used directly.
+    backend/app/dal/sql/insights/agent_context.sql (@query:
+    historical_enrichments) uses against Postgres (start_time DESC);
+    Athena's task_enrichments exposes the same point-in-time as app_pit
+    (timestamp(3)), so it's used directly.
     """
     max_rows_per_group = 1 + HISTORICAL_RUNS_FETCH_LIMIT
     sql = f"""
     WITH filtered AS (
-        SELECT {_ATHENA_COLUMNS}
-        FROM {_ATHENA_DB}.{_ATHENA_TABLE}
-        WHERE task__duration > 0
-          AND executor__memory_heap__allocated > 0
-          AND task__duration >= 15000
+        SELECT {_ATHENA_COLUMNS_E}, t.status
+        FROM {_ATHENA_DB}.{_ATHENA_TABLE} e
+        LEFT JOIN {_ATHENA_DB}.tasks t ON t.task_id = e.task_id
+        WHERE e.task__duration > 0
+          AND e.executor__memory_heap__allocated > 0
+          AND e.task__duration >= 15
     ),
     ranked AS (
         SELECT *,
@@ -348,14 +380,16 @@ def _fetch_athena_insights(
 ) -> list[dict[str, Any]]:
     """The task's rows from the Athena `insights` table, latest snapshot only.
 
-    Default filters mirror production insights.sql (lifecycle_status='active'
-    AND visibility='visible'); --include-hidden-insights relaxes both so
-    hidden/stale insights (e.g. task_profile) can be fed to the agent for
-    experimentation.
+    The default filter mirrors the production agent's active_insights query
+    (agent_context.sql): lifecycle_status='active' ONLY — production does
+    NOT filter on visibility, so hidden-but-active insights (e.g.
+    task_profile) reach the agent there too.  Agent runs always use this
+    prod filter; include_hidden exists only for diagnostics
+    (evaluation/compare_sql_stream.py) that need the unfiltered rows.
     """
     visibility_filter = (
         "" if include_hidden
-        else "AND lifecycle_status = 'active' AND visibility = 'visible'"
+        else "AND lifecycle_status = 'active'"
     )
     sql = f"""
     SELECT insight_id, task_name, type, impact_cost, impact_unit,
@@ -371,14 +405,17 @@ def _fetch_athena_insights(
 
 def _fetch_athena_task(task_id: int) -> list[dict[str, Any]]:
     """The enrichment row for the EXACT task_id — the branch's
-    insights/agent_latest_enrichment.sql selects `WHERE te.task_id = %s`,
-    so the analyzed run is the one requested, not the task's newest run.
+    insights/agent_context.sql (@query: latest_enrichment) resolves the
+    logical task from task_id and takes its latest COMPLETED run, not the
+    exact run requested; this fetches the exact run_id instead, so the
+    analyzed run is the one requested, not the task's newest run.
     Falls back to the logical task's latest run only when the exact run is
     missing from the Athena export (the caller prints a notice)."""
     sql = f"""
-    SELECT {_ATHENA_COLUMNS}
-    FROM {_ATHENA_DB}.{_ATHENA_TABLE}
-    WHERE task_id = {int(task_id)}
+    SELECT {_ATHENA_COLUMNS_E}, t.status
+    FROM {_ATHENA_DB}.{_ATHENA_TABLE} e
+    LEFT JOIN {_ATHENA_DB}.tasks t ON t.task_id = e.task_id
+    WHERE e.task_id = {int(task_id)}
     LIMIT 1
     """
     rows = _run_athena_query(sql)
@@ -387,21 +424,23 @@ def _fetch_athena_task(task_id: int) -> list[dict[str, Any]]:
 
     print(
         f"  task_id {task_id} has no enrichment row in Athena — "
-        "falling back to the logical task's latest run.",
+        "falling back to the logical task's latest COMPLETED run.",
         file=sys.stderr,
     )
     sql = f"""
-    SELECT {_ATHENA_COLUMNS}
-    FROM {_ATHENA_DB}.{_ATHENA_TABLE}
-    WHERE task_name = (
+    SELECT {_ATHENA_COLUMNS_E}, t.status
+    FROM {_ATHENA_DB}.{_ATHENA_TABLE} e
+    LEFT JOIN {_ATHENA_DB}.tasks t ON t.task_id = e.task_id
+    WHERE e.task_name = (
         SELECT task_name FROM {_ATHENA_DB}.{_ATHENA_TABLE}
         WHERE task_id = {int(task_id)} LIMIT 1
       )
-      AND app_id = (
+      AND e.app_id = (
         SELECT app_id FROM {_ATHENA_DB}.{_ATHENA_TABLE}
         WHERE task_id = {int(task_id)} LIMIT 1
       )
-    ORDER BY app_pit DESC, task__duration DESC
+      AND t.status = '{_COMPLETED_STATUS}'
+    ORDER BY e.app_pit DESC, e.task__duration DESC
     LIMIT 1
     """
     return _run_athena_query(sql)
@@ -412,120 +451,226 @@ def _fetch_athena_historical_runs(
 ) -> list[dict[str, Any]]:
     """Real historical runs for one logical task (task_name, app_id), oldest
     -> newest — the --task-id counterpart of _fetch_athena_sample_with_history,
-    mirroring agent_historical_enrichments.sql's semantics against Athena."""
+    mirroring agent_context.sql's (@query: historical_enrichments) semantics
+    against Athena."""
     sql = f"""
-    SELECT {_ATHENA_COLUMNS}
-    FROM {_ATHENA_DB}.{_ATHENA_TABLE}
-    WHERE task_name = '{_sql_escape(str(task_name))}'
-      AND app_id = {int(app_id)}
-      AND task_id != {int(exclude_task_id)}
-      AND task__duration > 0
-      AND executor__memory_heap__allocated > 0
-      AND task__duration >= 15000
-    ORDER BY app_pit DESC
+    SELECT {_ATHENA_COLUMNS_E}, t.status
+    FROM {_ATHENA_DB}.{_ATHENA_TABLE} e
+    LEFT JOIN {_ATHENA_DB}.tasks t ON t.task_id = e.task_id
+    WHERE e.task_name = '{_sql_escape(str(task_name))}'
+      AND e.app_id = {int(app_id)}
+      AND e.task_id != {int(exclude_task_id)}
+      AND e.task__duration > 0
+      AND e.executor__memory_heap__allocated > 0
+      AND e.task__duration >= 15
+    ORDER BY e.app_pit DESC
     LIMIT {limit}
     """
     rows = _run_athena_query(sql)
     return list(reversed(rows))
 
 
-# ── Run context (agent_task_run_context.sql equivalent) ────────────────────
-
-def _run_context_section_sql(task_id: int) -> dict[str, tuple[str, str]]:
-    """Per-section Athena SQL mirroring agent_task_run_context.sql (each JSON
-    section of the production one-row query becomes one Athena query here —
-    same columns, same ordering, same row/text caps).  Postgres-isms are
-    translated to Trino: EXTRACT(EPOCH FROM a-b) → date_diff, STRING_AGG →
-    array_join(array_agg(...)), SUBSTRING(x,1,n) → substr(cast(...)).
-    Returns {section: (base_table, sql)}."""
-    tid = int(task_id)
-    rows_limit = RUN_CONTEXT_ROWS_PER_TABLE_LIMIT
-    text_max = RUN_CONTEXT_TEXT_MAX_CHARS
+def _fetch_athena_task_candidates(task_name: str) -> list[dict[str, Any]]:
+    """Every (app_id, env_id) a task name runs under, with its latest
+    analyzable run — the disambiguation step a name-based entry point
+    needs, since task_name alone is not a key in task_enrichments (the same
+    name recurs across apps/environments; generic Databricks task names like
+    "compute" run under hundreds of apps). Joined to the Athena `apps` /
+    `envs` mirrors for human-readable app_name / env_name (deduped by
+    app_id/env_id in case the export holds more than one row per key).
+    Rows use the same analyzability filter _fetch_athena_historical_runs
+    applies plus tasks.status = COMPLETED (the entry gate's requirement), so
+    latest_task_id is a run the agent can actually work on. Newest app
+    first."""
     db = _ATHENA_DB
-    return {
-        "task_run": ("tasks", f"""
-            SELECT t.task_id, t.task_name, t.task_type, t.task_sub_type,
-                   t.status, t.error, t.start_time, t.end_time, t.app_pit,
-                   t.is_retry, t.parent_task_id, t.user_task_id, t.pipeline_run_id,
-                   a.app_name, e.env_name,
-                   pra.status AS pipeline_status,
-                   pra.sla_value AS pipeline_sla_value,
-                   pra.duration_value AS pipeline_duration_value,
-                   pra.task_runs AS pipeline_task_runs,
-                   pra.task_retries AS pipeline_task_retries
-            FROM {db}.tasks t
-            INNER JOIN {db}.apps a ON t.app_id = a.app_id
-            INNER JOIN {db}.envs e ON a.env_id = e.env_id
-            LEFT JOIN {db}.pipeline_run_agg pra
-              ON t.pipeline_run_id = pra.pipeline_run_id AND t.app_id = pra.app_id
-            WHERE t.task_id = {tid}
-            LIMIT 1
-        """),
-        "spark_parameters": ("task_params", f"""
-            SELECT key, value FROM {db}.task_params
-            WHERE task_id = {tid} ORDER BY key LIMIT {rows_limit}
-        """),
-        "events": ("events", f"""
-            SELECT event_id, category, sub_category, name, description,
-                   start_time_ms, end_time_ms,
-                   substr(CAST(payload AS VARCHAR), 1, {text_max}) AS payload
-            FROM {db}.events
-            WHERE task_id = {tid} ORDER BY start_time_ms LIMIT {rows_limit}
-        """),
-        "metrics": ("metrics", f"""
-            SELECT mc.metric_type, mc.asset_type, m.asset_value,
-                   m.metric_value, m.tf_id, m.end_time
-            FROM {db}.metrics m
-            INNER JOIN {db}.metrics_conf mc ON m.metric_id = mc.metric_id
-            WHERE m.task_id = {tid}
-            ORDER BY mc.asset_type, mc.metric_type, m.asset_value
-            LIMIT {rows_limit}
-        """),
-        "test_runs": ("test_runs", f"""
-            SELECT tr.test_id, ts.test_type, mc.metric_type, mc.asset_type,
-                   ts.asset_value, tr.run_value, tr.lower_bound, tr.upper_bound,
-                   tr.is_passed, tr.task_broke, tr.tf_id
-            FROM {db}.test_runs tr
-            LEFT JOIN {db}.tests ts ON tr.test_id = ts.test_id
-            LEFT JOIN {db}.metrics_conf mc ON tr.metric_id = mc.metric_id
-            WHERE tr.task_id = {tid}
-            ORDER BY tr.is_passed, ts.test_type
-            LIMIT {rows_limit}
-        """),
-        "transformations": ("tfs", f"""
-            SELECT tf.tf_id, tf.tf_type, tf.output_name, tf.status, tf.error,
-                   tf.description, tf.start_time, tf.end_time,
-                   date_diff('second', tf.start_time, tf.end_time) AS duration_seconds,
-                   substr(q.query, 1, {text_max}) AS query,
-                   substr(CAST(qv.query_vars AS VARCHAR), 1, {text_max}) AS query_vars,
-                   tf.labels,
-                   (
-                     SELECT array_join(array_agg(ds_name), ', ')
-                     FROM {db}.tf_inputs ti
-                     WHERE ti.tf_id = tf.tf_id
-                   ) AS input_datasets
-            FROM {db}.tfs tf
-            LEFT JOIN {db}.queries q ON tf.query_hash = q.query_hash
-            LEFT JOIN {db}.tfs_query_vars qv ON tf.tf_id = qv.tf_id
-            WHERE tf.task_id = {tid}
-            ORDER BY tf.start_time
-            LIMIT {rows_limit}
-        """),
-        "time_series_summary": ("time_series_metrics", f"""
-            SELECT tsm.metric_type, tsm.kind, tsm.asset_name,
-                   MIN(tsm.bucket_size_seconds) AS bucket_size_seconds,
-                   COUNT(v.value) AS points_count,
-                   MIN(v.value) AS min_value,
-                   MAX(v.value) AS max_value,
-                   AVG(v.value) AS avg_value
-            FROM {db}.time_series_metrics tsm
-            CROSS JOIN UNNEST(tsm."values") AS v (value)
-            WHERE tsm.task_id = {tid}
-            GROUP BY tsm.metric_type, tsm.kind, tsm.asset_name
-            ORDER BY tsm.metric_type, tsm.asset_name
-            LIMIT {rows_limit}
-        """),
+    sql = f"""
+    WITH runs AS (
+        SELECT e.app_id, e.env_id,
+               COUNT(*)                     AS run_count,
+               MAX(e.app_pit)               AS latest_app_pit,
+               MAX_BY(e.task_id, e.app_pit) AS latest_task_id
+        FROM {db}.{_ATHENA_TABLE} e
+        INNER JOIN {db}.tasks t ON t.task_id = e.task_id
+        WHERE e.task_name = '{_sql_escape(str(task_name))}'
+          AND t.status = '{_COMPLETED_STATUS}'
+          AND e.task__duration > 0
+          AND e.executor__memory_heap__allocated > 0
+          AND e.task__duration >= 15
+        GROUP BY e.app_id, e.env_id
+    ),
+    apps AS (
+        SELECT app_id, app_name, deleted_at
+        FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY app_id ORDER BY created_at DESC) AS rn
+              FROM {db}.apps)
+        WHERE rn = 1
+    ),
+    envs AS (
+        SELECT env_id, env_name, tenant_id
+        FROM (SELECT *, ROW_NUMBER() OVER (PARTITION BY env_id ORDER BY env_id) AS rn
+              FROM {db}.envs)
+        WHERE rn = 1
+    )
+    SELECT runs.app_id, apps.app_name, apps.deleted_at AS app_deleted_at,
+           runs.env_id, envs.env_name, envs.tenant_id,
+           runs.run_count, runs.latest_app_pit, runs.latest_task_id
+    FROM runs
+    LEFT JOIN apps ON apps.app_id = runs.app_id
+    LEFT JOIN envs ON envs.env_id = runs.env_id
+    ORDER BY runs.latest_app_pit DESC
+    """
+    return _run_athena_query(sql)
+
+
+def _search_athena_task_names(fragment: str, limit: int = 20) -> list[dict[str, Any]]:
+    """Task names matching `fragment` (case-insensitive substring), each with
+    a real analyzable COMPLETED run — a UI's type-ahead when the exact name
+    isn't known. Two things a plain `LIKE '%frag%' ORDER BY task_name` gets
+    wrong, fixed here:
+
+    - Relevance: alphabetical order puts a dotted/prefixed name like
+      "com.att.eg....compute.Application" ahead of the literal "compute"
+      (ASCII '.' sorts before letters), so a search for "compute" buried the
+      one name a person typed under a page of noise. Ranked instead: exact
+      match, then prefix match, then plain substring match; ties broken by
+      which name most recently had an analyzable run, so live names surface
+      over one-off historical ones.
+    - Dead ends: a task_name with zero COMPLETED, long-enough runs would
+      suggest a name that then fails with "no analyzable runs" the moment
+      it's picked — filtered out via the same join/thresholds
+      _fetch_athena_task_candidates uses.
+
+    Full scan of task_enrichments joined to tasks; fine for an internal
+    tool, not for a hot path."""
+    frag = _sql_escape(str(fragment).lower())
+    sql = f"""
+    WITH matches AS (
+        SELECT e.task_name,
+               COUNT(*)     AS run_count,
+               MAX(e.app_pit) AS latest_app_pit
+        FROM {_ATHENA_DB}.{_ATHENA_TABLE} e
+        JOIN {_ATHENA_DB}.tasks t ON t.task_id = e.task_id
+        WHERE LOWER(e.task_name) LIKE '%{frag}%'
+          AND t.status = '{_COMPLETED_STATUS}'
+          AND e.task__duration >= 15
+          AND e.executor__memory_heap__allocated > 0
+        GROUP BY e.task_name
+    )
+    SELECT task_name, run_count, latest_app_pit
+    FROM matches
+    ORDER BY
+        CASE
+            WHEN LOWER(task_name) = '{frag}' THEN 0
+            WHEN LOWER(task_name) LIKE '{frag}%' THEN 1
+            ELSE 2
+        END,
+        latest_app_pit DESC
+    LIMIT {int(limit)}
+    """
+    return _run_athena_query(sql)
+
+
+def _search_athena_apps_by_name(fragment: str, limit: int = 10) -> list[dict[str, Any]]:
+    """Apps whose app_name matches `fragment`, each paired with the real
+    Spark task_name(s) it runs — the fallback for when someone searches (or
+    types into "Find runs") the Databricks cluster/job label instead of the
+    task name task_enrichments actually keys on (e.g. "platinum_feedback_
+    cluster" is an app_name; the task that runs on it is "compute"). Only
+    analyzable COMPLETED runs count, same thresholds as
+    _fetch_athena_task_candidates, so every suggestion here leads somewhere.
+    Newest run first."""
+    frag = _sql_escape(str(fragment).lower())
+    sql = f"""
+    WITH app_match AS (
+        SELECT app_id, app_name
+        FROM (
+            SELECT *, ROW_NUMBER() OVER (PARTITION BY app_id ORDER BY created_at DESC) AS rn
+            FROM {_ATHENA_DB}.apps
+        )
+        WHERE rn = 1 AND LOWER(app_name) LIKE '%{frag}%'
+    )
+    SELECT am.app_id, am.app_name, e.task_name,
+           COUNT(*) AS run_count, MAX(e.app_pit) AS latest_app_pit
+    FROM app_match am
+    JOIN {_ATHENA_DB}.{_ATHENA_TABLE} e ON e.app_id = am.app_id
+    JOIN {_ATHENA_DB}.tasks t ON t.task_id = e.task_id
+    WHERE t.status = '{_COMPLETED_STATUS}'
+      AND e.task__duration >= 15
+      AND e.executor__memory_heap__allocated > 0
+    GROUP BY am.app_id, am.app_name, e.task_name
+    ORDER BY latest_app_pit DESC
+    LIMIT {int(limit)}
+    """
+    return _run_athena_query(sql)
+
+
+def _fetch_athena_export_freshness() -> dict[str, Any]:
+    """How far behind production the Athena export is: the newest run point-
+    in-time in task_enrichments and the newest insights snapshot. Surfaced
+    to users so "latest run" is understood as "latest exported run"."""
+    sql = f"""
+    SELECT
+      (SELECT MAX(app_pit)       FROM {_ATHENA_DB}.{_ATHENA_TABLE}) AS latest_enrichment_pit,
+      (SELECT MAX(snapshot_date) FROM {_ATHENA_DB}.insights)        AS latest_insights_snapshot
+    """
+    rows = _run_athena_query(sql)
+    return rows[0] if rows else {}
+
+
+# ── Local run sandbox (raw per-table Athena queries) ───────────────────────
+#
+# Mirrors backend/app/brain/insights/agent/constants.py's SANDBOX_DIRECT_TABLES
+# / SANDBOX_TF_KEYED_TABLES: each table dumped verbatim (SELECT * WHERE
+# task_id = ...) rather than the old pre-joined agent_task_run_context.sql
+# sections. tasks/task_enrichments aren't queried again here — this harness
+# already has the enrichment row (and no separate `tasks` row) — the
+# enrichment row itself is wrapped as a one-row task_enrichments table.
+
+
+def _sandbox_table_sql(task_id: int) -> dict[str, tuple[str, str]]:
+    """Per-table Athena SQL mirroring production's sandbox dump exactly
+    (agent_context.sql `sandbox_table_dump` / `sandbox_tf_table_dump`:
+    SELECT * FROM <table> WHERE task_id = ..., tf-keyed tables reached
+    through tfs.tf_id). The KB analysis layer (kb/analysis/*) reads the raw
+    column names — metrics.metric_id, time_series_metrics.values as a JSON
+    array string, events.payload — so any projection or aggregation here
+    breaks a detector somewhere (estimate_change_saving crashed on a
+    min/max/avg rollup of time_series_metrics that dropped `values`).
+    Athena-specific casts only: array columns become JSON text, as Postgres'
+    CSV export renders them. Returns {table: (base_table, sql)} (the base
+    table is used to skip a table the Athena export doesn't have)."""
+    tid = int(task_id)
+    rows_limit = SANDBOX_ROWS_PER_TABLE_LIMIT
+    db = _ATHENA_DB
+    direct = {
+        "tasks": "*",
+        "task_params": "*",
+        "events": "*",
+        "metrics": "*",
+        "test_runs": "*",
+        "tfs": "*",
+        "time_series_metrics": (
+            "app_id, task_id, metric_type, created_time, start_time_ms, bucket_size_seconds, "
+            "json_format(CAST(\"values\" AS JSON)) AS \"values\", kind, "
+            "json_format(CAST(server_metrics AS JSON)) AS server_metrics, asset_name"
+        ),
     }
+    order = {"events": "start_time_ms", "tfs": "start_time", "task_params": "key",
+             "metrics": "metric_id", "test_runs": "test_id", "time_series_metrics": "metric_type",
+             "tasks": "task_id"}
+    out: dict[str, tuple[str, str]] = {
+        table: (table, f"""
+            SELECT {cols} FROM {db}.{table}
+            WHERE task_id = {tid} ORDER BY {order[table]} LIMIT {rows_limit}
+        """)
+        for table, cols in direct.items()
+    }
+    for table in ("tf_inputs", "tfs_query_vars"):
+        out[table] = (table, f"""
+            SELECT * FROM {db}.{table}
+            WHERE tf_id IN (SELECT tf_id FROM {db}.tfs WHERE task_id = {tid})
+            LIMIT {rows_limit}
+        """)
+    return out
 
 _athena_tables_cache: set[str] | None = None
 
@@ -544,49 +689,71 @@ def _athena_table_names() -> set[str]:
     except Exception as exc:
         print(
             f"  Could not list Glue tables ({exc.__class__.__name__}: {exc}) — "
-            "run-context sections disabled",
+            "sandbox tables disabled",
             file=sys.stderr,
         )
     _athena_tables_cache = names
     return names
 
 
+# Structured JSON columns that downstream code json.loads() — truncating them
+# yields unparseable rows that are silently dropped (stage events over 2,000
+# chars vanished, so partition_distribution saw only a 1-partition final stage).
+# Production's sandbox dump does not truncate; neither may the harness.
+_STRUCTURED_COLUMNS = frozenset({"payload", "values", "server_metrics", "query_vars", "columns"})
+
+
 def _truncate_text_values(row: dict[str, Any], max_chars: int) -> dict[str, Any]:
-    """Cap free-text values the way agent_task_run_context.sql SUBSTRINGs
-    payload/query columns, so one pathological run can't flood the LLM."""
+    """Cap free-text values (query, description, ...) so one pathological run
+    can't flood the downstream review/LLM tools. Structured JSON columns are
+    passed through untouched — see _STRUCTURED_COLUMNS."""
     return {
-        k: (v[: max_chars] + "…") if isinstance(v, str) and len(v) > max_chars else v
+        k: (
+            (v[:max_chars] + "…")
+            if isinstance(v, str) and len(v) > max_chars and k not in _STRUCTURED_COLUMNS
+            else v
+        )
         for k, v in row.items()
     }
 
 
-def _fetch_athena_run_context(task_id: int) -> dict[str, Any] | None:
-    """Athena equivalent of insights/agent_task_run_context.sql.
-
-    The production query folds the per-run Postgres tables into one row of
-    JSON sections; here each section runs as its own Athena query with the
-    same columns, ordering and row/text caps. Sections whose base table is
-    missing from the export are skipped; a section whose query fails (e.g.
-    schema drift between Postgres and the export) is skipped with a notice.
-    Returns None when nothing is available — the get_run_data tool then
-    returns {}.
+def _fetch_athena_sandbox_tables(
+    task_id: int, enrichment: dict[str, Any], insight_rows: list[dict[str, Any]]
+) -> dict[str, list[dict[str, Any]]]:
+    """Raw per-table rows for this single run, Athena-sourced — the local
+    run-sandbox equivalent of production's S3 CSV dump. Tables whose base
+    table is missing from the Athena export are skipped; a table whose query
+    fails (e.g. schema drift) is skipped with a notice. Single-PIT only (this
+    run's rows, no multi-run history).
     """
-    tables = _athena_table_names()
-    sections: dict[str, Any] = {}
-    for section, (table, sql) in _run_context_section_sql(task_id).items():
-        if table not in tables:
+    available = _athena_table_names()
+    tables: dict[str, list[dict[str, Any]]] = {"task_enrichments": [enrichment]}
+    for table, (base_table, sql) in _sandbox_table_sql(task_id).items():
+        if base_table not in available:
             continue
         try:
             rows = _run_athena_query(sql)
         except Exception as exc:
             print(
-                f"  run-context section {section!r} failed ({exc}) — skipped",
+                f"  sandbox table {table!r} failed ({exc}) — skipped",
                 file=sys.stderr,
             )
             continue
-        rows = [_truncate_text_values(r, RUN_CONTEXT_TEXT_MAX_CHARS) for r in rows]
-        sections[section] = (rows[0] if rows else None) if section == "task_run" else rows
-    return sections or None
+        rows = [_truncate_text_values(r, SANDBOX_TEXT_MAX_CHARS) for r in rows]
+        if rows:
+            tables[table] = rows
+    if insight_rows:
+        tables["insights"] = insight_rows
+    return tables
+
+
+def _spark_param_value(sandbox_tables: dict[str, Any] | None, key: str) -> Any:
+    """{key, value} row lookup in the sandbox's task_params table — same
+    shape run_from_dump.py's _param_value reads."""
+    params = (sandbox_tables or {}).get("task_params")
+    if not isinstance(params, list):
+        return None
+    return next((p.get("value") for p in params if p.get("key") == key), None)
 
 
 # ── Output helpers ─────────────────────────────────────────────────────────
@@ -645,7 +812,6 @@ def _build_trace(state: dict[str, Any] | None) -> dict[str, Any] | None:
         for tier in range(1, 5)
     } if triage_result else {}
 
-    final_plan = state.get("final_plan")
     return {
         "gate_blocked": state.get("gate_blocked", False),
         "gate_reasons": state.get("gate_reasons", []),
@@ -654,13 +820,13 @@ def _build_trace(state: dict[str, Any] | None) -> dict[str, Any] | None:
         "merged_insights": [_serialize_insight(i, idx) for idx, i in enumerate(merged)],
         "triage_result": triage_dump,
         "tiered_insights": tiered_insights,
-        "kb_version": final_plan.kb_version if final_plan else None,
         # Real Athena runs fed to analyze_metric_trend — surfaced so a saved
         # result can be audited for how much trend evidence actually backed it.
         "historical_runs_count": len(state.get("historical_runs", [])),
-        # Which agent_task_run_context.sql sections the Athena export could
-        # provide to the get_run_data tool (None -> tool returned {}).
-        "run_context_sections": sorted((state.get("run_context") or {}).keys()),
+        # Which raw DB tables the local run sandbox could provide to
+        # run_deterministic_review/estimate_change_saving/
+        # get_advanced_config_catalog (empty -> those tools returned {}).
+        "sandbox_tables": sorted(getattr(state.get("run_sandbox"), "tables", [])),
         "sql_recommendations": [
             r.model_dump() for r in state.get("sql_recommendations", [])
         ],
@@ -671,18 +837,40 @@ def _build_assembled_output(plan) -> list[dict[str, Any]]:
     """The assemble_output node's product, flattened for reading.
 
     One entry per ActiveInsight in plan_inputs.active_insights (what
-    production feeds build_plan). agent_discovered entries expose the
-    payload contract keys (PAYLOAD_CONFIG_KEY / PAYLOAD_CURRENT_VALUE /
-    PAYLOAD_SUGGESTED_VALUE / PAYLOAD_ACTION) at the top level, joined with
-    the explain node's explanation / expected_impact / risk_note (matched by
-    config_key) or the safety block reasons. SQL-rule entries keep their
-    original insight payload and list every explained recommendation that
-    traces to their insight_type."""
+    production feeds build_plan). agent_discovered entries hold a
+    PAYLOAD_RECOMMENDATIONS list — one dict per companion config change
+    that shares this insight's insight_ref (see assemble_output.py's
+    _agent_active_insights grouping) — each joined with the explain node's
+    explanation / expected_impact / risk_note (matched by config_key) or
+    the safety block reasons. SQL-rule entries keep their original insight
+    payload and list every explained recommendation that traces to their
+    insight_type. Both branches converge on the same per-entry shape
+    (config_key/current_value/suggested_value/action/explanation/
+    expected_impact/risk_note/status/blocked_by) under "recommendations"."""
     if plan is None or plan.plan_inputs is None:
         return []
 
     explained_by_key = {r.config_key: r for r in plan.recommendations}
     blocked_by_key = {r.config_key: r for r in plan.blocked_recommendations}
+
+    def _explained(config_key: str | None) -> dict[str, Any]:
+        blocked = blocked_by_key.get(config_key)
+        rec: dict[str, Any] = {
+            # Explicit disposition so a blocked entry (which carries no
+            # explanation — explain only runs on safe recommendations)
+            # can never read as a live recommendation with missing text.
+            "status": "blocked" if blocked is not None else "recommended",
+        }
+        explained = explained_by_key.get(config_key)
+        if explained is not None:
+            rec.update(
+                explanation=explained.explanation,
+                expected_impact=explained.expected_impact,
+                risk_note=explained.risk_note,
+            )
+        if blocked is not None:
+            rec["blocked_by"] = blocked.blocked_by
+        return rec
 
     assembled: list[dict[str, Any]] = []
     for insight in plan.plan_inputs.active_insights:
@@ -691,24 +879,18 @@ def _build_assembled_output(plan) -> list[dict[str, Any]]:
             "insight_type": str(insight.insight_type),
             "usd_cost_annual": insight.usd_cost_annual,
         }
-        config_key = payload.get(PAYLOAD_CONFIG_KEY)
-        if config_key:  # agent_discovered payload contract
-            entry.update(
-                config_key=config_key,
-                current_value=payload.get(PAYLOAD_CURRENT_VALUE),
-                suggested_value=payload.get(PAYLOAD_SUGGESTED_VALUE),
-                action=payload.get(PAYLOAD_ACTION),
-            )
-            rec = explained_by_key.get(config_key)
-            if rec is not None:
-                entry.update(
-                    explanation=rec.explanation,
-                    expected_impact=rec.expected_impact,
-                    risk_note=rec.risk_note,
-                )
-            blocked = blocked_by_key.get(config_key)
-            if blocked is not None:
-                entry["blocked_by"] = blocked.blocked_by
+        entries = payload.get(PAYLOAD_RECOMMENDATIONS)
+        if entries is not None:  # agent_discovered payload contract
+            entry["recommendations"] = [
+                {
+                    "config_key": rec_payload.get(PAYLOAD_CONFIG_KEY),
+                    "current_value": rec_payload.get(PAYLOAD_CURRENT_VALUE),
+                    "suggested_value": rec_payload.get(PAYLOAD_SUGGESTED_VALUE),
+                    "action": rec_payload.get(PAYLOAD_ACTION),
+                    **_explained(rec_payload.get(PAYLOAD_CONFIG_KEY)),
+                }
+                for rec_payload in entries
+            ]
         else:  # SQL insight: original payload + the recommendations tracing to it
             entry["payload"] = payload
             entry["recommendations"] = [
@@ -733,28 +915,49 @@ def _print_assembled_output(assembled: list[dict[str, Any]]) -> None:
         return
     print(f"  Assembled output — plan_inputs.active_insights ({len(assembled)}):")
     for entry in assembled:
-        if "config_key" in entry:
-            state = "BLOCKED" if entry.get("blocked_by") else "safe"
-            print(f"    - [{entry['insight_type']}] {entry['config_key']}: "
-                  f"{entry['current_value']} → {entry['suggested_value']} ({state})")
-            if entry.get("explanation"):
-                print(f"        explanation: {entry['explanation']}")
-            if entry.get("expected_impact"):
-                print(f"        expected_impact: {entry['expected_impact']}")
-            if entry.get("risk_note"):
-                print(f"        risk: {entry['risk_note']}")
-            if entry.get("blocked_by"):
-                print(f"        blocked_by: {'; '.join(entry['blocked_by'])}")
-        else:
-            cost = (f" (${entry['usd_cost_annual']:,.0f}/yr)"
-                    if entry.get("usd_cost_annual") is not None else "")
-            print(f"    - [{entry['insight_type']}]{cost}")
-            for rec in entry.get("recommendations", []):
-                print(f"        → {rec['config_key']}: "
-                      f"{rec['current_value']} → {rec['suggested_value']}")
-                if rec.get("explanation"):
-                    print(f"          explanation: {rec['explanation']}")
+        cost = (f" (${entry['usd_cost_annual']:,.0f}/yr)"
+                if entry.get("usd_cost_annual") is not None else "")
+        print(f"    - [{entry['insight_type']}]{cost}")
+        for rec in entry.get("recommendations", []):
+            state = "BLOCKED" if rec.get("blocked_by") else "safe"
+            print(f"        → {rec['config_key']}: "
+                  f"{rec['current_value']} → {rec['suggested_value']} ({state})")
+            if rec.get("explanation"):
+                print(f"          explanation: {rec['explanation']}")
+            if rec.get("expected_impact"):
+                print(f"          expected_impact: {rec['expected_impact']}")
+            if rec.get("risk_note"):
+                print(f"          risk: {rec['risk_note']}")
+            if rec.get("blocked_by"):
+                print(f"          blocked_by: {'; '.join(rec['blocked_by'])}")
     print()
+
+
+def _build_run_config(
+    insight_rows: list[dict[str, Any]],
+    *,
+    dump_dir: str | None = None,
+) -> dict[str, Any]:
+    """Provenance block persisted with every result so two runs of the same
+    task can be diffed on their actual inputs: which insight rows were
+    injected (and under which filter), which model/temperature ran, and —
+    for dump runs — which dump directory fed the graph."""
+    from agent.inference_graph import _DEFAULT_LLM_MODEL
+
+    return {
+        "dump_dir": dump_dir,
+        "insight_filter": "lifecycle_status='active' (mimics prod active_insights)",
+        "injected_insights": [
+            {
+                "type": r.get("type"),
+                "lifecycle_status": r.get("lifecycle_status"),
+                "visibility": r.get("visibility"),
+            }
+            for r in insight_rows
+        ],
+        "llm_model": os.getenv("LLM_MODEL", _DEFAULT_LLM_MODEL),
+        "llm_temperature": float(os.getenv("LLM_TEMPERATURE", "0")),
+    }
 
 
 def _save_run_result(
@@ -764,6 +967,7 @@ def _save_run_result(
     source: str,
     output_dir: Path,
     trace: dict[str, Any] | None = None,
+    run_config: dict[str, Any] | None = None,
 ) -> Path | None:
     if plan is None:
         return None
@@ -781,6 +985,7 @@ def _save_run_result(
         "source": source,
         "task_id": plan.task_id,
         "task_name": (row or {}).get("task_name"),
+        "run_config": run_config,
         "input": row,
         "plan": plan.model_dump(),
         "run_metrics": run_metrics.model_dump() if run_metrics else None,
@@ -817,7 +1022,7 @@ def _append_batch_summary_row(
         "heap_headroom": m.memory_headroom if m else None,
         "gc_pressure": m.gc_pressure if m else None,
         "spill_mb": ((row or {}).get("task__disk_bytes_spilled") or 0) / 1024 / 1024 if row else None,
-        "duration_s": ((row or {}).get("task__duration") or 0) / 1000 if row else None,
+        "duration_s": (row or {}).get("task__duration") if row else None,
         "gate_blocked": bool((trace or {}).get("gate_blocked")),
         "recommendations": len(plan.recommendations) if plan else 0,
         "blocked": len(plan.blocked_recommendations) if plan else 0,
@@ -843,12 +1048,14 @@ def _persist_result(
     summary_csv: Path | None,
     save_results: bool,
     trace: dict[str, Any] | None = None,
+    run_config: dict[str, Any] | None = None,
 ) -> Path | None:
     if not save_results:
         return None
 
     path = _save_run_result(
         plan, row=row, source=source, output_dir=output_dir, trace=trace,
+        run_config=run_config,
     )
     if path is None:
         return None
@@ -892,7 +1099,7 @@ def _print_plan(plan, as_json: bool, row: dict | None = None) -> None:
 
     if m:
         spill_mb = ((row or {}).get("task__disk_bytes_spilled") or 0) / 1024 / 1024
-        duration_ms = (row or {}).get("task__duration")
+        duration_s = (row or {}).get("task__duration")
         print(f"  Run metrics:")
         print(f"    idle_ratio       {_fmt(m.idle_ratio, pct=True):<10}  "
               f"vcore_util   {_fmt(m.vcore_utilization, pct=True)}")
@@ -900,7 +1107,7 @@ def _print_plan(plan, as_json: bool, row: dict | None = None) -> None:
               f"gc_pressure  {_fmt(m.gc_pressure, pct=True)}")
         print(f"    skew_ratio       {_fmt(m.skew_ratio, pct=True):<10}  "
               f"spill_MB     {_fmt(spill_mb, decimals=1)}")
-        print(f"    duration_ms      {_fmt(duration_ms, decimals=0):<10}  "
+        print(f"    duration_s       {_fmt(duration_s, decimals=0):<10}  "
               f"retried_waste {_fmt(m.retried_task_waste, pct=True)}")
 
     if cost_profile and cost_profile.cost_per_run_usd is not None:
@@ -970,7 +1177,7 @@ def _print_batch_table(results: list[tuple[dict, object]]) -> None:
             _fmt(m.memory_headroom if m else None, pct=True)[:7],
             _fmt(m.gc_pressure if m else None, pct=True)[:6],
             _fmt((row.get("task__disk_bytes_spilled") or 0)/1024/1024, decimals=1)[:9],
-            _fmt((row.get("task__duration") or 0)/1000, decimals=1)[:10],
+            _fmt(row.get("task__duration") or 0, decimals=1)[:10],
             str(len(plan.recommendations)),
             str(len(plan.blocked_recommendations)),
             (plan.summary or "")[:50],
@@ -992,7 +1199,6 @@ async def _run_on_row(
     summary_csv: Path | None = None,
     source: str = "athena",
     historical_runs: list[dict] | None = None,
-    include_hidden_insights: bool = False,
     fetch_run_context: bool = True,
 ) -> tuple[dict, object]:
     from agent.inference_graph import run_analysis
@@ -1002,18 +1208,27 @@ async def _run_on_row(
     task_id = int(row.get("task_id", 0))
     insight_rows = _fetch_athena_insights(
         row.get("app_id"), str(row.get("task_name")),
-        include_hidden=include_hidden_insights,
     )
     print(
         f"  Insights table: {len(insight_rows)} row(s) for "
-        f"({row.get('task_name')}, app_id={row.get('app_id')})"
-        + (" [including hidden/stale]" if include_hidden_insights else ""),
+        f"({row.get('task_name')}, app_id={row.get('app_id')})",
         file=sys.stderr, flush=True,
     )
 
-    run_context = _fetch_athena_run_context(task_id) if fetch_run_context else None
+    sandbox_tables = (
+        _fetch_athena_sandbox_tables(task_id, row, insight_rows)
+        if fetch_run_context
+        else None
+    )
+    # TaskProfile.aqe_enabled_param reads this off the enrichment row (a
+    # submitted-conf fact, not derivable from task_enrichments columns) —
+    # mirrors run_from_dump.py's read_spark_parameters()/_param_value() path.
+    if row.get("task__aqe_enabled__param") is None:
+        row["task__aqe_enabled__param"] = _spark_param_value(
+            sandbox_tables, "spark.sql.adaptive.enabled"
+        )
 
-    set_row_override(row, historical_runs, run_context)
+    set_row_override(row, historical_runs, sandbox_tables)
     set_insights_override(insight_rows)
     try:
         plan, trace = await run_analysis(
@@ -1031,6 +1246,7 @@ async def _run_on_row(
         summary_csv=summary_csv,
         save_results=save_results,
         trace=trace,
+        run_config=_build_run_config(insight_rows),
     )
     _print_plan(plan, as_json, row)
     if not as_json:
@@ -1046,7 +1262,6 @@ async def _run_athena_batch(
     *,
     show_progress: bool = True,
     save_results: bool = True,
-    include_hidden_insights: bool = False,
     fetch_run_context: bool = True,
 ) -> None:
     print(f"\nFetching from Athena ({_ATHENA_DB}.{_ATHENA_TABLE})…")
@@ -1108,7 +1323,6 @@ async def _run_athena_batch(
                 summary_csv=summary_csv,
                 source="athena",
                 historical_runs=history,
-                include_hidden_insights=include_hidden_insights,
                 fetch_run_context=fetch_run_context,
             )
         except Exception as exc:
@@ -1157,13 +1371,11 @@ def main() -> None:
                       help="Fetch N random rows from Athena and run the agent on each")
 
     parser.add_argument("--json",    action="store_true", help="Output raw JSON per task")
-    parser.add_argument("--include-hidden-insights", action="store_true",
-                        help="Feed hidden/stale insights (e.g. task_profile) to the agent too — "
-                             "by default only active+visible ones are used, matching production")
     parser.add_argument("--skip-run-context", action="store_true",
-                        help="Do not query Athena for the raw per-run context tables "
-                             "(params/events/metrics/tests/transformations) — the "
-                             "get_run_data tool then returns {}")
+                        help="Do not query Athena for the raw per-run sandbox tables "
+                             "(params/events/metrics/tests/tfs/time_series_metrics) — "
+                             "run_deterministic_review/estimate_change_saving/"
+                             "get_advanced_config_catalog then return {}")
     parser.add_argument("--quiet",   action="store_true", help="Suppress per-node progress output")
     parser.add_argument("--no-save", action="store_true", help="Do not write results to disk")
     parser.add_argument("--verbose", action="store_true", help="Show full agent log output")
@@ -1182,7 +1394,6 @@ def main() -> None:
         sequential=True,
         show_progress=show_progress,
         save_results=save_results,
-        include_hidden_insights=args.include_hidden_insights,
         fetch_run_context=not args.skip_run_context,
     ))
 

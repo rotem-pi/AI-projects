@@ -1,0 +1,54 @@
+[
+  {
+    "insight_id": 470799,
+    "task_name": "landing_job",
+    "type": "orphaned_node_resources",
+    "impact_cost": 0.0,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "node_cores": 2,
+      "node_mem_gb": 8.0,
+      "worker_type": "m7gd.large",
+      "task_metrics": null,
+      "cnt_task_runs": 7,
+      "executor_cores": 2,
+      "time_span_days": 4,
+      "executor_mem_gb": 2.8330078125,
+      "annual_orphan_gb_s": 787400479.205502,
+      "cluster_max_workers": null,
+      "cluster_min_workers": null,
+      "executors_per_worker": 1,
+      "annual_orphan_vcore_s": 0
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 464074,
+    "task_name": "landing_job",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "r6gd.xlarge",
+      "worker_types": [
+        "m7gd.large"
+      ],
+      "cnt_task_runs": 5,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 16,
+      "cluster_workers": 6,
+      "shuffle_partitions": "200",
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 5
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "hidden"
+  }
+]

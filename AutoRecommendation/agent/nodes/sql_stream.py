@@ -6,8 +6,9 @@ objects straight from the row dicts, then extracts engine recommendations
 with the same extract_recommendations dispatcher.
 
 Here main.py fetches the task's rows from the Athena `insights` table
-(latest snapshot, active+visible by default — the same filters insights.sql
-applies) and injects them via set_insights_override().  Each Athena row is
+(latest snapshot, lifecycle_status='active' by default — the same filter
+the production agent's active_insights query applies; visibility is NOT
+filtered) and injects them via set_insights_override().  Each Athena row is
 mapped to the insights.sql output shape first — usd_cost computed the way
 CALCULATE_USD_COST does, insights_payload parsed to a dict, rows ordered by
 usd_cost DESC — so SqlInsight(**row) sees exactly what production sees.
@@ -19,14 +20,13 @@ import json
 import logging
 import os
 
-from app.brain.insights.agent.enums import InsightSource, RecommendationAction
-from app.brain.insights.agent.models import DbRow, Recommendation, SqlInsight
+from app.brain.insights.agent.enums import InsightSource, InsightType, RecommendationAction
+from app.brain.insights.agent.models import Recommendation, SqlInsight
 from app.brain.insights.agent.state import AgentState
 from app.brain.insights.recommendations import extract_recommendations
-from app.brain.insights.recommendations.protocol import (
+from app.brain.insights.recommendations.models import (
     Recommendation as TuningRecommendation,
 )
-from app.brain.insights.tuning.task_profile import compute_task_profile
 
 from agent.cost_utils import DEFAULT_MEMORY_PRICE, DEFAULT_VCORE_PRICE
 
@@ -116,7 +116,7 @@ def _build_recommendation(
     rec: TuningRecommendation, insight: SqlInsight
 ) -> Recommendation:
     return Recommendation(
-        config_key=rec.config_key,
+        config_key=rec.config_key or "",
         action=RecommendationAction(rec.action.value),
         suggested_value=rec.suggested_value,
         current_value=rec.current_value,
@@ -125,7 +125,7 @@ def _build_recommendation(
         confidence=1.0,
         priority=0,
         rationale=rec.reason or "",
-        insight_type=insight.type,
+        insight_type=InsightType(insight.type),
         insight_id=insight.id,
     )
 
@@ -140,9 +140,6 @@ def run_sql_stream(state: AgentState) -> dict:
         )
         return {"sql_insights": [], "sql_recommendations": []}
 
-    enrichment: DbRow | None = state.get("latest_enrichment")
-    task_profile = compute_task_profile(enrichment) if enrichment else None
-
     mapped = [_to_insights_sql_row(row) for row in _INSIGHTS_OVERRIDE]
     # insights.sql orders by usd_cost DESC with NULLs last.
     mapped.sort(key=lambda r: (r["usd_cost"] is None, -(r["usd_cost"] or 0.0)))
@@ -153,7 +150,6 @@ def run_sql_stream(state: AgentState) -> dict:
         raw_recs = extract_recommendations(
             insight_type=insight.type,
             payload=insight.insights_payload or {},
-            task_profile=task_profile,
         )
         recommendations.extend(_build_recommendation(raw, insight) for raw in raw_recs)
 

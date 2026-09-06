@@ -1,0 +1,35 @@
+key,value
+tf_id,507658
+agent_tf_id,0
+task_id,18609
+env,default
+task_name,cr-ml-b4-agg-app
+app_id,4
+app_name,cr-ml-b4-agg-app
+app_pit,2026-09-06T07:01:46
+output_name,
+tf_type,head
+status,COMPLETED
+start_time,2026-09-06T07:03:57.600000+00:00
+end_time,2026-09-06T07:28:23.332000+00:00
+duration,1465.732
+cnt_test_runs,
+cnt_alerts,
+cnt_breaks,
+cnt_metrics,
+tf_io_type,internal
+error,
+description,first at B4FeedAggApp.scala:233 (GlobalLimit)
+query_str,"Aggregate([approx_count_distinct(pre_agg_finger_print) AS `approx_count_distinct(pre_agg_finger_print)`])
+:- Project([concat(account, ip) AS pre_agg_finger_print])
+   :- InMemoryRelation(([account, ip, ts, b4_url_regex_6000_count, b4_media_extension_count, b4_legacy_aux1_top1500_vuln_files_distinct_count, b4_wp_scan_tls_count, b4_crawler_regex_count, b4_url_words_distinct_count, b4_wp_backup_files_distinct_count, b4_end_path_distinct_count, b4_base_path_distinct_count, b4_windows_ua_distinct_count, b4_url_regex_6001_count, b4_tcp_fingerprinting_distinct_count, b4_url_regex_6004_count, b4_social_media_referer_requests_distinct_count, b4_ecommerce_path_distinct_count, b4_url_regex_4002_count, b4_wp_plugins_distinct_count, b4_search_engine_referer_requests_distinct_count, b4_ua_distinct_count, b4_url_regex_2002_count, b4_scanner_path_distinct_count, b4_cookie_distinct_count, b4_ua_http_existence, b4_document_extension_count, b4_url_regex_6003_count, b4_query_params_distinct_count, b4_hosts_set, b4_url_regex_3000015_count, b4_failed_response_ratio, b4_wp_scan_path_distinct_count, b4_scraping_tools_existence, b4_query_values_distinct_count, b4_executable_extension_count, b4_total_requests, b4_wp_count, b4_tls_fingerprinting_distinct_count, b4_wp_themes_distinct_count, b4_authentication_paths_distinct, b4_host_distinct_count, b4_host_requests_ratio, b4_ua_tls_ratio, b4_ua_length_median], $VAR_1$))
+         :- AdaptiveSparkPlan($VAR_2$)
+               :- ShuffleQueryStage(3)
+"
+query_vars,"{""$VAR_1$"":""StorageLevel(disk, memory, deserialized, 1 replicas)"",""$VAR_2$"":""isFinalPlan=true""}"
+labels,
+prev_query,
+prev_query_vars,
+inputs,"[""csi_prod_centralus_ingest.gamora-behavioral4-3""]"
+inputs_exist,[false]
+output_exists,false

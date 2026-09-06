@@ -1,0 +1,159 @@
+[
+  {
+    "insight_id": 563321,
+    "task_name": "PUB_REDUCED_DIMENSIONS",
+    "type": "executors_long_spill_time",
+    "impact_cost": 2012221100.48461,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Disk bytes spilled",
+          "metric_ids": [
+            2317169
+          ]
+        },
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            2317178,
+            2317207,
+            2317191
+          ]
+        }
+      ],
+      "task_profile": {
+        "task_type": "spark",
+        "tenant_id": 63,
+        "cnt_task_runs": 207,
+        "task_sub_type": null,
+        "time_span_days": 9,
+        "shuffle_partitions": "2500",
+        "cnt_failed_task_runs": 0,
+        "cnt_completed_task_runs": 199
+      },
+      "avg_spill_pct": 15.065562717465458,
+      "cnt_task_runs": 206,
+      "time_span_days": 9,
+      "avg_executor_max_memory_pct": 82.28282287702392,
+      "avg_executor_max_heap_memory_pct": 77.44057808053292,
+      "avg_executor_max_off_heap_memory_pct": 101.65180206298828
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530276,
+    "task_name": "PUB_REDUCED_DIMENSIONS",
+    "type": "over_provisioned_driver_cores",
+    "impact_cost": 56082145.5877658,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver cores",
+          "metric_ids": [
+            2317195,
+            2317213
+          ]
+        }
+      ],
+      "cnt_task_runs": 192,
+      "driver_memory": 43,
+      "cloud_provider": null,
+      "time_span_days": 9,
+      "max_cpu_utilization": 0.0575893536121673,
+      "current_driver_cores": 5,
+      "has_dedicated_cluster": false,
+      "suggested_driver_cores": 1
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530303,
+    "task_name": "PUB_REDUCED_DIMENSIONS",
+    "type": "over_provisioned_driver_heap_memory",
+    "impact_cost": 392575019.114361,
+    "impact_unit": "GB",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Driver heap memory usage",
+          "metric_ids": [
+            2317180,
+            2317211,
+            2317221
+          ]
+        }
+      ],
+      "cnt_task_runs": 192,
+      "time_span_days": 9,
+      "avg_utilization": 10,
+      "suggested_value": 10,
+      "watermark_value": 7.49506739526987,
+      "current_allocated": 38
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 563333,
+    "task_name": "PUB_REDUCED_DIMENSIONS",
+    "type": "over_provisioned_executors",
+    "impact_cost": 8956308155.9691,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "is_dynamic": true,
+      "task_metrics": [
+        {
+          "title": "Executors vCores usage",
+          "metric_ids": [
+            2317186,
+            2317225
+          ]
+        }
+      ],
+      "cnt_task_runs": 100,
+      "time_span_days": 5,
+      "avg_utilization": 40,
+      "spark_executor_cores": 5,
+      "max_executors_suggestion": 245,
+      "min_executors_suggestion": 104,
+      "avg_task_duration_minutes": 30,
+      "estimated_utilization_pct": 58,
+      "dynamic_max_executors_conf": 500,
+      "dynamic_min_executors_conf": 200,
+      "has_executor_cores_changed": false,
+      "estimated_cost_reduction_pct": 31,
+      "estimated_duration_impact_pct": 15,
+      "estimated_duration_impact_minutes": 4
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 525933,
+    "task_name": "PUB_REDUCED_DIMENSIONS",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 63,
+      "cnt_task_runs": 207,
+      "task_sub_type": null,
+      "time_span_days": 9,
+      "shuffle_partitions": "2500",
+      "cnt_failed_task_runs": 0,
+      "cnt_completed_task_runs": 199
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

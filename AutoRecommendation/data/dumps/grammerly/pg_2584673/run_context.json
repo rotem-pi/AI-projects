@@ -1,0 +1,2159 @@
+{
+  "task_run": {
+    "task_id": 2584673,
+    "task_name": "landing_job",
+    "task_type": "spark",
+    "task_sub_type": "Databricks",
+    "status": "COMPLETED",
+    "error": null,
+    "start_time": "2026-07-02T06:41:00.322000+00:00",
+    "end_time": "2026-07-02T18:41:04.911000+00:00",
+    "app_pit": "2026-07-02T06:40:55",
+    "is_retry": false,
+    "parent_task_id": 2584669,
+    "user_task_id": "Databricks Shell",
+    "pipeline_run_id": "11551-2026-07-02 06:40:55",
+    "app_name": "raw.ingestion_front_end.performance_landing",
+    "env_name": "prod",
+    "pipeline_status": "COMPLETED",
+    "pipeline_sla_value": 43205.733614,
+    "pipeline_duration_value": 43204.589,
+    "pipeline_task_runs": 1,
+    "pipeline_task_retries": 0
+  },
+  "spark_parameters": [
+    {
+      "key": "definity.agent.version",
+      "value": "0.87.2"
+    },
+    {
+      "key": "definity.server.version",
+      "value": "0.76.0"
+    },
+    {
+      "key": "fs.s3a.ifNoneMatch.star.enabled",
+      "value": "true"
+    },
+    {
+      "key": "java.version",
+      "value": "1.8.0_482"
+    },
+    {
+      "key": "spark.app.id",
+      "value": "app-20260701183308-0000"
+    },
+    {
+      "key": "spark.app.startTime",
+      "value": "1782930755197"
+    },
+    {
+      "key": "spark.databricks.adaptive.repartitioning.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.autotune.maintenance.autoClustering.preserveHierarchicalColumnsAfterReplace",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.autotune.maintenance.liquidAuto.scanMetric.minTableSizeMB",
+      "value": "200"
+    },
+    {
+      "key": "spark.databricks.autotune.maintenance.ucPoNonAuto.scanMetric.sampleRate",
+      "value": "0.05"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.SEC11193UncheckedInsertOverwriteDirPlans",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.SEC11225UncheckedCachePlans",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.hivesimpleudf.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.javamethod.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.other.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.pythonudf.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.pythonudtf.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.reflect.enforce",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.scalaudf.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.behaviorChange.ucIsolationRule.scripttransformation.enforce",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.cloudFiles.adjustBackfillBeginMs",
+      "value": "1d"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterAllTags",
+      "value": "[{\"key\":\"Environment\",\"value\":\"prod\"},{\"key\":\"TechOwner\",\"value\":\"data\"},{\"key\":\"Division\",\"value\":\"DataPlatform\"},{\"key\":\"DatabricksResourceName\",\"value\":\"ingestion-front-end\"},{\"key\":\"Repository\",\"value\":\"data/databricks/terraform/services/ingestion-front-end\"},{\"key\":\"Product\",\"value\":\"Databricks\"},{\"key\":\"DatabricksResourceType\",\"value\":\"service\"},{\"key\":\"Vendor\",\"value\":\"Databricks\"},{\"key\":\"Creator\",\"value\":\"7662850e-d8f6-4d7f-ab83-c010f15e3f34\"},{\"key\":\"ClusterName\",\"value\":\"job-859930314036640-run-663279658671149-landing_job_cluster\"},{\"key\":\"ClusterId\",\"value\":\"0701-182951-34ihnleo\"},{\"key\":\"JobId\",\"value\":\"859930314036640\"},{\"key\":\"RunName\",\"value\":\"raw.ingestion_front_end.performance_landing\"},{\"key\":\"Name\",\"value\":\"workerenv-4547565018768595-2b650db3-c8a5-4104-98c3-95e23b193a50-worker\"}]"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterId",
+      "value": "0701-182951-34ihnleo"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.clusterName",
+      "value": "job-859930314036640-run-663279658671149-landing_job_cluster"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverContainerId",
+      "value": "d7625f39c5a546f087a9cb3676321884"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverContainerPrivateIp",
+      "value": "10.84.25.195"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverInstanceId",
+      "value": "i-0f1003e1151eeb1dd"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.driverInstancePrivateIp",
+      "value": "10.84.28.208"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.sparkImageLabel",
+      "value": "release__15.4.x-snapshot-aarch64-scala2.12__databricks__15.4.41__48c70ab__82f21dc__jenkins__3f26a7a__format-3"
+    },
+    {
+      "key": "spark.databricks.clusterUsageTags.workloadType",
+      "value": "AUTOMATED"
+    },
+    {
+      "key": "spark.databricks.compliance.workspaceRequiresFipsValidatedEncryptionModules",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.connector.snowflakeStrategyAllowEmptyProjection",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.alwaysPropagateUCTableId",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.catalog.update.uc.etagValidation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.checkConstraints.validation.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.delta.commitService.moveOutExternalTablesCommit",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.commitService.moveOutStatsOnLoad",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.conflictDetection.skipConcurrentAppendCheckForInPlaceFileMetadataUpdates",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.dropTable.ShallowCloneProtection.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.dr.tableChangeDetection.ucUpdate.useDrApi",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.dr.uc.etagValidation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.enhancedS3AFileSystem.nativePutIfAbsent.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.generatedColumn.maskValidation.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.delta.generatedColumn.validateOnWrite.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.delta.logStore.cacheUpload.contextPropagatingExecutor.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.logStore.s3.writeCommit.nativePutIfAbsent.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.checkpointPolicy.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.columnMapping.mode.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.enableDeletionVectors.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.managed.delta.autoEnablement.enableRowTracking.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.prepareDeltaScan.dedupRelationsByReference",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.deltaSharing.o2dDirectoryBasedAccess.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.snapshotHint.useOptimizedGetFileStatus",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.sqlSnapshotReconstruction.removeRepartition",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.table.uc.etagValidation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.uniform.readIcebergEnabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.delta.vacuum.enforceTimeTravelWithinDeletedFileRetentionDuration",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.vacuum.retentionWindowIgnore.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.delta.writeWithDroppedNullTypeWithSchemaEvolutionThrow",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.cleanUpSparkSessionsOnUCSharedClusters",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.driver.enableUseraddLockRetry",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.notebookGrpcSqlMagicApiEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.notebookGrpcWidgetsApiEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.driver.replPool.autoMode.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.dynamicConf.demoFlag10",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.dynamicConf.demoFlag4",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.fips.accpJvmEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.hive.metastore.client.ignoreEmptyStringLocation",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.instanceId",
+      "value": "i-0f1003e1151eeb1dd"
+    },
+    {
+      "key": "spark.databricks.io.cache.autocompression.instance.overrides",
+      "value": "{\"r5dn?\\\\..*\":1.1,\"m5dn?\\\\..*\":1.1,\"i3(en)?\\\\..*\":4,\"Standard_E\\\\d+_v3\":1.1}"
+    },
+    {
+      "key": "spark.databricks.io.cache.enabled.instance.overrides",
+      "value": "{\"fake\":false,\"Standard_D\\\\d+ds_v7\":true,\"Standard_E\\\\d+(i)?ds_v7\":true,\"r8id\\\\..*\":true,\"m8id\\\\..*\":true,\"Standard_D\\\\d+ads_v7\":true,\"Standard_E\\\\d+ads_v7\":true,\"Standard_F\\\\d+a(m)?ds_v7\":true,\"Standard_L\\\\d+(a(o)?)?s_v4\":true,\"c4d?-(standard|highmem)-\\\\d+-lssd\":true}"
+    },
+    {
+      "key": "spark.databricks.io.cache.parquet.crc",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.io.parquet.writeParquetFormatVersion.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.io.parquet.writeSparkImageLabel.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.jdbc.useDialectInSavePartition",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.collectOnExitEnabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.outputDirectory",
+      "value": "/databricks/driver/logs/jfr"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.outputDirectorySizeBytes",
+      "value": "1073741824"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.rollingInterval",
+      "value": "600"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.settingsProfile",
+      "value": "/databricks/jfr_configs/jdk17_default_oos_lite.jfc"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.sizeLimitBytesPerCollection",
+      "value": "1073741824"
+    },
+    {
+      "key": "spark.databricks.jfr.background.driver.uploadDestination",
+      "value": "/databricks/driver/logs/jfr-dumps"
+    },
+    {
+      "key": "spark.databricks.jfr.streaming.stacktraceDepth",
+      "value": "32"
+    },
+    {
+      "key": "spark.databricks.logging.usage.migration.dualLogPercentProbabilitiesIngestion",
+      "value": "{\"controlPlane\":{},\"dataPlane\":{\"w1Core\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w2Query\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w3Driver\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w4Env\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w5Fuse\":{\"lP\":0,\"uP\":100,\"lC\":0},\"w13FuseIO\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w6ML\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w7Repl\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w8SQL\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w9Safe\":{\"lP\":1,\"uP\":100,\"lC\":0},\"w10Storage\":{\"lP\":1,\"uP\":100,\"lC\":0}}}"
+    },
+    {
+      "key": "spark.databricks.logging.usage.migration.dualLogPercentProbabilitiesSparkCore",
+      "value": "{\"driverMetastoreEvent\":{\"lC\":0,\"lP\":100,\"uP\":100},\"metastoreUsage\":{\"lC\":100,\"lP\":100,\"uP\":0},\"mlMlAlgorithm\":{\"lC\":100,\"lP\":100,\"uP\":0},\"pandasOnSparkImported\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkConnectOperationDuration\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkJobEnd\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkOperationDuration\":{\"lC\":100,\"lP\":100,\"uP\":0},\"sparkStageCompleted\":{\"lC\":100,\"lP\":100,\"uP\":0},\"tahoeEvent\":{\"lC\":0,\"lP\":10,\"uP\":100}}"
+    },
+    {
+      "key": "spark.databricks.optimizer.cumulativeMaxCNFNodeCount",
+      "value": "200"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.alwaysLogFirstNCalls",
+      "value": "1"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.extension.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.internalCallSitePrefixes",
+      "value": "/databricks/python_shell/dbruntime,/databricks/python_shell/lib,/databricks/python_shell/scripts,/databricks/spark/python"
+    },
+    {
+      "key": "spark.databricks.pyspark.instrumentation.samplingRateFraction",
+      "value": "0.0"
+    },
+    {
+      "key": "spark.databricks.pyspark.udt.allowUnpickle",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.pyspark.udt.importTypeCheck",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.pyspark.udt.log",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.enableClientShutdown",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.ES1890727",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.ES1899676_null_literal_fix.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.retryChangedSession",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.retryClosedSession",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.retryRstStreamClosedStream",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.remoteFiltering.useSessionIdInProto",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.rewriteViewCatalogInUcOnlyMode",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.additionalCentralizableKeys",
+      "value": "spark.databricks.clusterUsageTags.driverInstancePrivateIp,timezone,use_cached_result"
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.internalClassPrefixes",
+      "value": "com.databricks.,org.apache.spark.,org.mlflow.spark.,py4j."
+    },
+    {
+      "key": "spark.databricks.runtimeConfigAccessLogging.scala.additionalFramesToSkip",
+      "value": "org.apache.spark.sql.SQLContext,org.apache.spark.sql.connect.service.SparkConnectConfigHandler$RuntimeConfigWrapper,com.databricks.spark.sqlgateway.history.RuntimeConfGetter,com.databricks.pipelines.graph.PipelineConfEntry,com.databricks.pipelines.util.FeatureFlagUtils$:getCurrentValue"
+    },
+    {
+      "key": "spark.databricks.s3.createAtomicIfAbsent.bypassCommitService.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.scheduler.failureRateExclusion.minRateFloor",
+      "value": "0.2"
+    },
+    {
+      "key": "spark.databricks.scheduler.failureRateExclusion.minSample",
+      "value": "60"
+    },
+    {
+      "key": "spark.databricks.sparkContextId",
+      "value": "5686691502700435011"
+    },
+    {
+      "key": "spark.databricks.sql.assigned.metastore.id",
+      "value": "43862f49-20d3-4f58-bab4-476789d5de25"
+    },
+    {
+      "key": "spark.databricks.sql.functions.readFiles.inferredPartitionTypes.mode",
+      "value": "inferType"
+    },
+    {
+      "key": "spark.databricks.sql.materializedViewWithMesa",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.optimizer.lateralJoinPreserveOuterSemantics",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.photon.es1663535.scanFilterRequireAttributes",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.blockLiteralParseableColumnNameAsPolicyParameter.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.blockQueriesWithAmbiguousLiteralParseablePolicyParameters.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.generatedColumnValidation.enabled",
+      "value": "ASSERT"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.regenerateCteRefOutput.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.syncCteRefOutputTypes.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.rowColumnAccess.syncMaskOutputTypes.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.sql.SC-214978",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.currentUser.identityMismatch.log",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.fabricCrawler.enabled",
+      "value": null
+    },
+    {
+      "key": "spark.databricks.unityCatalog.forwardEtagInUpdate",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.lakehouseFederation.preserveUCComments.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.mcsc.sparkEnvFallback.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.cluster.eventsCollector",
+      "value": "MetricEmittingSAMEventsCollector"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.cluster.eventsCollector.config",
+      "value": "{}"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.crossUserMerge.log",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.samRegistry.crossUserMerge.skip",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.SEC11193DescendIntoChildPlans",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.skipForeignMetadataSyncOnListTablesWithSchemaPattern",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.skipProvisioningStateFailedCheckForRefreshCommands",
+      "value": "true"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.validateSQLUDFDependencies",
+      "value": "false"
+    },
+    {
+      "key": "spark.databricks.unityCatalog.volumes.fuse.server.sslTruststorePath",
+      "value": "/databricks/keys/jetty_ssl_truststore.pem"
+    },
+    {
+      "key": "spark.definity.agent.task.id",
+      "value": "1716975511864326998"
+    },
+    {
+      "key": "spark.definity.databricks.job.jobRunAttemptNum",
+      "value": "0"
+    },
+    {
+      "key": "spark.definity.databricks.job.jobRunId",
+      "value": "663279658671149"
+    },
+    {
+      "key": "spark.definity.databricks.job.jobTriggerType",
+      "value": "manual"
+    },
+    {
+      "key": "spark.definity.session.source",
+      "value": "session_rotation"
+    },
+    {
+      "key": "spark.delta.sharing.network.asyncQueryTimeout",
+      "value": "1800000"
+    },
+    {
+      "key": "spark.delta.sharing.network.useAsyncQuery",
+      "value": "true"
+    },
+    {
+      "key": "spark.driver.host",
+      "value": "10.84.25.195"
+    },
+    {
+      "key": "spark.driver.port",
+      "value": "35723"
+    },
+    {
+      "key": "spark.master",
+      "value": "spark://10.84.25.195:7077"
+    },
+    {
+      "key": "spark.repl.class.outputDir",
+      "value": "/local_disk0/tmp/repl/spark-5686691502700435011-55f24704-6b59-45a4-8915-ca6c991b0233"
+    },
+    {
+      "key": "spark.repl.class.uri",
+      "value": "spark://10.84.25.195:35723/classes"
+    },
+    {
+      "key": "spark.r.sql.derby.temp.dir",
+      "value": "/tmp/Rtmp7qLnXN"
+    },
+    {
+      "key": "spark.sql.legacy.useLegacyXMLParser.migrationValidation.enabled",
+      "value": "false"
+    }
+  ],
+  "events": [
+    {
+      "event_id": 41778,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51180",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51180, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974460312,
+      "end_time_ms": 1782974463647,
+      "payload": "{\"id\": 51180, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 438, \"internal.metrics.resultSize\": 1260, \"internal.metrics.executorCpuTime\": 1466186913, \"internal.metrics.executorRunTime\": 2600, \"internal.metrics.input.recordsRead\": 129650, \"internal.metrics.executorDeserializeTime\": 4, \"internal.metrics.executorDeserializeCpuTime\": 3792649}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [2624.0, 2624.0, 2624.0, 2624.0, 2624.0], \"jvmGcTime\": [438.0, 438.0, 438.0, 438.0, 438.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [20.0, 20.0, 20.0, 20.0, 20.0], \"executorRunTime\": [2600.0, 2600.0, 2600.0, 2600.0, 2600.0], \"executorDeserializeTime\": [4.0, 4.0, 4.0, 4.0, 4.0], \"inputMetrics_recordsRead\": [129650.0, 129650.0, 129650.0, 129650.0, 129650.0]}}"
+    },
+    {
+      "event_id": 41780,
+      "category": "internal",
+      "sub_category": "executors_info",
+      "name": "Executors",
+      "description": "",
+      "start_time_ms": 1782974461000,
+      "end_time_ms": 1783017661036,
+      "payload": "{\"0\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-0466d610ff73ec940\", \"lifecycle\": \"on-demand\", \"totalCores\": 2, \"machineType\": \"m7gd.large\", \"totalMemoryBytes\": 8149561344}, \"startTime\": \"2026\u201107\u201101 18:33:23.415\"}, \"1\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-0f809875f8c8d96f8\", \"lifecycle\": \"on-demand\", \"totalCores\": 2, \"machineType\": \"m7gd.large\", \"totalMemoryBytes\": 8149557248}, \"startTime\": \"2026\u201107\u201101 18:33:23.491\"}, \"2\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-0617f582f1c9fe098\", \"lifecycle\": \"on-demand\", \"totalCores\": 2, \"machineType\": \"m7gd.large\", \"totalMemoryBytes\": 8149561344}, \"startTime\": \"2026\u201107\u201101 18:33:23.560\"}, \"3\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-07b007787664afbe6\", \"lifecycle\": \"on-demand\", \"totalCores\": 2, \"machineType\": \"m7gd.large\", \"totalMemoryBytes\": 8149553152}, \"startTime\": \"2026\u201107\u201101 18:33:25.263\"}, \"4\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-0cdd27d6d0fb31418\", \"lifecycle\": \"on-demand\", \"totalCores\": 2, \"machineType\": \"m7gd.large\", \"totalMemoryBytes\": 8149553152}, \"startTime\": \"2026\u201107\u201101 18:33:22.400\"}, \"5\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-011cf39afeeaf74eb\", \"lifecycle\": \"on-demand\", \"totalCores\": 2, \"machineType\": \"m7gd.large\", \"totalMemoryBytes\": 8149557248}, \"startTime\": \"2026\u201107\u201101 18:33:19.640\"}, \"driver\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"hostInfo\": {\"hostId\": \"i-0f1003e1151eeb1dd\", \"lifecycle\": \"on-demand\", \"totalCores\": 4, \"machineType\": \"r6gd.xlarge\", \"totalMemoryBytes\": 33229426688}, \"startTime\": \"2026\u201107\u201102 06:41:01.000\"}}"
+    },
+    {
+      "event_id": 41779,
+      "category": "internal",
+      "sub_category": "cluster_info",
+      "name": "Databricks",
+      "description": "",
+      "start_time_ms": 1782974461003,
+      "end_time_ms": 1782974461003,
+      "payload": "{\"info\": {\"driverNodeType\": \"r6gd.xlarge\", \"workerNodeType\": \"m7gd.large\", \"clusterAvailability\": \"ON_DEMAND\", \"clusterTargetWorkers\": \"6\"}}"
+    },
+    {
+      "event_id": 41781,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51181",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51181, jobId=41755, numTasks=1, partitions=1, rootTfId=10215, shuffleOutput=HashPartitioning(__dataset_name), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10216",
+      "start_time_ms": 1782974463678,
+      "end_time_ms": 1782974463826,
+      "payload": "{\"id\": 51181, \"tfId\": 10216, \"jobId\": 41755, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 2437, \"internal.metrics.executorCpuTime\": 119112254, \"internal.metrics.executorRunTime\": 124, \"internal.metrics.input.bytesRead\": 37492752, \"internal.metrics.input.recordsRead\": 39, \"internal.metrics.peakExecutionMemory\": 33816576, \"internal.metrics.executorDeserializeTime\": 4, \"internal.metrics.shuffle.write.writeTime\": 9549707, \"internal.metrics.executorDeserializeCpuTime\": 4425396, \"internal.metrics.shuffle.write.bytesWritten\": 76, \"internal.metrics.shuffle.write.recordsWritten\": 1}, \"numTasks\": 1, \"rootTfId\": 10215, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"shuffleOutput\": \"HashPartitioning(__dataset_name)\", \"taskMetricsDistributions\": {\"duration\": [143.0, 143.0, 143.0, 143.0, 143.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [15.0, 15.0, 15.0, 15.0, 15.0], \"executorRunTime\": [124.0, 124.0, 124.0, 124.0, 124.0], \"peakExecutionMemory\": [33816576.0, 33816576.0, 33816576.0, 33816576.0, 33816576.0], \"inputMetrics_bytesRead\": [37492752.0, 37492752.0, 37492752.0, 37492752.0, 37492752.0], \"executorDeserializeTime\": [4.0, 4.0, 4.0, 4.0, 4.0], \"inputMetrics_recordsRead\": [39.0, 39.0, 39.0, 39.0, 39.0], \"shuffleWriteMetrics_writeBytes\": [76.0, 76.0, 76.0, 76.0, 76.0], \"shuffleWriteMetrics_writeRecords\": [1.0, 1.0, 1.0, 1.0, 1.0]}}"
+    },
+    {
+      "event_id": 41782,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51183",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51183, jobId=41756, numTasks=1, parentStages=(51182), partitions=1, rootTfId=10215, shuffleInputs=(HashPartitioning(__dataset_name)), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10216",
+      "start_time_ms": 1782974463852,
+      "end_time_ms": 1782974463882,
+      "payload": "{\"id\": 51183, \"tfId\": 10216, \"jobId\": 41756, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 2439, \"internal.metrics.executorCpuTime\": 4087831, \"internal.metrics.executorRunTime\": 7, \"internal.metrics.peakExecutionMemory\": 33816576, \"internal.metrics.executorDeserializeTime\": 4, \"internal.metrics.shuffle.read.recordsRead\": 1, \"internal.metrics.executorDeserializeCpuTime\": 3886918, \"internal.metrics.shuffle.read.fetchWaitTime\": 1, \"internal.metrics.shuffle.read.remoteBytesRead\": 76, \"internal.metrics.shuffle.read.remoteReqsDuration\": 1, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 1}, \"numTasks\": 1, \"rootTfId\": 10215, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"parentStages\": \"(51182)\", \"shuffleInputs\": \"(HashPartitioning(__dataset_name))\", \"taskMetricsDistributions\": {}}"
+    },
+    {
+      "event_id": 41783,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51184",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51184, jobId=41757, numTasks=1, partitions=1, rootTfId=124, shuffleOutput=HashPartitioning(event_dt), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10218",
+      "start_time_ms": 1782974464895,
+      "end_time_ms": 1782974476233,
+      "payload": "{\"id\": 51184, \"tfId\": 10218, \"jobId\": 41757, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 2962, \"internal.metrics.resultSize\": 7790, \"internal.metrics.executorCpuTime\": 8219806928, \"internal.metrics.executorRunTime\": 11273, \"internal.metrics.input.bytesRead\": 37492752, \"internal.metrics.input.recordsRead\": 39, \"internal.metrics.peakExecutionMemory\": 203423744, \"internal.metrics.executorDeserializeTime\": 6, \"internal.metrics.shuffle.write.writeTime\": 83529387, \"internal.metrics.executorDeserializeCpuTime\": 6346108, \"internal.metrics.shuffle.write.bytesWritten\": 45859784, \"internal.metrics.shuffle.write.recordsWritten\": 129650}, \"numTasks\": 1, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"shuffleOutput\": \"HashPartitioning(event_dt)\", \"taskMetricsDistributions\": {\"duration\": [11296.0, 11296.0, 11296.0, 11296.0, 11296.0], \"jvmGcTime\": [2962.0, 2962.0, 2962.0, 2962.0, 2962.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [17.0, 17.0, 17.0, 17.0, 17.0], \"executorRunTime\": [11273.0, 11273.0, 11273.0, 11273.0, 11273.0], \"peakExecutionMemory\": [203423744.0, 203423744.0, 203423744.0, 203423744.0, 203423744.0], \"inputMetrics_bytesRead\": [37492752.0, 37492752.0, 37492752.0, 37492752.0, 37492752.0], \"executorDeserializeTime\": [6.0, 6.0, 6.0, 6.0, 6.0], \"inputMetrics_recordsRead\": [39.0, 39.0, 39.0, 39.0, 39.0], \"shuffleWriteMetrics_writeBytes\": [45859784.0, 45859784.0, 45859784.0, 45859784.0, 45859784.0], \"shuffleWriteMetrics_writeRecords\": [129650.0, 129650.0, 129650.0, 129650.0, 129650.0]}}"
+    },
+    {
+      "event_id": 41784,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51185",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51185, jobId=41758, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974467793,
+      "end_time_ms": 1782974470599,
+      "payload": "{\"id\": 51185, \"jobId\": 41758, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 66, \"internal.metrics.resultSize\": 12732, \"internal.metrics.executorCpuTime\": 3830784, \"internal.metrics.executorRunTime\": 2787, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1703277}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [2801.0, 2801.0, 2801.0, 2801.0, 2801.0], \"jvmGcTime\": [66.0, 66.0, 66.0, 66.0, 66.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [12.0, 12.0, 12.0, 12.0, 12.0], \"executorRunTime\": [2787.0, 2787.0, 2787.0, 2787.0, 2787.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41785,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51186",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51186, jobId=41759, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974471019,
+      "end_time_ms": 1782974472371,
+      "payload": "{\"id\": 51186, \"jobId\": 41759, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 3560096, \"internal.metrics.executorRunTime\": 1336, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1729373}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [1349.0, 1349.0, 1349.0, 1349.0, 1349.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [11.0, 11.0, 11.0, 11.0, 11.0], \"executorRunTime\": [1336.0, 1336.0, 1336.0, 1336.0, 1336.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41786,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51187",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51187, jobId=41760, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974472787,
+      "end_time_ms": 1782974473741,
+      "payload": "{\"id\": 51187, \"jobId\": 41760, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 3848424, \"internal.metrics.executorRunTime\": 940, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1835113}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [953.0, 953.0, 953.0, 953.0, 953.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [11.0, 11.0, 11.0, 11.0, 11.0], \"executorRunTime\": [940.0, 940.0, 940.0, 940.0, 940.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41787,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51188",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51188, jobId=41761, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974474159,
+      "end_time_ms": 1782974477632,
+      "payload": "{\"id\": 51188, \"jobId\": 41761, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 163, \"internal.metrics.resultSize\": 12732, \"internal.metrics.executorCpuTime\": 6264646, \"internal.metrics.executorRunTime\": 3454, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1898172}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [3471.0, 3471.0, 3471.0, 3471.0, 3471.0], \"jvmGcTime\": [163.0, 163.0, 163.0, 163.0, 163.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [15.0, 15.0, 15.0, 15.0, 15.0], \"executorRunTime\": [3454.0, 3454.0, 3454.0, 3454.0, 3454.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41788,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51190",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51190, jobId=41762, numTasks=1, parentStages=(51189), partitions=1, rootTfId=124, shuffleInputs=(HashPartitioning(event_dt)), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10218",
+      "start_time_ms": 1782974476275,
+      "end_time_ms": 1782974480412,
+      "payload": "{\"id\": 51190, \"tfId\": 10218, \"jobId\": 41762, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 465, \"internal.metrics.resultSize\": 7876, \"internal.metrics.executorCpuTime\": 2869379765, \"internal.metrics.executorRunTime\": 4012, \"internal.metrics.io.requestCount\": 7, \"internal.metrics.output.bytesWritten\": 19332073, \"internal.metrics.peakExecutionMemory\": 205520896, \"internal.metrics.io.requestBytesCount\": 19332292, \"internal.metrics.io.requestMsDuration\": 639, \"internal.metrics.output.recordsWritten\": 129650, \"internal.metrics.executorDeserializeTime\": 13, \"internal.metrics.shuffle.read.recordsRead\": 129650, \"internal.metrics.executorDeserializeCpuTime\": 12434518, \"internal.metrics.shuffle.read.fetchWaitTime\": 148, \"internal.metrics.shuffle.read.remoteBytesRead\": 45859784, \"internal.metrics.shuffle.read.remoteReqsDuration\": 150, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 1}, \"numTasks\": 1, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"parentStages\": \"(51189)\", \"shuffleInputs\": \"(HashPartitioning(event_dt))\", \"taskMetricsDistributions\": {\"duration\": [4041.0, 4041.0, 4041.0, 4041.0, 4041.0], \"jvmGcTime\": [465.0, 465.0, 465.0, 465.0, 465.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [16.0, 16.0, 16.0, 16.0, 16.0], \"executorRunTime\": [4012.0, 4012.0, 4012.0, 4012.0, 4012.0], \"peakExecutionMemory\": [205520896.0, 205520896.0, 205520896.0, 205520896.0, 205520896.0], \"executorDeserializeTime\": [13.0, 13.0, 13.0, 13.0, 13.0], \"outputMetrics_bytesWritten\": [19332073.0, 19332073.0, 19332073.0, 19332073.0, 19332073.0], \"outputMetrics_recordsWritten\": [129650.0, 129650.0, 129650.0, 129650.0, 129650.0], \"shuffleReadMetrics_readBytes\": [45859784.0, 45859784.0, 45859784.0, 45859784.0, 45859784.0], \"shuffleReadMetrics_readRecords\": [129650.0, 129650.0, 129650.0, 129650.0, 129650.0]}}"
+    },
+    {
+      "event_id": 41789,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51191",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51191, jobId=41763, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974478050,
+      "end_time_ms": 1782974479943,
+      "payload": "{\"id\": 51191, \"jobId\": 41763, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 3652448, \"internal.metrics.executorRunTime\": 1876, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1790801}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [1891.0, 1891.0, 1891.0, 1891.0, 1891.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [13.0, 13.0, 13.0, 13.0, 13.0], \"executorRunTime\": [1876.0, 1876.0, 1876.0, 1876.0, 1876.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41790,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51192",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51192, jobId=41764, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974480363,
+      "end_time_ms": 1782974482094,
+      "payload": "{\"id\": 51192, \"jobId\": 41764, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 3612884, \"internal.metrics.executorRunTime\": 1716, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1805482}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [1729.0, 1729.0, 1729.0, 1729.0, 1729.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [11.0, 11.0, 11.0, 11.0, 11.0], \"executorRunTime\": [1716.0, 1716.0, 1716.0, 1716.0, 1716.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41791,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51193",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51193, jobId=41765, numTasks=1, partitions=1, rootTfId=124, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10218",
+      "start_time_ms": 1782974480449,
+      "end_time_ms": 1782974480472,
+      "payload": "{\"id\": 51193, \"tfId\": 10218, \"jobId\": 41765, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 877, \"internal.metrics.executorCpuTime\": 1959969, \"internal.metrics.executorRunTime\": 2, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1914081}, \"numTasks\": 1, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [21.0, 21.0, 21.0, 21.0, 21.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [17.0, 17.0, 17.0, 17.0, 17.0], \"executorRunTime\": [2.0, 2.0, 2.0, 2.0, 2.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41792,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51194",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51194, jobId=41766, numTasks=18, partitions=18, rootTfId=124, shuffleOutput=HashPartitioning(coalesce(add_path_canonical, remove_path_canonical)), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10219",
+      "start_time_ms": 1782974481471,
+      "end_time_ms": 1782974482556,
+      "payload": "{\"id\": 51194, \"tfId\": 10219, \"jobId\": 41766, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 13, \"internal.metrics.resultSize\": 62029, \"internal.metrics.executorCpuTime\": 3981219694, \"internal.metrics.executorRunTime\": 5173, \"internal.metrics.input.recordsRead\": 256074, \"internal.metrics.parquetCacheDiskUsage\": 1102813378, \"internal.metrics.executorDeserializeTime\": 180, \"internal.metrics.shuffle.write.writeTime\": 1427423015, \"internal.metrics.parquetCacheMaxDiskUsage\": 346634833920, \"internal.metrics.parquetCacheMetadataSize\": 1481373, \"internal.metrics.executorDeserializeCpuTime\": 94134549, \"internal.metrics.shuffle.write.bytesWritten\": 207922116, \"internal.metrics.shuffle.write.recordsWritten\": 256156}, \"numTasks\": 18, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 18, \"shuffleOutput\": \"HashPartitioning(coalesce(add_path_canonical, remove_path_canonical))\", \"taskMetricsDistributions\": {\"duration\": [17.0, 25.0, 49.0, 808.0, 1036.0], \"jvmGcTime\": [0.0, 0.0, 0.0, 0.0, 13.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [4.0, 5.0, 17.0, 19.0, 22.0], \"executorRunTime\": [6.0, 9.0, 17.0, 778.0, 996.0], \"executorDeserializeTime\": [5.0, 6.0, 7.0, 15.0, 23.0], \"inputMetrics_recordsRead\": [0.0, 0.0, 0.0, 40174.0, 46285.0], \"shuffleWriteMetrics_writeBytes\": [5306.0, 9623.0, 12237.0, 32720333.0, 38900639.0], \"shuffleWriteMetrics_writeRecords\": [6.0, 7.0, 7.0, 40174.0, 46285.0]}}"
+    },
+    {
+      "event_id": 41793,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51195",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51195, jobId=41767, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974482516,
+      "end_time_ms": 1782974483070,
+      "payload": "{\"id\": 51195, \"jobId\": 41767, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 4100114, \"internal.metrics.executorRunTime\": 531, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1980841}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [551.0, 551.0, 551.0, 551.0, 551.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [18.0, 18.0, 18.0, 18.0, 18.0], \"executorRunTime\": [531.0, 531.0, 531.0, 531.0, 531.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41794,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51197",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51197, jobId=41768, numTasks=92, parentStages=(51196), partitions=92, rootTfId=124, shuffleInputs=(HashPartitioning(coalesce(add_path_canonical, remove_path_canonical))), shuffleOutput=SinglePartition$, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10220",
+      "start_time_ms": 1782974483467,
+      "end_time_ms": 1782974484810,
+      "payload": "{\"id\": 51197, \"tfId\": 10220, \"jobId\": 41768, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 1292, \"internal.metrics.resultSize\": 343547, \"internal.metrics.executorCpuTime\": 7613602009, \"internal.metrics.executorRunTime\": 11598, \"internal.metrics.peakExecutionMemory\": 3099066368, \"internal.metrics.executorDeserializeTime\": 1494, \"internal.metrics.resultSerializationTime\": 2, \"internal.metrics.shuffle.write.writeTime\": 28865035, \"internal.metrics.shuffle.read.recordsRead\": 256156, \"internal.metrics.executorDeserializeCpuTime\": 920945823, \"internal.metrics.shuffle.read.fetchWaitTime\": 158, \"internal.metrics.shuffle.write.bytesWritten\": 29328, \"internal.metrics.shuffle.read.localBytesRead\": 34792537, \"internal.metrics.shuffle.read.remoteBytesRead\": 173129579, \"internal.metrics.shuffle.write.recordsWritten\": 92, \"internal.metrics.shuffle.read.localBlocksFetched\": 102, \"internal.metrics.shuffle.read.remoteReqsDuration\": 1976, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 518}, \"numTasks\": 92, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 92, \"parentStages\": \"(51196)\", \"shuffleInputs\": \"(HashPartitioning(coalesce(add_path_canonical, remove_path_canonical)))\", \"shuffleOutput\": \"SinglePartition$\", \"taskMetricsDistributions\": {\"duration\": [1.0, 123.0, 132.0, 171.0, 265.0], \"jvmGcTime\": [0.0, 0.0, 0.0, 24.0, 103.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [3.0, 5.0, 6.0, 10.0, 28.0], \"executorRunTime\": [83.0, 101.0, 107.0, 154.0, 216.0], \"peakExecutionMemory\": [33685504.0, 33685504.0, 33685504.0, 33685504.0, 33685504.0], \"executorDeserializeTime\": [9.0, 11.0, 16.0, 20.0, 36.0], \"resultSerializationTime\": [0.0, 0.0, 0.0, 0.0, 1.0], \"shuffleReadMetrics_readBytes\": [2149201.0, 2236578.0, 2257048.0, 2286735.0, 2363124.0], \"shuffleReadMetrics_readRecords\": [2646.0, 2759.0, 2780.0, 2812.0, 2919.0], \"shuffleWriteMetrics_writeBytes\": [259.0, 285.0, 298.0, 307.0, 350.0], \"shuffleWriteMetrics"
+    },
+    {
+      "event_id": 41795,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51198",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51198, jobId=41769, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974483576,
+      "end_time_ms": 1782974485145,
+      "payload": "{\"id\": 51198, \"jobId\": 41769, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 3514745, \"internal.metrics.executorRunTime\": 453, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1701574}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {}}"
+    },
+    {
+      "event_id": 41796,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51201",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51201, jobId=41770, numTasks=1, parentStages=(51200), partitions=1, rootTfId=124, shuffleInputs=(SinglePartition$), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10220",
+      "start_time_ms": 1782974484836,
+      "end_time_ms": 1782974484925,
+      "payload": "{\"id\": 51201, \"tfId\": 10220, \"jobId\": 41770, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 6216, \"internal.metrics.executorCpuTime\": 15493404, \"internal.metrics.executorRunTime\": 25, \"internal.metrics.executorDeserializeTime\": 11, \"internal.metrics.shuffle.read.recordsRead\": 92, \"internal.metrics.executorDeserializeCpuTime\": 10534550, \"internal.metrics.shuffle.read.localBytesRead\": 5010, \"internal.metrics.shuffle.read.remoteBytesRead\": 24318, \"internal.metrics.shuffle.read.localBlocksFetched\": 17, \"internal.metrics.shuffle.read.remoteReqsDuration\": 48, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 75}, \"numTasks\": 1, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"parentStages\": \"(51200)\", \"shuffleInputs\": \"(SinglePartition$)\", \"taskMetricsDistributions\": {}}"
+    },
+    {
+      "event_id": 41797,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51202",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51202, jobId=41771, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974485562,
+      "end_time_ms": 1782974485867,
+      "payload": "{\"id\": 51202, \"jobId\": 41771, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 3848587, \"internal.metrics.executorRunTime\": 284, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1980819}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [297.0, 297.0, 297.0, 297.0, 297.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [11.0, 11.0, 11.0, 11.0, 11.0], \"executorRunTime\": [284.0, 284.0, 284.0, 284.0, 284.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    },
+    {
+      "event_id": 41798,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51203",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51203, jobId=41772, numTasks=1, partitions=1, rootTfId=124, shuffleOutput=HashPartitioning(), status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571, tfId=10222",
+      "start_time_ms": 1782974486063,
+      "end_time_ms": 1782974489159,
+      "payload": "{\"id\": 51203, \"tfId\": 10222, \"jobId\": 41772, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 335, \"internal.metrics.resultSize\": 7450, \"internal.metrics.executorCpuTime\": 2665047788, \"internal.metrics.executorRunTime\": 3018, \"internal.metrics.input.bytesRead\": 37492752, \"internal.metrics.input.recordsRead\": 39, \"internal.metrics.peakExecutionMemory\": 32768, \"internal.metrics.executorDeserializeTime\": 5, \"internal.metrics.executorDeserializeCpuTime\": 5158540}, \"numTasks\": 1, \"rootTfId\": 124, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"shuffleOutput\": \"HashPartitioning()\", \"taskMetricsDistributions\": {\"duration\": [3038.0, 3038.0, 3038.0, 3038.0, 3038.0], \"jvmGcTime\": [335.0, 335.0, 335.0, 335.0, 335.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [15.0, 15.0, 15.0, 15.0, 15.0], \"executorRunTime\": [3018.0, 3018.0, 3018.0, 3018.0, 3018.0], \"peakExecutionMemory\": [32768.0, 32768.0, 32768.0, 32768.0, 32768.0], \"inputMetrics_bytesRead\": [37492752.0, 37492752.0, 37492752.0, 37492752.0, 37492752.0], \"executorDeserializeTime\": [5.0, 5.0, 5.0, 5.0, 5.0], \"inputMetrics_recordsRead\": [39.0, 39.0, 39.0, 39.0, 39.0]}}"
+    },
+    {
+      "event_id": 41799,
+      "category": "internal",
+      "sub_category": "stage",
+      "name": "Stage 51204",
+      "description": "start at IngestLander.scala:213 - attempt=0, id=51204, jobId=41773, numTasks=1, partitions=1, status=succeeded, streamId=427e35b1-06d4-4d3c-9f07-2fa518d36571",
+      "start_time_ms": 1782974486277,
+      "end_time_ms": 1782974486612,
+      "payload": "{\"id\": 51204, \"jobId\": 41773, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 12694, \"internal.metrics.executorCpuTime\": 8437924, \"internal.metrics.executorRunTime\": 317, \"internal.metrics.executorDeserializeTime\": 2, \"internal.metrics.executorDeserializeCpuTime\": 1916046}, \"numTasks\": 1, \"streamId\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [333.0, 333.0, 333.0, 333.0, 333.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [14.0, 14.0, 14.0, 14.0, 14.0], \"executorRunTime\": [317.0, 317.0, 317.0, 317.0, 317.0], \"executorDeserializeTime\": [2.0, 2.0, 2.0, 2.0, 2.0]}}"
+    }
+  ],
+  "metrics": [
+    {
+      "metric_type": "num_output_rows",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 118180372.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 720.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 43603.9375,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_operation_duration.addBatch",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 43182.9513888889,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_operation_duration.commitOffsets",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 149.101388888889,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_operation_duration.getBatch",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.886111111111111,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_operation_duration.latestOffset",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.25277777777778,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_operation_duration.queryPlanning",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 24.5375,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "batch_operation_duration.walCommit",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 153.268055555556,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "broadcasts_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "broadcasts_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "cached_data_max_disk_size",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "cached_data_max_memory_size",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 637597870.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "definity_driver_overhead",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 120.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "definity_executors_overhead",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 14.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "disk_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_cores",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_cpu_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.190985886968447,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 19.859375,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_jvm_gc_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 58.876,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_jvm_gc_time_pct",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.136278535401553,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_max_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.359807476295813,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_max_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 7.14555159956217,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_max_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.353139229630872,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_max_off_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_max_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 7.14555159956217,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 20.234375,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "driver_off_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.375,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 43204.589,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.001000+00:00"
+    },
+    {
+      "metric_type": "executor_cores",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.4580078125,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_off_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_on_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.3515625,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_off_heap_memory_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_on_heap_memory_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.673534993082285,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_off_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_on_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.434820583090186,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_max_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.942489866515119,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_max_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.31664745509624,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_max_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_max_off_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.934364318847656,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_max_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.86513875424862,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.8330078125,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executor_off_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.375,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_java_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 37606.25,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_jvm_gc_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5409.681,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_other_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_python_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_shuffle_read_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 511.929,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_shuffle_write_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1347.055154579,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 37606.25,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 74011.49,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time_of_retried_tasks",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "executors_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 518432.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "fs_list_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "fs_open_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "global_watermark_gap",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "input_bytes_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 209217407943.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "input_records_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 308237718.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "input_rows_per_sec",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2735.78375054076,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "memory_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "memory_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1608583.47879883,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_changed_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:41:00.322000+00:00"
+    },
+    {
+      "metric_type": "num_executors",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 6.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 658.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:41:00.322000+00:00"
+    },
+    {
+      "metric_type": "num_spark_jobs",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 27897.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 27897.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages_retries",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 115327.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks_retries",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "num_tfs",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T18:41:04.911000+00:00"
+    },
+    {
+      "metric_type": "output_bytes_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 17899609203.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "output_records_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 118180372.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "processed_rows_per_sec",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 3761.66335969136,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "rows_dropped_by_watermark",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "s3_get_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "s3_head_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "s3_list_objects_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "s3_put_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "shuffle_bytes_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 198142470107.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "shuffle_bytes_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 198142470107.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "shuffle_records_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 307311497.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "shuffle_records_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 307311497.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "skew_score",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "sla",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 43205.156,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:33.801209+00:00"
+    },
+    {
+      "metric_type": "state_memory_used_bytes",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "state_total_rows",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "state_updated_rows",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "task_idle_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.88299989700317,
+      "tf_id": null,
+      "end_time": "2026-07-02T18:41:04.911000+00:00"
+    },
+    {
+      "metric_type": "tasks_result_size_bytes",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 520965512.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "trigger_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 720.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "used_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 107017.48,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 691251.0,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    },
+    {
+      "metric_type": "vcore_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.154817106955361,
+      "tf_id": null,
+      "end_time": "2026-07-02T06:43:01.220000+00:00"
+    }
+  ],
+  "test_runs": [
+    {
+      "test_id": 174875,
+      "test_type": "PctDiff",
+      "metric_type": "broadcasts_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.0,
+      "lower_bound": 0.0,
+      "upper_bound": 0.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 180388,
+      "test_type": "PctDiff",
+      "metric_type": "driver_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.0,
+      "lower_bound": 0.0,
+      "upper_bound": 0.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 174874,
+      "test_type": "Range",
+      "metric_type": "vcore_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.154817106955361,
+      "lower_bound": 0.0,
+      "upper_bound": 0.95,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 178649,
+      "test_type": "Range",
+      "metric_type": "sla",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 43205.156,
+      "lower_bound": 0.0,
+      "upper_bound": 9300000.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 196566,
+      "test_type": "Range",
+      "metric_type": "memory_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 0.0,
+      "lower_bound": 0.0,
+      "upper_bound": 18000000000.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    },
+    {
+      "test_id": 198775,
+      "test_type": "Range",
+      "metric_type": "duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "run_value": 43204.589,
+      "lower_bound": 0.0,
+      "upper_bound": 180000.0,
+      "is_passed": true,
+      "task_broke": false,
+      "tf_id": null
+    }
+  ],
+  "transformations": [
+    {
+      "tf_id": 67737153,
+      "tf_type": "stream",
+      "output_name": null,
+      "status": "COMPLETED",
+      "error": null,
+      "description": "raw.ingestion_front_end.performance_landing [id = 427e35b1-06d4-4d3c-9f07-2fa518d36571, runId = a057adaf-54b6-4658-82da-dd8b13173cdd], ProcessingTimeTrigger(60000)",
+      "start_time": "2026-07-02T06:41:01.001000+00:00",
+      "end_time": "2026-07-02T18:41:03.707000+00:00",
+      "duration_seconds": 43202.706,
+      "query": "WriteToMicroBatchDataSourceV1(ForeachBatchSink, $VAR_1$, $VAR_2$, Append)\n:- Project([__broker_metadata, raw_value, get_json_object(CAST(raw_value AS STRING), $VAR_3$) AS __dataset_name])\n   :- Project([__broker_metadata, data AS raw_value])\n      :- Project([partitionKey, data, stream, shardId, sequenceNumber, approximateArrivalTimestamp, struct(approximateArrivalTimestamp, shardId, sequenceNumber) AS __broker_metadata])\n         :- StreamingDataSourceV2ScanRelation([partitionKey, data, stream, shardId, sequenceNumber, approximateArrivalTimestamp], $VAR_7$, $VAR_8$)\n",
+      "query_vars": "{\"$VAR_1$\": \"427e35b1-06d4-4d3c-9f07-2fa518d36571\", \"$VAR_2$\": \"[queryName=raw.ingestion_front_end.performance_landing, checkpointLocation=/Volumes/raw/ingestion_front_end/raw_ingestion_front_end_performance_landing_checkpoint/v0]\", \"$VAR_3$\": \"'$.__dataset_name'\", \"$VAR_4$\": \"'arrival_epoch'\", \"$VAR_5$\": \"'partition_id'\", \"$VAR_6$\": \"'offset'\", \"$VAR_7$\": \"com.databricks.sql.kinesis.KinesisScan@7a37f187\", \"$VAR_8$\": \"KinesisV2[raw.ingestion_front_end.performance]\"}",
+      "labels": null,
+      "input_datasets": "kinesis/raw.ingestion_front_end.performance"
+    }
+  ],
+  "time_series_summary": [
+    {
+      "metric_type": "active_tasks_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 2.0,
+      "max_value": 842.0,
+      "avg_value": 636.939226519337
+    },
+    {
+      "metric_type": "app_vcores_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 2.25,
+      "max_value": 4.875000000000001,
+      "avg_value": 3.4312845303867405
+    },
+    {
+      "metric_type": "batch_count",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 5.0,
+      "avg_value": 3.977900552486188
+    },
+    {
+      "metric_type": "batch_duration",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 58321.25,
+      "avg_value": 43382.78130755065
+    },
+    {
+      "metric_type": "batch_operation_duration.addBatch",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 57913.5,
+      "avg_value": 42964.17955801105
+    },
+    {
+      "metric_type": "batch_operation_duration.commitOffsets",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 359.5,
+      "avg_value": 148.25285451197053
+    },
+    {
+      "metric_type": "batch_operation_duration.getBatch",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 3.75,
+      "avg_value": 0.8843462246777164
+    },
+    {
+      "metric_type": "batch_operation_duration.latestOffset",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 2.25,
+      "avg_value": 1.2467771639042358
+    },
+    {
+      "metric_type": "batch_operation_duration.queryPlanning",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 34.75,
+      "avg_value": 24.405156537753225
+    },
+    {
+      "metric_type": "batch_operation_duration.walCommit",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 233.75,
+      "avg_value": 152.4729281767956
+    },
+    {
+      "metric_type": "cached_data_memory_size_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 208252347.0,
+      "max_value": 637597870.0,
+      "avg_value": 300540529.4475138
+    },
+    {
+      "metric_type": "driver_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 19.859375,
+      "max_value": 19.9208984375,
+      "avg_value": 19.892257100310772
+    },
+    {
+      "metric_type": "driver_jvm_gc_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 1819.0,
+      "avg_value": 324.49171270718233
+    },
+    {
+      "metric_type": "driver_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 20.234375,
+      "max_value": 20.2958984375,
+      "avg_value": 20.267257100310772
+    },
+    {
+      "metric_type": "driver_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 210549.99999999627,
+      "avg_value": 181420.38674033148
+    },
+    {
+      "metric_type": "driver_used_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 5.491833463311195,
+      "max_value": 7.145551599562168,
+      "avg_value": 6.748701925024143
+    },
+    {
+      "metric_type": "driver_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 5.491833463311195,
+      "max_value": 7.145551599562168,
+      "avg_value": 6.748701925024143
+    },
+    {
+      "metric_type": "executor_avg_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 2.116597471034361,
+      "avg_value": 1.885685654057673
+    },
+    {
+      "metric_type": "executor_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 2.4580078125,
+      "max_value": 2.4580078125,
+      "avg_value": 2.4580078125
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_on_heap_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 377487360.0,
+      "avg_value": 235904978.7403315
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_on_heap_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 466885046.0,
+      "avg_value": 276139322.3646409
+    },
+    {
+      "metric_type": "executor_max_java_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 2.9970550537109375,
+      "avg_value": 2.965165765245975
+    },
+    {
+      "metric_type": "executor_max_used_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 2.316647455096245,
+      "avg_value": 2.1211452481661053
+    },
+    {
+      "metric_type": "executor_max_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 2.865138754248619,
+      "avg_value": 2.684952917061129
+    },
+    {
+      "metric_type": "executor_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 2.8330078125,
+      "max_value": 2.8330078125,
+      "avg_value": 2.8330078125
+    },
+    {
+      "metric_type": "executors_java_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 302940.0,
+      "avg_value": 206759.44751381208
+    },
+    {
+      "metric_type": "executors_jvm_gc_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 303.0,
+      "max_value": 62108.0,
+      "avg_value": 29874.331491712706
+    },
+    {
+      "metric_type": "executors_shuffle_read_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 22305.0,
+      "avg_value": 2828.3370165745855
+    },
+    {
+      "metric_type": "executors_shuffle_write_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 8.11305,
+      "max_value": 12581.666558999987,
+      "avg_value": 7442.293671707187
+    },
+    {
+      "metric_type": "executors_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 302940.0,
+      "avg_value": 206759.44751381208
+    },
+    {
+      "metric_type": "executors_used_vcore_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 6513.0,
+      "max_value": 529838.0,
+      "avg_value": 408903.2596685083
+    },
+    {
+      "metric_type": "input_bytes_read_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 47075674.0,
+      "max_value": 2098403315.0,
+      "avg_value": 1155897281.4530387
+    },
+    {
+      "metric_type": "input_rows_per_sec",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 3558.518388286407,
+      "avg_value": 2721.5536886099826
+    },
+    {
+      "metric_type": "num_output_rows.stream_output",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 997227.0,
+      "avg_value": 652930.2320441989
+    },
+    {
+      "metric_type": "output_bytes_written_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 133959995.0,
+      "avg_value": 98892868.52486187
+    },
+    {
+      "metric_type": "plugin_messages_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 72.0,
+      "avg_value": 71.20441988950276
+    },
+    {
+      "metric_type": "processed_rows_per_sec",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 4453.224876792352,
+      "avg_value": 3740.870645016364
+    },
+    {
+      "metric_type": "shuffle_bytes_read_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 76.0,
+      "max_value": 1503732625.0,
+      "avg_value": 1094403915.7513812
+    },
+    {
+      "metric_type": "shuffle_bytes_written_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 76.0,
+      "max_value": 1503734094.0,
+      "avg_value": 1094709779.5966852
+    },
+    {
+      "metric_type": "trigger_count",
+      "kind": "gauge",
+      "asset_name": "stream",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 0.0,
+      "max_value": 5.0,
+      "avg_value": 3.977900552486188
+    },
+    {
+      "metric_type": "vcores_avg_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 1.125,
+      "max_value": 3.1875,
+      "avg_value": 1.8125
+    },
+    {
+      "metric_type": "vcores_max_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 12.0,
+      "max_value": 12.0,
+      "avg_value": 12.0
+    },
+    {
+      "metric_type": "vcores_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 240,
+      "points_count": 181,
+      "min_value": 2.0,
+      "max_value": 12.0,
+      "avg_value": 4.602209944751381
+    }
+  ]
+}

@@ -15,7 +15,7 @@ that DID finish were consistent.
 Unlike the notebook, the task set is FIXED: a benchmark file pins the
 (task_name, app_id, task_id) jobs and their historical runs, so every gate
 run measures the same inputs and scores are comparable across prompt/KB
-versions.  Results are stamped with the kb_version that produced them.
+versions.
 
 Usage:
     # From the repo root:
@@ -96,14 +96,12 @@ def load_benchmark(path: Path) -> list[tuple[dict, list[dict]]]:
 
 async def run_cycles(
     jobs: list[tuple[dict, list[dict]]], cycles: int, output_dir: Path
-) -> tuple[list[dict], str | None]:
+) -> list[dict]:
     """Sequential (set_row_override / set_insights_override are module-global).
 
-    Returns flattened recommendation records plus the kb_version that
-    produced them (from the first successful plan).
+    Returns flattened recommendation records.
     """
     records: list[dict] = []
-    kb_version: str | None = None
     for row, history in jobs:
         task_id = row["task_id"]
         for cycle in range(1, cycles + 1):
@@ -126,7 +124,6 @@ async def run_cycles(
             if plan is None:
                 records.append({"task_id": task_id, "cycle": cycle, "ok": False})
                 continue
-            kb_version = kb_version or plan.kb_version
             recs = list(_iter_recommendations(arm._build_assembled_output(plan)))
             records.append(
                 {
@@ -137,27 +134,22 @@ async def run_cycles(
                     "recommendations": recs,
                 }
             )
-    return records, kb_version
+    return records
 
 
 def _iter_recommendations(assembled: list[dict]):
-    """One record per recommended config_key (same flattening as the notebook):
-    agent_discovered entries carry the key at top level, SQL-rule entries
-    nest theirs under `recommendations`."""
+    """One record per recommended config_key (same flattening as the notebook).
+    Both agent_discovered and SQL-rule entries nest their config changes under
+    `recommendations` (agent_discovered ones grouped by shared insight_ref —
+    see assemble_output.py's _agent_active_insights — so one entry can hold
+    several companion config_keys)."""
     for entry in assembled:
-        if "config_key" in entry:
+        for rec in entry.get("recommendations", []):
             yield {
-                "config_key": entry["config_key"],
-                "suggested_value": entry.get("suggested_value"),
-                "blocked": bool(entry.get("blocked_by")),
+                "config_key": rec["config_key"],
+                "suggested_value": rec.get("suggested_value"),
+                "blocked": bool(rec.get("blocked_by")),
             }
-        else:
-            for rec in entry.get("recommendations", []):
-                yield {
-                    "config_key": rec["config_key"],
-                    "suggested_value": rec.get("suggested_value"),
-                    "blocked": False,
-                }
 
 
 # ── Scoring ─────────────────────────────────────────────────────────────────
@@ -247,7 +239,6 @@ def rebuild_records(run_dir: Path) -> list[dict]:
                     "cycle": cycle,
                     "ok": True,
                     "plan_degraded": bool(payload["plan"].get("plan_degraded")),
-                    "kb_version": payload["plan"].get("kb_version"),
                     "recommendations": list(
                         _iter_recommendations(payload["assembled_output"])
                     ),
@@ -267,9 +258,6 @@ def score_run_dir(run_dir: Path) -> dict:
         )
     ]
     result = score_all(records, jobs)
-    result["kb_version"] = next(
-        (r["kb_version"] for r in records if r.get("kb_version")), None
-    )
     result["cycles"] = max((r["cycle"] for r in records), default=0)
     return result
 
@@ -365,10 +353,9 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"Gate over {len(jobs)} task(s) x {args.cycles} cycle(s) -> {output_dir}")
 
-    records, kb_version = asyncio.run(run_cycles(jobs, args.cycles, output_dir))
+    records = asyncio.run(run_cycles(jobs, args.cycles, output_dir))
     result = score_all(records, jobs)
     result.update(
-        kb_version=kb_version,
         cycles=args.cycles,
         threshold_pct=args.threshold,
         max_degraded_pct=args.max_degraded_pct,
@@ -376,7 +363,6 @@ def main() -> int:
         run_utc=stamp,
     )
     print_report(result, args.threshold, args.max_degraded_pct)
-    print(f"kb_version: {kb_version}")
 
     verdict = gate_verdict(result, args.threshold, args.max_degraded_pct)
     result["verdict"] = {EXIT_PASS: "pass", EXIT_FAIL: "fail"}.get(verdict, "invalid")

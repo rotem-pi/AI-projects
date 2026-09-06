@@ -8,3 +8,11 @@ __pycache__/
 
 # Saved agent runs — local only, not uploaded
 data/results/
+
+# Dedicated worktree bootstrap_worktree.py manages — local checkout, not uploaded
+.worktrees/
+
+# Recommendation Agent job workdirs (service/app.py) — transient, swept by TTL
+data/jobs/
+deploy/.context/
+deploy/.last-image

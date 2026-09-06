@@ -1,0 +1,1741 @@
+{
+  "task_run": {
+    "task_id": 2673054,
+    "task_name": "\"spark-LoggerParquetConversion\"",
+    "task_type": "spark",
+    "task_sub_type": null,
+    "status": "COMPLETED",
+    "error": null,
+    "start_time": "2026-07-14T10:10:44.033000+00:00",
+    "end_time": "2026-07-14T10:21:36.855000+00:00",
+    "app_pit": "2026-07-14T01:00:00",
+    "is_retry": false,
+    "parent_task_id": null,
+    "user_task_id": "FlattenerApplication",
+    "pipeline_run_id": "28855-2026-07-14 01:00:00",
+    "app_name": "\"SSP_logger\"",
+    "env_name": "dev",
+    "pipeline_status": "COMPLETED",
+    "pipeline_sla_value": null,
+    "pipeline_duration_value": 6157.898,
+    "pipeline_task_runs": 3,
+    "pipeline_task_retries": 0
+  },
+  "spark_parameters": [
+    {
+      "key": "definity.agent.version",
+      "value": "0.91.0"
+    },
+    {
+      "key": "definity.server.version",
+      "value": "0.77.0"
+    },
+    {
+      "key": "java.version",
+      "value": "1.8.0_401"
+    },
+    {
+      "key": "scala.version",
+      "value": "2.12.15"
+    },
+    {
+      "key": "spark.app.name",
+      "value": "FlattenerApplication"
+    },
+    {
+      "key": "spark.app.startTime",
+      "value": "1784023842390"
+    },
+    {
+      "key": "spark.default.parallelism",
+      "value": "9000"
+    },
+    {
+      "key": "spark.definity.env.name",
+      "value": "dev"
+    },
+    {
+      "key": "spark.definity.pipeline.name",
+      "value": "\"SSP_logger\""
+    },
+    {
+      "key": "spark.definity.pipeline.pit",
+      "value": "2026/07/14/01"
+    },
+    {
+      "key": "spark.definity.server",
+      "value": "https://app.definity.run"
+    },
+    {
+      "key": "spark.definity.tags",
+      "value": "\"run:prod-test\""
+    },
+    {
+      "key": "spark.definity.task.name",
+      "value": "\"spark-LoggerParquetConversion\""
+    },
+    {
+      "key": "spark.driver.cores",
+      "value": "5"
+    },
+    {
+      "key": "spark.driver.extraJavaOptions",
+      "value": "-Djob.name=spark-LoggerParquetConversion,-DreportTime=2026/07/14/01,-DjobType=HOURLY,-Dobservium.product.name=SSP-Logger,-Dobservium.db.properties.file=observium_db.properties,-Ddc=VA1LAKE"
+    },
+    {
+      "key": "spark.driver.extraLibraryPath",
+      "value": "/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64"
+    },
+    {
+      "key": "spark.driver.host",
+      "value": "va1aggr292.va1.pubmatic.local"
+    },
+    {
+      "key": "spark.driver.memory",
+      "value": "30g"
+    },
+    {
+      "key": "spark.driver.memoryOverhead",
+      "value": "5120"
+    },
+    {
+      "key": "spark.driver.port",
+      "value": "15894"
+    },
+    {
+      "key": "spark.dynamicAllocation.cachedExecutorIdleTimeout",
+      "value": "2147483647"
+    },
+    {
+      "key": "spark.dynamicAllocation.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.dynamicAllocation.executorIdleTimeout",
+      "value": "60"
+    },
+    {
+      "key": "spark.dynamicAllocation.maxExecutors",
+      "value": "1200"
+    },
+    {
+      "key": "spark.dynamicAllocation.minExecutors",
+      "value": "0"
+    },
+    {
+      "key": "spark.dynamicAllocation.shuffleTracking.enabled",
+      "value": "false"
+    },
+    {
+      "key": "spark.dynamicAllocation.shuffleTracking.timeout",
+      "value": "9223372036854775807"
+    },
+    {
+      "key": "spark.eventLog.dir",
+      "value": "hdfs:///spark3-history"
+    },
+    {
+      "key": "spark.eventLog.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.executor.cores",
+      "value": "7"
+    },
+    {
+      "key": "spark.executorEnv.JAVA_HOME",
+      "value": "/opt/jdk1.8.0_401/jre1.8.0_401"
+    },
+    {
+      "key": "spark.executor.extraLibraryPath",
+      "value": "/usr/hdp/current/hadoop-client/lib/native:/usr/hdp/current/hadoop-client/lib/native/Linux-amd64-64"
+    },
+    {
+      "key": "spark.executor.heartbeatInterval",
+      "value": "60s"
+    },
+    {
+      "key": "spark.executor.id",
+      "value": "driver"
+    },
+    {
+      "key": "spark.executor.memory",
+      "value": "16g"
+    },
+    {
+      "key": "spark.executor.memoryOverhead",
+      "value": "4096"
+    },
+    {
+      "key": "spark.extraListeners",
+      "value": "com.pubmatic.observium.Listner.Observium"
+    },
+    {
+      "key": "spark.file.transferTo",
+      "value": "false"
+    },
+    {
+      "key": "spark.hadoop.dfs.blocksize",
+      "value": "268435456"
+    },
+    {
+      "key": "spark.hadoop.dfs.client.read.shortcircuit",
+      "value": "true"
+    },
+    {
+      "key": "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version",
+      "value": "2"
+    },
+    {
+      "key": "spark.hadoop.mapreduce.input.fileinputformat.split.minsize",
+      "value": "134217728"
+    },
+    {
+      "key": "spark.hadoop.parquet.block.size",
+      "value": "268435456"
+    },
+    {
+      "key": "spark.hadoop.parquet.enable.summary-metadata",
+      "value": "false"
+    },
+    {
+      "key": "spark.history.fs.cleaner.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.history.fs.cleaner.interval",
+      "value": "1d"
+    },
+    {
+      "key": "spark.history.fs.cleaner.maxAge",
+      "value": "14d"
+    },
+    {
+      "key": "spark.history.fs.logDirectory",
+      "value": "hdfs:///spark3-history/"
+    },
+    {
+      "key": "spark.history.kerberos.keytab",
+      "value": "none"
+    },
+    {
+      "key": "spark.history.kerberos.principal",
+      "value": "none"
+    },
+    {
+      "key": "spark.history.provider",
+      "value": "org.apache.spark.deploy.history.FsHistoryProvider"
+    },
+    {
+      "key": "spark.history.ui.port",
+      "value": "18081"
+    },
+    {
+      "key": "spark.master",
+      "value": "yarn"
+    },
+    {
+      "key": "spark.org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter.param.PROXY_HOSTS",
+      "value": "va1nn001.va1.pubmatic.local,va1nn002.va1.pubmatic.local"
+    },
+    {
+      "key": "spark.org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter.param.PROXY_URI_BASES",
+      "value": "http://va1nn001.va1.pubmatic.local:8088/proxy/application_1781190684098_126949,http://va1nn002.va1.pubmatic.local:8088/proxy/application_1781190684098_126949"
+    },
+    {
+      "key": "spark.org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter.param.RM_HA_URLS",
+      "value": "va1nn001.va1.pubmatic.local:8088,va1nn002.va1.pubmatic.local:8088"
+    },
+    {
+      "key": "spark.plugins",
+      "value": "ai.definity.spark.plugin.DefinitySparkPlugin"
+    },
+    {
+      "key": "spark.rdd.compress",
+      "value": "false"
+    },
+    {
+      "key": "spark.shuffle.service.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.speculation",
+      "value": "true"
+    },
+    {
+      "key": "spark.sql.adaptive.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.sql.autoBroadCastJoinThreshold",
+      "value": "524888000"
+    },
+    {
+      "key": "spark.sql.caseSensitive",
+      "value": "true"
+    },
+    {
+      "key": "spark.sql.files.maxPartitionBytes",
+      "value": "268435456"
+    },
+    {
+      "key": "spark.sql.inMemoryColumnarStorage.batchSize",
+      "value": "1000000"
+    },
+    {
+      "key": "spark.sql.inMemoryColumnarStorage.compressed",
+      "value": "true"
+    },
+    {
+      "key": "spark.sql.parquet.compression.codec",
+      "value": "snappy"
+    },
+    {
+      "key": "spark.sql.parquet.filterPushdown",
+      "value": "true"
+    },
+    {
+      "key": "spark.sql.parquet.mergeSchema",
+      "value": "false"
+    },
+    {
+      "key": "spark.sql.session.timeZone",
+      "value": "America/Los_Angeles"
+    },
+    {
+      "key": "spark.sql.shuffle.partitions",
+      "value": "11000"
+    },
+    {
+      "key": "spark.sql.tungsten.enabled",
+      "value": "true"
+    },
+    {
+      "key": "spark.submit.deployMode",
+      "value": "cluster"
+    },
+    {
+      "key": "spark.submit.pyFiles",
+      "value": ""
+    },
+    {
+      "key": "spark.task.maxFailures",
+      "value": "10"
+    },
+    {
+      "key": "spark.ui.filters",
+      "value": "org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter"
+    },
+    {
+      "key": "spark.ui.port",
+      "value": "0"
+    },
+    {
+      "key": "spark.version",
+      "value": "3.2.1"
+    },
+    {
+      "key": "spark.yarn.app.container.log.dir",
+      "value": "/data3/hadoop/yarn/log/application_1781190684098_126949/container_e67_1781190684098_126949_01_000002"
+    },
+    {
+      "key": "spark.yarn.app.id",
+      "value": "application_1781190684098_126949"
+    },
+    {
+      "key": "spark.yarn.appMasterEnv.JAVA_HOME",
+      "value": "/opt/jdk1.8.0_401/jre1.8.0_401"
+    },
+    {
+      "key": "spark.yarn.dist.files",
+      "value": "hdfs://Matrix-Aggr/sharedlib/ssp/config/logger-flattening-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/logger-sampled-flattening-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/config_combined.properties,hdfs://Matrix-Aggr/sharedlib/ssp/config/config_combined_tld.properties,hdfs://Matrix-Aggr/sharedlib/ssp/config/config_data_deals.properties,hdfs://Matrix-Aggr/sharedlib/ssp/config/config_etl.properties,hdfs://Matrix-Aggr/sharedlib/ssp/config/logger-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/tracker-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/click-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/video-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/click-ingx-schema.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/etl-config.xml,hdfs://Matrix-Aggr/sharedlib/common/config/agg_meta.json,hdfs://Matrix-Aggr/sharedlib/common/config/timezone.csv,hdfs://Matrix-Aggr/sharedlib/common/config/channelPartnersList.csv,hdfs://Matrix-Aggr/sharedlib/common/config/winningHistogramBidBucketMapping.csv,hdfs://Matrix-Aggr/sharedlib/ssp/config/logger-schema-coalesce.avsc,hdfs://Matrix-Aggr/sharedlib/ssp/config/config_sampling.properties,hdfs://Matrix-Aggr/sharedlib/common/config/observium_db.properties"
+    },
+    {
+      "key": "spark.yarn.dist.jars",
+      "value": "hdfs://Matrix-Aggr/sharedlib/definity/definity-spark-agent-3.2_2.12-0.91.0.jar,hdfs://Matrix-Aggr/sharedlib/lib/mysql-connector-java-8.0.18.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/spark-avro_2.12-3.2.1.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/scala-logging_2.12-3.9.2.jar,hdfs://Matrix-Aggr/sharedlib/lib/scala-logging-api_2.11-2.1.2.jar,hdfs://Matrix-Aggr/sharedlib/lib/hll-1.6.0.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/spark-alchemy_2.12-1.2.1.jar,hdfs://Matrix-Aggr/sharedlib/lib/fastutil-6.3.jar,hdfs://Matrix-Aggr/sharedlib/lib/jsch-0.1.55.jar,hdfs://Matrix-Aggr/sharedlib/lib/jdbi3-core-3.18.0.jar,hdfs://Matrix-Aggr/sharedlib/lib/caffeine-2.8.4.jar,hdfs://Matrix-Aggr/sharedlib/lib/geantyref-1.3.11.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/snowflake-jdbc-3.28.0.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/spark-snowflake_2.12-3.1.9.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/snowflake-ingest-sdk-0.10.8.jar,hdfs://Matrix-Aggr/sharedlib/lib/jdbi-2.78.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/spark-measure_2.12-0.19.jar,hdfs://Matrix-Aggr/sharedlib/observium/observium.jar,hdfs://Matrix-Aggr/sharedlib/lib-spark3/snowlite-plugin_spark-3.2.1.jar,hdfs://Matrix-Aggr/sharedlib/lib/postgresql-42.7.3.jar"
+    },
+    {
+      "key": "spark.yarn.historyServer.address",
+      "value": "http://10.140.67.13:18081"
+    },
+    {
+      "key": "spark.yarn.maxAppAttempts",
+      "value": "1"
+    },
+    {
+      "key": "spark.yarn.max.executor.failures",
+      "value": "500"
+    },
+    {
+      "key": "spark.yarn.queue",
+      "value": "Aggregation"
+    },
+    {
+      "key": "spark.yarn.secondary.jars",
+      "value": "definity-spark-agent-3.2_2.12-0.91.0.jar,mysql-connector-java-8.0.18.jar,spark-avro_2.12-3.2.1.jar,scala-logging_2.12-3.9.2.jar,scala-logging-api_2.11-2.1.2.jar,hll-1.6.0.jar,spark-alchemy_2.12-1.2.1.jar,fastutil-6.3.jar,jsch-0.1.55.jar,jdbi3-core-3.18.0.jar,caffeine-2.8.4.jar,geantyref-1.3.11.jar,snowflake-jdbc-3.28.0.jar,spark-snowflake_2.12-3.1.9.jar,snowflake-ingest-sdk-0.10.8.jar,jdbi-2.78.jar,spark-measure_2.12-0.19.jar,observium.jar,snowlite-plugin_spark-3.2.1.jar,postgresql-42.7.3.jar"
+    }
+  ],
+  "events": [
+    {
+      "event_id": 5,
+      "category": "internal",
+      "sub_category": "definity_stats",
+      "name": "stats",
+      "description": "",
+      "start_time_ms": 1784023844033,
+      "end_time_ms": 1784024450225,
+      "payload": "{\"stats\": [[\"listener_bus_post_SparkListenerSQLExecutionStart\", 1, 5132.594486], [\"inferFilesSchema\", 1, 2482.0], [\"/log/task\", 1, 1789.0], [\"listener_bus_post_SparkListenerStageCompleted\", 3, 1546.0451110000001], [\"/log/events\", 2, 1489.0], [\"/log/heartbeat\", 5, 1306.0], [\"/log/tf\", 1, 661.0], [\"/log/metrics\", 2, 655.0], [\"listener_bus_post_SparkListenerStageSubmitted\", 4, 156.98663299999998], [\"listener_bus_post_SparkListenerTaskStart\", 40289, 138.84693800000042], [\"listener_bus_post_SparkListenerTaskEnd\", 39334, 81.42267800000019], [\"listener_bus_post_SparkListenerJobStart\", 4, 47.927023999999996], [\"listener_bus_post_SparkListenerBlockUpdated\", 3576, 32.892407999999946], [\"spark_session_tracked\", 95415, 26.31874599999885], [\"listener_bus_post_SparkListenerBlockManagerAdded\", 1765, 26.207550999999977], [\"listener_bus_post_SparkListenerExecutorMetricsUpdate\", 2526, 19.12732700000004], [\"listener_bus_post_SparkListenerJobEnd\", 3, 18.732646000000003], [\"listener_bus_post_SparkListenerExecutorAdded\", 1764, 16.848994000000005], [\"query_execution_created\", 185, 14.426142999999996], [\"analyzer_executed\", 185, 8.495047999999999], [\"data_source_created\", 2, 7.534415], [\"listener_bus_post_SparkListenerExecutorRemoved\", 564, 4.568689000000001], [\"listener_bus_post_SparkListenerSpeculativeTaskSubmitted\", 3246, 4.031627], [\"listener_bus_post_SparkListenerBlockManagerRemoved\", 564, 3.5986560000000005], [\"table_scope_start\", 1, 3.353201], [\"df_reader_load_end\", 1, 3.232501], [\"shuffle_dep_created_start\", 1, 1.907466], [\"on_file_index_refresh_end\", 1, 1.537658], [\"shuffle_dep_created_end\", 1, 0.721267], [\"on_datasource_resolve_relation_start\", 1, 0.501053], [\"listener_bus_post_SparkListenerTaskGettingResult\", 22, 0.46516399999999997], [\"on_fs_list_end\", 420, 0.10000900000000004], [\"on_fs_list_start\", 420, 0.07692900000000004], [\"listener_bus_post_SparkListenerSQLAdaptiveExecutionUpdate\", 2, 0.063026], [\"listener_bus_post_SparkListenerEnvironmentUpdate\", 1, 0.05426], [\"listener_b"
+    },
+    {
+      "event_id": 2,
+      "category": "internal",
+      "sub_category": "executors_info",
+      "name": "Executors",
+      "description": "",
+      "start_time_ms": 1784023844033,
+      "end_time_ms": 1784024489372,
+      "payload": "{\"1\": {\"gcType\": \"PS MarkSweep,PS Scavenge\", \"endTime\": \"2026\u201107\u201114 10:16:36.859\", \"numCores\": 7, \"startTime\": \"2026\u201107\u201114 10:11:06.974\", \"hostInfoOpt\": {\"hostId\": \"va1aggr001.va1.pubmatic.local\", \"hostName\": \"va1aggr001.va1.pubmatic.local\", \"totalCores\": 40, \"totalMemoryBytes\": 270193057792}, \"tasksFailed\": 0, \"removedReason\": \"Executor killed by driver.\", \"maxDiskMetrics\": {\"isEmpty\": false, \"collectTimeMs\": 2, \"hostUsedBytes\": 25820857987072, \"hostTotalBytes\": 59537248993280, \"hostUsableSpace\": 33116105904128, \"executorRootDirs\": [\"/data9/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-b6695c2a-4aaf-472e-a83b-6c6d0512bfd2\", \"/data10/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-e28b1cc6-6c74-4c5f-b775-47421383beb9\", \"/data1/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-98458170-330c-4b2d-9682-601e78123e63\", \"/data2/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-23c0ad17-5447-4778-997a-21728f7f95b5\", \"/data3/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-cbc7f729-fe77-4a1d-bc0b-9c124dc4f4ee\", \"/data8/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-d0899e43-9c16-4f2b-b4c8-1ab4b4fe948f\", \"/data7/hahadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-e3c7536f-77ee-4ecb-8b77-d59564462f4d\", \"/data5/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-57330326-cf70-462b-ba33-a07229a7e583\", \"/data6/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-8896e214-3a83-4811-953d-bb56a0735265\", \"/data4/hadoop/yarn/local/usercache/agg-user/appcache/application_1781190684098_126949/blockmgr-601a9ca2-b0a6-4c70-a6ca-004850e10eac\"], \"executorTopFiles\": [{\"path\": \"14\", \"sizeBytes\": 4096}], \"executorUsedBytes\": 49152, \"hostUnallocatedSpace"
+    },
+    {
+      "event_id": 6,
+      "category": "internal",
+      "sub_category": "debug",
+      "name": "Session debug info",
+      "description": "",
+      "start_time_ms": 1784023844033,
+      "end_time_ms": 1784024495142,
+      "payload": "{\"metric.clusterAppsSubmitted\": 126996}"
+    },
+    {
+      "event_id": 1,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 0",
+      "description": "load at ParquetConvertorJob.scala:119 - attempt=0, id=0, jobId=0, numTasks=92, partitions=92, status=succeeded",
+      "start_time_ms": 1784023860193,
+      "end_time_ms": 1784023878027,
+      "payload": "{\"id\": 0, \"jobId\": 0, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 26346, \"internal.metrics.resultSize\": 61076325, \"internal.metrics.executorCpuTime\": 67426377082, \"internal.metrics.executorRunTime\": 266461, \"internal.metrics.executorDeserializeTime\": 142113, \"internal.metrics.resultSerializationTime\": 3925, \"internal.metrics.executorDeserializeCpuTime\": 45191443475}, \"numTasks\": 92, \"partitions\": 92, \"taskMetricsDistributions\": {\"duration\": [3624.0, 4234.0, 4703.0, 5062.0, 5418.0], \"jvmGcTime\": [223.0, 239.0, 288.0, 313.0, 361.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [75.0, 89.0, 98.0, 114.0, 216.0], \"executorRunTime\": [2082.0, 2592.0, 2918.0, 3156.0, 3656.0], \"gettingResultTime\": [0.0, 0.0, 0.0, 0.0, 118.0], \"executorDeserializeTime\": [1354.0, 1437.0, 1534.0, 1604.0, 1905.0], \"resultSerializationTime\": [6.0, 20.0, 41.0, 60.0, 124.0]}}"
+    },
+    {
+      "event_id": 3,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 1",
+      "description": "inferSchema at HadoopFsRelationInputNodeHelper.scala:252 - attempt=0, id=1, jobId=1, numTasks=1, partitions=1, rootTfId=0, status=succeeded, tfId=0",
+      "start_time_ms": 1784023899448,
+      "end_time_ms": 1784023901801,
+      "payload": "{\"id\": 1, \"tfId\": 0, \"jobId\": 1, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.resultSize\": 38789, \"internal.metrics.executorCpuTime\": 497576605, \"internal.metrics.executorRunTime\": 2065, \"internal.metrics.executorDeserializeTime\": 210, \"internal.metrics.resultSerializationTime\": 17, \"internal.metrics.executorDeserializeCpuTime\": 197211055}, \"numTasks\": 1, \"rootTfId\": 0, \"partitions\": 1, \"taskMetricsDistributions\": {\"duration\": [2319.0, 2319.0, 2319.0, 2319.0, 2319.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [27.0, 27.0, 27.0, 27.0, 27.0], \"executorRunTime\": [2065.0, 2065.0, 2065.0, 2065.0, 2065.0], \"executorDeserializeTime\": [210.0, 210.0, 210.0, 210.0, 210.0], \"resultSerializationTime\": [17.0, 17.0, 17.0, 17.0, 17.0]}}"
+    },
+    {
+      "event_id": 9,
+      "category": "internal",
+      "sub_category": "physical_plan",
+      "name": "physical plan (tfId=0)",
+      "description": "",
+      "start_time_ms": 1784023903159,
+      "end_time_ms": 1784024490669,
+      "payload": "{\"plan\": {\"name\": \"DataWritingCommandExec\", \"stages\": [4], \"metrics\": {\"numFiles\": 11000, \"jobCommitTime\": 218, \"numOutputRows\": 4794956824, \"numOutputBytes\": 697408517544, \"taskCommitTime\": 803331, \"definity.numOutputAttributes\": 0}, \"children\": [{\"name\": \"AdaptiveSparkPlanExec\", \"stages\": [4], \"metrics\": {\"definity.numOutputAttributes\": 180}, \"children\": [{\"name\": \"ProjectExec\", \"stages\": [4], \"metrics\": {\"definity.numOutputAttributes\": 180}, \"children\": [{\"name\": \"SortAggregateExec\", \"stages\": [4], \"metrics\": {\"numOutputRows\": 4794956824, \"definity.numOutputAttributes\": 85}, \"children\": [{\"name\": \"SortExec\", \"stages\": [4], \"metrics\": {\"sortTime\": 6050858, \"peakMemory\": 9042919424000}, \"children\": [{\"name\": \"ShuffleQueryStageExec\", \"stages\": [4], \"metrics\": {\"definity.numOutputAttributes\": 169}, \"children\": [{\"name\": \"ShuffleExchangeExec\", \"stages\": [2, 4], \"metrics\": {\"dataSize\": 8458854694624, \"recordsRead\": 4794956850, \"fetchWaitTime\": 8673222, \"numPartitions\": 11000, \"localBytesRead\": 2780778111, \"remoteBytesRead\": 2302708573068, \"shuffleWriteTime\": 3672890652515, \"localBlocksFetched\": 346691, \"remoteBlocksFetched\": 286679796, \"shuffleBytesWritten\": 2305489351179, \"shuffleRecordsWritten\": 4794956850}, \"children\": [{\"name\": \"SortAggregateExec\", \"stages\": [2], \"metrics\": {\"numOutputRows\": 4794956850, \"definity.numOutputAttributes\": 169}, \"children\": [{\"name\": \"SortExec\", \"stages\": [2], \"metrics\": {\"sortTime\": 2770114, \"peakMemory\": 6291917635584}, \"children\": [{\"name\": \"FileSourceScanExec\", \"stages\": [2], \"metrics\": {\"numFiles\": 199410, \"filesSize\": 5453032513826, \"metadataTime\": 140, \"numOutputRows\": 4794959778, \"definity.numOutputAttributes\": 85}, \"description\": \"FileScan parquet [ts#0L,uId#1,uIdS#2,uIdmm#3,pId#4,sId#5,adId#6,adtype#7,sURL#8,reqCnt#9,uFP#10,BrID#11,osID#12,gID#13,dc#14,sc#15,rmtyp#16,video#17,mob#18,mbr#19,wAdnId#20,csa#21,wcId#22,cvId#23,... 61 more fields] Batched: false, DataFilters: [], Format: Parquet, Location: InMemoryFileIndex(92 paths"
+    },
+    {
+      "event_id": 4,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 2",
+      "description": "parquet at ParquetConvertorJob.scala:174 - attempt=0, id=2, jobId=2, numTasks=26284, partitions=26284, rootTfId=0, status=succeeded, tfId=0",
+      "start_time_ms": 1784023905779,
+      "end_time_ms": 1784024268953,
+      "payload": "{\"id\": 2, \"tfId\": 0, \"jobId\": 2, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 11953023, \"internal.metrics.resultSize\": 62807440, \"internal.metrics.executorCpuTime\": 201903994933547, \"internal.metrics.executorRunTime\": 322210400, \"internal.metrics.input.bytesRead\": 754558095148, \"internal.metrics.diskBytesSpilled\": 781517898, \"internal.metrics.input.recordsRead\": 5028270491, \"internal.metrics.memoryBytesSpilled\": 35785801728, \"internal.metrics.peakExecutionMemory\": 15993518030848, \"internal.metrics.executorDeserializeTime\": 7740271, \"internal.metrics.resultSerializationTime\": 1404, \"internal.metrics.shuffle.write.writeTime\": 3681752331365, \"internal.metrics.executorDeserializeCpuTime\": 1910225888880, \"internal.metrics.shuffle.write.bytesWritten\": 2311320417190, \"internal.metrics.shuffle.write.recordsWritten\": 4807174683}, \"numTasks\": 26284, \"rootTfId\": 0, \"partitions\": 26284, \"taskMetricsDistributions\": {\"duration\": [18.0, 6989.0, 8891.0, 12091.0, 20423.0], \"jvmGcTime\": [0.0, 98.0, 137.0, 256.0, 3512.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [2.0, 5.0, 6.0, 8.0, 71.0], \"executorRunTime\": [3079.0, 7563.0, 9754.0, 14515.0, 167443.0], \"diskBytesSpilled\": [0.0, 0.0, 0.0, 0.0, 37551191.0], \"memoryBytesSpilled\": [0.0, 0.0, 0.0, 0.0, 687865856.0], \"peakExecutionMemory\": [134316032.0, 545259520.0, 549453824.0, 683671552.0, 1912602624.0], \"inputMetrics_bytesRead\": [14110529.0, 24655989.0, 27071687.0, 29850440.0, 35392240.0], \"executorDeserializeTime\": [2.0, 3.0, 5.0, 8.0, 3823.0], \"resultSerializationTime\": [0.0, 0.0, 0.0, 0.0, 251.0], \"inputMetrics_recordsRead\": [47.0, 162265.0, 183369.0, 206886.0, 614391.0], \"shuffleWriteMetrics_writeBytes\": [31631.0, 77978805.0, 88352172.0, 99280214.0, 244737235.0], \"shuffleWriteMetrics_writeRecords\": [47.0, 162265.0, 183369.0, 206886.0, 614391.0]}}"
+    },
+    {
+      "event_id": 7,
+      "category": "insight",
+      "sub_category": "skewed_stage",
+      "name": "Skew (stage=2)",
+      "description": "Tasks duration (seconds): avg=11, p75=12, max=167. ",
+      "start_time_ms": 1784024102149,
+      "end_time_ms": 1784024258545,
+      "payload": "{\"stageId\": 2, \"topKeys\": {}, \"stageAttempt\": 0, \"shuffleInputs\": \"\", \"maxTaskMetrics\": {\"internal.metrics.jvmGCTime\": 342, \"internal.metrics.resultSize\": 2356, \"internal.metrics.executorCpuTime\": 4373732226, \"internal.metrics.executorRunTime\": 167443, \"internal.metrics.input.bytesRead\": 22966909, \"internal.metrics.input.recordsRead\": 74900, \"internal.metrics.peakExecutionMemory\": 339738624, \"internal.metrics.executorDeserializeTime\": 4, \"internal.metrics.shuffle.write.writeTime\": 63809418, \"internal.metrics.executorDeserializeCpuTime\": 4507149, \"internal.metrics.shuffle.write.bytesWritten\": 38678168, \"internal.metrics.shuffle.write.recordsWritten\": 74900}, \"avgTaskDurationSec\": 11, \"maxTaskDurationSec\": 167, \"p75TaskDurationSec\": 12}"
+    },
+    {
+      "event_id": 8,
+      "category": "spark_execution",
+      "sub_category": "stage",
+      "name": "Stage 4",
+      "description": "parquet at ParquetConvertorJob.scala:174 - attempt=0, id=4, jobId=3, numTasks=11000, parentStages=(3), partitions=11000, rootTfId=0, status=succeeded, tfId=0",
+      "start_time_ms": 1784024272631,
+      "end_time_ms": 1784024487173,
+      "payload": "{\"id\": 4, \"tfId\": 0, \"jobId\": 3, \"status\": \"succeeded\", \"attempt\": 0, \"metrics\": {\"internal.metrics.jvmGCTime\": 59134973, \"internal.metrics.resultSize\": 48701280, \"internal.metrics.executorCpuTime\": 739706478771045, \"internal.metrics.executorRunTime\": 916294757, \"internal.metrics.output.bytesWritten\": 697408517544, \"internal.metrics.peakExecutionMemory\": 9062649430016, \"internal.metrics.output.recordsWritten\": 4794956824, \"internal.metrics.executorDeserializeTime\": 29715836, \"internal.metrics.resultSerializationTime\": 24995, \"internal.metrics.shuffle.read.recordsRead\": 4805422197, \"internal.metrics.executorDeserializeCpuTime\": 7293742593127, \"internal.metrics.shuffle.read.fetchWaitTime\": 8673222, \"internal.metrics.shuffle.read.localBytesRead\": 2788760388, \"internal.metrics.shuffle.read.remoteBytesRead\": 2307732817082, \"internal.metrics.shuffle.read.localBlocksFetched\": 347689, \"internal.metrics.shuffle.read.remoteBlocksFetched\": 287305010}, \"numTasks\": 11000, \"rootTfId\": 0, \"partitions\": 11000, \"parentStages\": \"(3)\", \"taskMetricsDistributions\": {\"duration\": [280.0, 70564.0, 87497.0, 101925.0, 144313.0], \"jvmGcTime\": [315.0, 4585.0, 5947.0, 6876.0, 12037.0], \"quantiles\": [0.0, 0.25, 0.5, 0.75, 1.0], \"schedulerDelay\": [3.0, 61.0, 85.0, 103.0, 300.0], \"executorRunTime\": [40759.0, 68830.0, 84233.0, 98296.0, 150487.0], \"peakExecutionMemory\": [822083584.0, 822083584.0, 822083584.0, 822083584.0, 822083584.0], \"executorDeserializeTime\": [23.0, 2586.0, 3214.0, 3673.0, 8486.0], \"resultSerializationTime\": [0.0, 0.0, 0.0, 5.0, 60.0], \"outputMetrics_bytesWritten\": [62987163.0, 63330672.0, 63400411.0, 63470367.0, 63822926.0], \"outputMetrics_recordsWritten\": [432993.0, 435463.0, 435908.0, 436349.0, 438568.0], \"shuffleReadMetrics_readBytes\": [-2.0, 209375029.0, 209585063.0, 209797520.0, 210422740.0], \"shuffleReadMetrics_readRecords\": [432993.0, 435463.0, 435908.0, 436349.0, 438568.0]}}"
+    }
+  ],
+  "metrics": [
+    {
+      "metric_type": "meta_numFiles",
+      "asset_type": "file",
+      "asset_value": "",
+      "metric_value": 11000.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "meta_numOutputBytes",
+      "asset_type": "file",
+      "asset_value": "",
+      "metric_value": 697408517544.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "meta_numOutputRows",
+      "asset_type": "file",
+      "asset_value": "",
+      "metric_value": 4794956824.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "meta_numParts",
+      "asset_type": "file",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "freshness",
+      "asset_type": "input_table",
+      "asset_value": "",
+      "metric_value": 1637.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "meta_filesSize",
+      "asset_type": "input_table",
+      "asset_value": "",
+      "metric_value": 5453032513826.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "meta_numFiles",
+      "asset_type": "input_table",
+      "asset_value": "",
+      "metric_value": 199410.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "meta_numOutputRows",
+      "asset_type": "input_table",
+      "asset_value": "",
+      "metric_value": 4794959778.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "num_schema_changes",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.944000+00:00"
+    },
+    {
+      "metric_type": "schema_cnt",
+      "asset_type": "table",
+      "asset_value": "",
+      "metric_value": 180.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.944000+00:00"
+    },
+    {
+      "metric_type": "approx_lingering_vcores_time_pct",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "broadcasts_count",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "broadcasts_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "cached_data_max_disk_size",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "cached_data_max_memory_size",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "definity_driver_overhead",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 11.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "definity_executors_overhead",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 572.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "disk_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 781517898.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_cores",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_cpu_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.12547465437788,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 30.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_jvm_gc_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.102,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_jvm_gc_time_pct",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.322833811235907,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_max_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.192766068379084,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_max_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5.78298205137253,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_max_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.165228058610644,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_max_off_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_max_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5.78298205137253,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 35.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "driver_off_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 652.822,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.085000+00:00"
+    },
+    {
+      "metric_type": "executor_cores",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 7.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 16.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_off_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_on_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5.359375,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_off_heap_memory_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_on_heap_memory_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5.36352776829153,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_off_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_on_heap_max_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.00415276829153299,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_max_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.794572735205293,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_max_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 12.7131637632847,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_max_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.695650596916676,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_max_off_heap_memory_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.73918628692627,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_max_off_heap_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.95674514770508,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_max_used_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 13.9130119383335,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 20.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executor_off_heap_memory",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_deserialize_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 37598.43,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_idle_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 54.8220000267029,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:21:36.855000+00:00"
+    },
+    {
+      "metric_type": "executors_java_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1336473.86,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_jvm_gc_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 71114.414,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_other_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_python_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_run_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1238915.276,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_serialize_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 30.341,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_shuffle_read_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 8673.222,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_shuffle_write_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 3668.622,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_used_cpu_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1336473.86,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1238915.276,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time_of_retried_tasks",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 17293.096,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "executors_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2091719.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "fs_list_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 11420.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "fs_open_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 449447.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "getting_result_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.021,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "hosts_max_disk_used",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 48979304607744.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "hosts_max_disk_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.522591368307117,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "hosts_total_disk_used_max",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2.78452932609597e+16,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "input_bytes_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 754558095148.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "input_records_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5028270491.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "memory_bytes_spilled",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 35785801728.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "memory_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 5999129.375,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_executors",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1764.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_params",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 88.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:10:44.033000+00:00"
+    },
+    {
+      "metric_type": "num_spark_jobs",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages_retries",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 37377.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks_failures",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks_retries",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2926.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "num_tfs",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:21:36.855000+00:00"
+    },
+    {
+      "metric_type": "output_bytes_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 697408517544.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "output_records_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4794956824.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "s3_get_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "s3_head_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "s3_list_objects_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "s3_put_object_requests",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "scheduler_delay",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1463.459,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "shuffle_bytes_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2310521577470.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "shuffle_bytes_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2311320417190.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "shuffle_records_read",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4805422197.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "shuffle_records_written",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 4807174683.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "skew_score",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 156.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "task_idle_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 45.1410000324249,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:21:36.855000+00:00"
+    },
+    {
+      "metric_type": "tasks_duration",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1278008.548,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "tasks_result_size_bytes",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 172623834.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "used_vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 1239323.696,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "vcore_time",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 2094974.0,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "vcore_utilization",
+      "asset_type": "task",
+      "asset_value": "",
+      "metric_value": 0.591569965068779,
+      "tf_id": null,
+      "end_time": "2026-07-14T10:12:50.342000+00:00"
+    },
+    {
+      "metric_type": "duration",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 588.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.845000+00:00"
+    },
+    {
+      "metric_type": "executors_used_vcore_time",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 1238646.75,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "num_spark_jobs",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 2.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "num_spark_stages",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 2.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    },
+    {
+      "metric_type": "num_spark_tasks",
+      "asset_type": "tf",
+      "asset_value": "",
+      "metric_value": 37284.0,
+      "tf_id": 69517216,
+      "end_time": "2026-07-14T10:21:30.849000+00:00"
+    }
+  ],
+  "transformations": [
+    {
+      "tf_id": 69517216,
+      "tf_type": "file",
+      "output_name": "hdfs://Matrix-Aggr/apps/matrix/agg/output/va1/flattened/hourly",
+      "status": "COMPLETED",
+      "error": null,
+      "description": "parquet at ParquetConvertorJob.scala:174 (InsertIntoHadoopFsRelationCommand)",
+      "start_time": "2026-07-14T10:11:43.164000+00:00",
+      "end_time": "2026-07-14T10:21:30.845000+00:00",
+      "duration_seconds": 587.681,
+      "query": "InsertIntoHadoopFsRelationCommand($VAR_1$, false, Parquet, $VAR_2$, Overwrite, [timestamp, publisherId, siteId, adTagId, adFormatId, rAdFormatId, adSizeId, platformId, countryId, dataCenterId, campaignId, winningDealId, dealId, childDealId, bundledDealId, adNetworkId, bidId, pubmaticBuyerId, dspBuyerId, extractedDomain, dspId, foldPosition, ruleId, tld, passbackCodeId, sectionId, campaignStatus, bidStatus, campaignRequestId, dspCookie, impressionId, indirectAdTagId, secureStatus, mobileId, mobileDeviceType, mobileDeviceIdType, mobileDeviceMake, mobileDeviceModel, mobileDeviceCoordinates, mobileDeviceLocation, mobileDeviceApp, mobileDeviceDerivedApp, mobileDeviceBundle, mobileDeviceDerivedBundle, mobileTldEntityType, mobileDeviceIdHash, mobileOsId, mobileRichMediaTypeAvailable, verified, defaultVerified, clickVerified, paidToPublisher, trackerRevenue, trackerSpend, isUniqueCampaignRequest, numberOfBids, whiteopsId, winningRuleId, winningAdvertiserId, ver, gdprDerivedReason, pubmaticConsent, gdprError, gdpr, dspConsent, isgdpr, pageURL, whiteopsCacheFlag, highestBidPrice, secondBidPrice, auctionBidCount, adsCertified, userId, userIdSource, userIdMatchMethod, matchFlag, auctionType, finalFloorPrice, campaignIStat, bidIStat, digitrustId, mobileDeviceIdHashAvailable, mobileDeviceIdTypeAvailable, mobileDeviceCoordinatesAvailable, mobileDeviceAppAvailable, mobileDeviceIdAvailable, mobileDeviceBundleAvailable, mobileDeviceParamAvailable, mobileDeviceLocationAvailable, exchangeImplementationType, publisherAuctionType, winningCampaignId, highestBidCampaignId, secondBidCampaignId, browserId, dpdeals, dpchilddeal, dpbundleddeal, dOwn, dMapOwn, whiteopsPhaseFlag, winningRTBId, trackerDataFee, storeId, placementType, videoPlcmtTypeV26, interstitial, rewardedVideo, tldDomainId, paprFlag, transactioncpm, transactionFeeType, marketplaceId, marketplacePubId, derivedUIDFlag, lexiconABTestingFlag, creativeId, adServerVersion, usryob, usrgen, audLayeringEnabled, winningDealAudSegmentown",
+      "query_vars": "{\"$VAR_1$\": \"hdfs://Matrix-Aggr/apps/matrix/agg/output/va1/flattened/hourly/2026/07/14/01\", \"$VAR_2$\": \"[path=*********(redacted)]\", \"$VAR_3$\": \"'hour'\", \"$VAR_4$\": \"'yyyy-MM-dd HH:mm:ss'\", \"$VAR_5$\": \"1000L\", \"$VAR_6$\": \"0L\", \"$VAR_7$\": \"0\", \"$VAR_8$\": \"''\", \"$VAR_9$\": \"'^\\\\\\\\s+|\\\\\\\\s+$'\", \"$VAR_10$\": \"1\", \"$VAR_11$\": \"',\\r\\n'\", \"$VAR_12$\": \"[-6,-9]\", \"$VAR_13$\": \"8\", \"$VAR_14$\": \"[-9,-8]\", \"$VAR_15$\": \"-9\", \"$VAR_16$\": \"[0,-9]\", \"$VAR_17$\": \"false\", \"$VAR_18$\": \"-7\", \"$VAR_19$\": \"'0'\", \"$VAR_20$\": \"'\\\\\\\\n'\", \"$VAR_21$\": \"'\\\\\\\\t'\", \"$VAR_22$\": \"','\", \"$VAR_23$\": \"-1\", \"$VAR_24$\": \"[-9]\", \"$VAR_25$\": \"[]\", \"$VAR_26$\": \"'-7'\", \"$VAR_27$\": \"0.0D\", \"$VAR_28$\": \"[-6]\", \"$VAR_29$\": \"[-7]\", \"$VAR_30$\": \"2\", \"$VAR_31$\": \"3\", \"$VAR_32$\": \"[[-9,-9,-9.0,-9,0.0,0.0,-9]]\", \"$VAR_33$\": \"[[-14,-14,0.0,-14,0.0,-14.0,-14.0]]\", \"$VAR_34$\": \"100\", \"$VAR_35$\": \"1L\", \"$VAR_36$\": \"100.0D\", \"$VAR_37$\": \"1.0D\", \"$VAR_38$\": \"32\", \"$VAR_39$\": \"true\", \"$VAR_40$\": \"999.0D\", \"$VAR_41$\": \"1000.0D\", \"$VAR_42$\": \"50\", \"$VAR_43$\": \"150\", \"$VAR_44$\": \"200\", \"$VAR_45$\": \"[hdfs://Matrix-Aggr/raw/logger/data/fr2-1-sampled-s1/data=logger/datehr=2026071401/bucket=raw-nw, hdfs://Matrix-Aggr/raw/logger/data/fr2-1-sampled-s1/data=logger/datehr=2026071401/bucket=raw-win, hdfs://Matrix-Aggr/raw/logger/data/fr2-3-j2/data=logger/datehr=2026071401/bucket=raw-nw, hdfs://Matrix-Aggr/raw/logger/data/fr2-3-j2/data=logger/datehr=2026071401/bucket=raw-win, hdfs://Matrix-Aggr/raw/logger/data/fr2-4-j1/data=logger/datehr=2026071401/bucket=raw-nw, hdfs://Matrix-Aggr/raw/logger/data/fr2-4-j1/data=logger/datehr=2026071401/bucket=raw-win, hdfs://Matrix-Aggr/raw/logger/data/fr2-4-j2/data=logger/datehr=2026071401/bucket=raw-nw, hdfs://Matrix-Aggr/raw/logger/data/fr2-4-j2/data=logger/datehr=2026071401/bucket=raw-win, hdfs://Matrix-Aggr/raw/logger/data/fr2-5-j1/data=logger/datehr=2026071401/bucket=raw-nw, hdfs://Matrix-Aggr/raw/logger/data/fr2-5-j1/data=logger/datehr=2026071401/bucket=raw-win, hdfs://Matrix-Aggr/raw/logger/data",
+      "labels": null,
+      "input_datasets": "group:hdfs://Matrix-Aggr/raw/logger/data/fr2-1-sampled-s1,hdfs://Matrix-Aggr/raw/logger/data/fr2-3-j2,hdfs://Matrix-Aggr/raw/logger/data/fr2-4-j1,hdfs://Matrix-Aggr/raw/logger/data/fr2-4-j2,hdfs://Matrix-Aggr/raw/logger/data/fr2-5-j1,hdfs://Matrix-Aggr/raw/logger/data/fr2-5-j2,hdfs://Matrix-Aggr/raw/logger/data/fr2-5-j3,hdfs://Matrix-Aggr/raw/logger/data/fr2-8-j1,hdfs://Matrix-Aggr/raw/logger/data/fr2-8-j2,hdfs://Matrix-Aggr/raw/logger/data/fr2-8-j3,hdfs://Matrix-Aggr/raw/logger/data/nje1-10-j1,..."
+    }
+  ],
+  "time_series_summary": [
+    {
+      "metric_type": "active_tasks_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 11533.0,
+      "avg_value": 3015.4545454545455
+    },
+    {
+      "metric_type": "cluster_total_vcores_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 44167.0,
+      "avg_value": 40150.954545454544
+    },
+    {
+      "metric_type": "disk_bytes_spilled_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 477129083.0,
+      "avg_value": 35523540.81818182
+    },
+    {
+      "metric_type": "driver_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 30.0,
+      "max_value": 30.0,
+      "avg_value": 30.0
+    },
+    {
+      "metric_type": "driver_jvm_gc_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 690.0,
+      "avg_value": 77.5
+    },
+    {
+      "metric_type": "driver_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 35.0,
+      "max_value": 35.0,
+      "avg_value": 35.0
+    },
+    {
+      "metric_type": "driver_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 46970.0,
+      "avg_value": 16891.81818181818
+    },
+    {
+      "metric_type": "driver_used_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.45307494699954987,
+      "max_value": 5.782982051372528,
+      "avg_value": 3.2211163562129843
+    },
+    {
+      "metric_type": "driver_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.45307494699954987,
+      "max_value": 5.782982051372528,
+      "avg_value": 3.2211163562129843
+    },
+    {
+      "metric_type": "executor_avg_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.23590248574813205,
+      "max_value": 9.497772036775041,
+      "avg_value": 4.9208680758357835
+    },
+    {
+      "metric_type": "executor_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 16.0,
+      "max_value": 16.0,
+      "avg_value": 16.0
+    },
+    {
+      "metric_type": "executor_managed_execution_memory_on_heap_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 5754585088.0,
+      "avg_value": 3066903086.5454545
+    },
+    {
+      "metric_type": "executor_managed_storage_memory_on_heap_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 4459001.0,
+      "avg_value": 2129531.1818181816
+    },
+    {
+      "metric_type": "executor_max_java_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 1.0278434753417969,
+      "max_value": 15.678092956542969,
+      "avg_value": 10.559507196599787
+    },
+    {
+      "metric_type": "executor_max_used_heap_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.2668249011039734,
+      "max_value": 12.713163763284683,
+      "avg_value": 8.16814971241084
+    },
+    {
+      "metric_type": "executor_max_used_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.2668249011039734,
+      "max_value": 13.913011938333511,
+      "avg_value": 8.44444466111335
+    },
+    {
+      "metric_type": "executor_memory_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 20.0,
+      "max_value": 20.0,
+      "avg_value": 20.0
+    },
+    {
+      "metric_type": "executors_allocated_vcore_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 252000000.0,
+      "avg_value": 95008295.45454545
+    },
+    {
+      "metric_type": "executors_deserialize_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 11988296.0,
+      "avg_value": 1709019.5454545454
+    },
+    {
+      "metric_type": "executors_java_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 291575400.0000001,
+      "avg_value": 60717879.545454614
+    },
+    {
+      "metric_type": "executors_jvm_gc_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 23333730.0,
+      "avg_value": 3232473.3636363638
+    },
+    {
+      "metric_type": "executors_run_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 378868599.0,
+      "avg_value": 56314330.72727273
+    },
+    {
+      "metric_type": "executors_serialize_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 10349.0,
+      "avg_value": 1379.1363636363637
+    },
+    {
+      "metric_type": "executors_shuffle_read_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 4813200.0,
+      "avg_value": 394237.36363636365
+    },
+    {
+      "metric_type": "executors_shuffle_write_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 1571370.7287519996,
+      "avg_value": 167355.9032881363
+    },
+    {
+      "metric_type": "executors_used_cpu_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 291575400.0000001,
+      "avg_value": 60717879.545454614
+    },
+    {
+      "metric_type": "executors_used_vcore_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 378868599.0,
+      "avg_value": 56314330.72727273
+    },
+    {
+      "metric_type": "getting_result_time_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 1021.0,
+      "avg_value": 46.40909090909091
+    },
+    {
+      "metric_type": "hosts_max_disk_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 48979304607744.0,
+      "avg_value": 45632046812066.91
+    },
+    {
+      "metric_type": "hosts_total_disk_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 2.7845293260959744e+16,
+      "avg_value": 1.172160970521507e+16
+    },
+    {
+      "metric_type": "input_bytes_read_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 314750802244.0,
+      "avg_value": 34299229438.545456
+    },
+    {
+      "metric_type": "output_bytes_written_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 289555289518.0,
+      "avg_value": 31700387161.090908
+    },
+    {
+      "metric_type": "plugin_messages_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 2082.0,
+      "avg_value": 698.3181818181819
+    },
+    {
+      "metric_type": "scheduler_delay_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 363813.0,
+      "avg_value": 66520.86363636363
+    },
+    {
+      "metric_type": "shuffle_bytes_read_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 959502662431.0,
+      "avg_value": 105023708066.81818
+    },
+    {
+      "metric_type": "shuffle_bytes_written_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 1013297969516.0,
+      "avg_value": 105061953705.27272
+    },
+    {
+      "metric_type": "tasks_duration_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 391230361.0,
+      "avg_value": 58091297.63636363
+    },
+    {
+      "metric_type": "tasks_retries_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 2676.0,
+      "avg_value": 133.0
+    },
+    {
+      "metric_type": "vcores_avg_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 8400.0,
+      "avg_value": 1935.3181818181818
+    },
+    {
+      "metric_type": "vcores_max_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 8400.0,
+      "avg_value": 3521.318181818182
+    },
+    {
+      "metric_type": "vcores_max_used_over_time",
+      "kind": "gauge",
+      "asset_name": "",
+      "bucket_size_seconds": 30,
+      "points_count": 22,
+      "min_value": 0.0,
+      "max_value": 8400.0,
+      "avg_value": 2305.4545454545455
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+[
+  {
+    "insight_id": 530311,
+    "task_name": "audienceVideoIDTETL_STORE_JOIN",
+    "type": "over_provisioned_executor_off_heap_memory",
+    "impact_cost": 40462146225.861,
+    "impact_unit": "GB",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Executors off-heap memory usage",
+          "metric_ids": [
+            2318212,
+            2318226
+          ]
+        }
+      ],
+      "cnt_task_runs": 8,
+      "time_span_days": 8,
+      "avg_utilization": 31,
+      "suggested_value": 13,
+      "watermark_value": 9.79011535644531,
+      "current_allocated": 30
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 530272,
+    "task_name": "audienceVideoIDTETL_STORE_JOIN",
+    "type": "spark_task_retries_cost",
+    "impact_cost": 3239088140.27644,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Spark task retries vCore time",
+          "metric_ids": [
+            2318159,
+            2318147
+          ]
+        }
+      ],
+      "task_profile": {
+        "task_type": "spark",
+        "tenant_id": 63,
+        "cnt_task_runs": 9,
+        "task_sub_type": null,
+        "time_span_days": 8,
+        "shuffle_partitions": "30000",
+        "cnt_failed_task_runs": 0,
+        "cnt_completed_task_runs": 8
+      },
+      "avg_retry_pct": 16,
+      "cnt_task_runs": 9,
+      "time_span_days": 8
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 525960,
+    "task_name": "audienceVideoIDTETL_STORE_JOIN",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 63,
+      "cnt_task_runs": 9,
+      "task_sub_type": null,
+      "time_span_days": 8,
+      "shuffle_partitions": "30000",
+      "cnt_failed_task_runs": 0,
+      "cnt_completed_task_runs": 8
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

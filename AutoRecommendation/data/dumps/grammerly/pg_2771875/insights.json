@@ -1,0 +1,117 @@
+[
+  {
+    "insight_id": 367150,
+    "task_name": "deserialized_stat_feedback_v3",
+    "type": "captured_cost_savings",
+    "impact_cost": 137435.563546547,
+    "impact_unit": "savings",
+    "insights_payload": {
+      "time_bounds": {
+        "last_period_end": "2026-07-16T07:26:10.795+00:00",
+        "first_period_end": "2025-10-25T20:23:28.096+00:00",
+        "last_period_start": "2026-06-29T07:26:10.795+00:00",
+        "first_period_start": "2025-10-08T20:23:28.096+00:00"
+      },
+      "task_metrics": [
+        {
+          "title": "Task execution time",
+          "metric_ids": [
+            392904221,
+            392820432,
+            392820427
+          ]
+        }
+      ],
+      "last_period_vcore_time": 654950,
+      "first_period_vcore_time": 365083256,
+      "last_period_memory_time": 4004102.38547461,
+      "first_period_memory_time": 1071797506.838531,
+      "total_vcore_time_to_reduce": 364428306,
+      "annual_vcore_seconds_impact": 7652994426,
+      "total_memory_time_to_reduce": 1067793404.4530565,
+      "annual_memory_seconds_impact": 22423661493.514187
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "debug"
+  },
+  {
+    "insight_id": 366992,
+    "task_name": "deserialized_stat_feedback_v3",
+    "type": "orphaned_node_resources",
+    "impact_cost": 0.0,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "node_cores": 32,
+      "node_mem_gb": 128.0,
+      "worker_type": "r6gd.4xlarge",
+      "task_metrics": null,
+      "cnt_task_runs": 514,
+      "executor_cores": 32,
+      "time_span_days": 17,
+      "executor_mem_gb": 97.966796875,
+      "annual_orphan_gb_s": 1384830421.84277,
+      "cluster_max_workers": 200,
+      "cluster_min_workers": 200,
+      "executors_per_worker": 1,
+      "annual_orphan_vcore_s": 0
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 362426,
+    "task_name": "deserialized_stat_feedback_v3",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "r6gd.4xlarge",
+      "worker_types": [
+        "r6gd.4xlarge"
+      ],
+      "cnt_task_runs": 404,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 17,
+      "cluster_workers": 24,
+      "shuffle_partitions": "200",
+      "cluster_max_workers": 24,
+      "cluster_min_workers": 24,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 404
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  },
+  {
+    "insight_id": 470774,
+    "task_name": "deserialized_stat_feedback_v3",
+    "type": "task_retries_cost",
+    "impact_cost": 1690876707.548,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Pipeline Tasks Count",
+          "metric_ids": [
+            392810942,
+            392904228,
+            392904227
+          ]
+        }
+      ],
+      "cnt_task_runs": 523,
+      "total_retries": 106,
+      "time_span_days": 5
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "visible"
+  }
+]

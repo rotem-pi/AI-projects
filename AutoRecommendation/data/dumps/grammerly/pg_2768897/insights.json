@@ -1,0 +1,31 @@
+[
+  {
+    "insight_id": 363644,
+    "task_name": "Run_2_write_user_assignment_snapshot_day",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "m6gd.4xlarge",
+      "worker_types": [
+        "m6gd.4xlarge"
+      ],
+      "cnt_task_runs": 16,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 16,
+      "cluster_workers": 100,
+      "shuffle_partitions": "200",
+      "cluster_max_workers": 100,
+      "cluster_min_workers": 100,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 16
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

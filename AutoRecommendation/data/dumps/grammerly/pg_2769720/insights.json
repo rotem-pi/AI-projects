@@ -1,0 +1,31 @@
+[
+  {
+    "insight_id": 364513,
+    "task_name": "platinum_feedback_day",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "r6gd.4xlarge",
+      "worker_types": [
+        "r6gd.8xlarge"
+      ],
+      "cnt_task_runs": 16,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 16,
+      "cluster_workers": 180,
+      "shuffle_partitions": "8000",
+      "cluster_max_workers": 180,
+      "cluster_min_workers": 180,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 16
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]

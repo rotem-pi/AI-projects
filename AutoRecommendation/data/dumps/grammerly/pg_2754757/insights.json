@@ -1,0 +1,109 @@
+[
+  {
+    "insight_id": 462197,
+    "task_name": "platinum_feedback_user_day",
+    "type": "executors_long_spill_time",
+    "impact_cost": 2132058357.2259,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "task_metrics": [
+        {
+          "title": "Disk bytes spilled",
+          "metric_ids": [
+            2096952865
+          ]
+        },
+        {
+          "title": "Executors memory usage",
+          "metric_ids": [
+            2096952880,
+            2096952912,
+            2096952892
+          ]
+        }
+      ],
+      "task_profile": {
+        "task_type": "spark",
+        "tenant_id": 29,
+        "driver_type": "r6gd.4xlarge",
+        "worker_types": [
+          "r6gd.8xlarge"
+        ],
+        "cnt_task_runs": 17,
+        "task_sub_type": "Databricks",
+        "cloud_provider": "AWS",
+        "time_span_days": 16,
+        "cluster_workers": 180,
+        "shuffle_partitions": "8000",
+        "cluster_max_workers": 180,
+        "cluster_min_workers": 180,
+        "cnt_failed_task_runs": 0,
+        "workers_availability": "ON_DEMAND",
+        "cnt_completed_task_runs": 17
+      },
+      "avg_spill_pct": 28.863352970654653,
+      "cnt_task_runs": 17,
+      "time_span_days": 16,
+      "avg_executor_max_memory_pct": 83.92400399997557,
+      "avg_executor_max_heap_memory_pct": 34.63601808438511,
+      "avg_executor_max_off_heap_memory_pct": 99.82341596972093
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 479175,
+    "task_name": "platinum_feedback_user_day",
+    "type": "orphaned_node_resources",
+    "impact_cost": 0.0,
+    "impact_unit": "VCore",
+    "insights_payload": {
+      "node_cores": 32,
+      "node_mem_gb": 256.0,
+      "worker_type": "r6gd.8xlarge",
+      "task_metrics": null,
+      "cnt_task_runs": 17,
+      "executor_cores": 32,
+      "time_span_days": 15,
+      "executor_mem_gb": 199.7783203125,
+      "annual_orphan_gb_s": 788018603.519621,
+      "cluster_max_workers": 180,
+      "cluster_min_workers": 180,
+      "executors_per_worker": 1,
+      "annual_orphan_vcore_s": 0
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "stale",
+    "visibility": "visible"
+  },
+  {
+    "insight_id": 364514,
+    "task_name": "platinum_feedback_user_day",
+    "type": "task_profile",
+    "impact_cost": null,
+    "impact_unit": null,
+    "insights_payload": {
+      "task_type": "spark",
+      "tenant_id": 29,
+      "driver_type": "r6gd.4xlarge",
+      "worker_types": [
+        "r6gd.8xlarge"
+      ],
+      "cnt_task_runs": 17,
+      "task_sub_type": "Databricks",
+      "cloud_provider": "AWS",
+      "time_span_days": 16,
+      "cluster_workers": 180,
+      "shuffle_partitions": "8000",
+      "cluster_max_workers": 180,
+      "cluster_min_workers": 180,
+      "cnt_failed_task_runs": 0,
+      "workers_availability": "ON_DEMAND",
+      "cnt_completed_task_runs": 17
+    },
+    "manual_overrides": null,
+    "lifecycle_status": "active",
+    "visibility": "hidden"
+  }
+]
