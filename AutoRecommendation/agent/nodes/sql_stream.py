@@ -23,9 +23,9 @@ import os
 from app.brain.insights.agent.enums import InsightSource, InsightType, RecommendationAction
 from app.brain.insights.agent.models import Recommendation, SqlInsight
 from app.brain.insights.agent.state import AgentState
-from app.brain.insights.recommendations import extract_recommendations
+from app.brain.insights.recommendations import extract_knob_recommendations
 from app.brain.insights.recommendations.models import (
-    Recommendation as TuningRecommendation,
+    KnobRecommendation as TuningRecommendation,
 )
 
 from agent.cost_utils import DEFAULT_MEMORY_PRICE, DEFAULT_VCORE_PRICE
@@ -147,7 +147,7 @@ def run_sql_stream(state: AgentState) -> dict:
 
     recommendations: list[Recommendation] = []
     for insight in insights:
-        raw_recs = extract_recommendations(
+        raw_recs = extract_knob_recommendations(
             insight_type=insight.type,
             payload=insight.insights_payload or {},
         )
