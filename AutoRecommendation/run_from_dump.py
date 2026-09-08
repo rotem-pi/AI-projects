@@ -275,6 +275,26 @@ def _param_value(params: list[dict[str, object]], key: str) -> object:
     return next((p["value"] for p in params if p.get("key") == key), None)
 
 
+def _param_bool(params: list[dict[str, object]], key: str) -> bool | None:
+    """Like _param_value, but coerces a "true"/"false" string to a real bool.
+
+    read_spark_parameters keeps the JSON blob's inner value as-is, so a
+    boolean-valued Spark conf key comes back as the string "true"/"false",
+    not a Python bool. TaskProfile.from_enrichment_row does a strict `is
+    True` check on dbx_autooptimizeshuffle and
+    task__dynamic_is_allocation_enabled__param (the DB/Athena path always
+    hands it a real bool there — Postgres BOOLEAN columns and _cast_athena
+    both produce one) — passing the raw string through would silently
+    resolve to False regardless of the actual value.
+    """
+    value = _param_value(params, key)
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str) and value.strip().lower() in ("true", "false"):
+        return value.strip().lower() == "true"
+    return None
+
+
 def _annual_runs_estimate(insights: list[dict[str, object]]) -> float | None:
     """Runs/year from the observed frequency any SQL insight payload carries
     (cnt_task_runs over time_span_days). Max across payloads: the widest
@@ -456,6 +476,45 @@ def build_enrichment_row(
         str(shuffle_from_params)
         if shuffle_from_params is not None
         else _shuffle_partitions_param(insights)
+    )
+    # Executor-scaling config — same submitted-conf keys
+    # task_run_enrichment.sql reads into these columns (task__executor_
+    # instances__param etc.), just not previously surfaced here. Rule 8
+    # (vCore budget guard) and Rule 9 (platform scaling knob) both read
+    # TaskProfile fields derived from these; left unset, every REST-dump
+    # run reports no executor-scaling config regardless of the source
+    # task's real one.
+    row["task__executor_instances__param"] = _param_value(
+        spark_params, "spark.executor.instances"
+    )
+    row["task__dynamic_is_allocation_enabled__param"] = _param_bool(
+        spark_params, "spark.dynamicAllocation.enabled"
+    )
+    row["task__executors_dynamic_allocation_min_executors__param"] = _param_value(
+        spark_params, "spark.dynamicAllocation.minExecutors"
+    )
+    row["task__executors_dynamic_allocation_max_executors__param"] = _param_value(
+        spark_params, "spark.dynamicAllocation.maxExecutors"
+    )
+    # Databricks cluster identity — task_run_enrichment.sql derives
+    # cluster_min_workers/cluster_max_workers/cluster_workers from these
+    # exact spark.databricks.clusterUsageTags.* submitted-conf tags (a
+    # Databricks cluster injects them into its own driver's conf). Rule 9
+    # (rules/blocking/platform_scaling_knob.py, _is_databricks) uses these
+    # three fields as its ONLY Databricks signal — left unset, a REST-dump
+    # run of a real Databricks task still reads as non-Databricks, so a
+    # spark.dynamicAllocation.* recommendation is never blocked.
+    row["cluster_min_workers"] = _param_value(
+        spark_params, "spark.databricks.clusterUsageTags.clusterMinWorkers"
+    )
+    row["cluster_max_workers"] = _param_value(
+        spark_params, "spark.databricks.clusterUsageTags.clusterMaxWorkers"
+    )
+    row["cluster_workers"] = _param_value(
+        spark_params, "spark.databricks.clusterUsageTags.clusterWorkers"
+    )
+    row["dbx_autooptimizeshuffle"] = _param_bool(
+        spark_params, "spark.databricks.adaptive.autoOptimizeShuffle.enabled"
     )
     # AQE effective state — a fact from the submitted conf, so the agent
     # never has to guess whether a static partition count governs runtime.
