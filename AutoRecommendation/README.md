@@ -82,8 +82,8 @@ batch runs also get a `batch_summary.csv`.
   knows about one task into `data/dumps/dump_<task_id>/` (task detail, params, metrics, TFs,
   lineage, events, time-series, plus per-TF detail/events/physical-plan/lineage/stages, all as
   CSV). Standard library only. Token from `DEFINITY_API_TOKEN` (environment or `.env`), base URL
-  from `--base` / `DEFINITY_API_BASE`. Endpoints are retried 3× — the prod API 500s
-  intermittently; 4xx are not retried. `dump_task()` / `probe_task()` are the library form the
+  from `--base` / `DEFINITY_API_BASE`. Endpoints are retried up to 5× with a growing pause
+  (about 20 s in total) — the prod API 500s intermittently; 4xx are not retried. `dump_task()` / `probe_task()` are the library form the
   web service uses for REST-sourced jobs. [tools/dump-rest-api.sh](tools/dump-rest-api.sh) is
   kept as a thin wrapper for the old invocation.
 

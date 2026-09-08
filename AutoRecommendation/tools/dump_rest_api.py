@@ -34,7 +34,9 @@ from json2csv import write_csv  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_BASE = "https://definity-ai.infra.aks.prod.akamaicsi.net"
-RETRIES = 3          # the prod API 500s intermittently
+# The prod API 500s intermittently, sometimes for 10+ s at a stretch: retry
+# with a growing pause (2, 4, 6, 8 s -> ~20 s of patience per endpoint).
+RETRIES = 5
 RETRY_SLEEP_S = 2.0
 TIMEOUT_S = 60.0
 ERROR_PREVIEW_CHARS = 120
@@ -83,6 +85,15 @@ def env_from_dotenv() -> dict[str, str]:
     return out
 
 
+def normalize_token(token: str) -> str:
+    """Accept what people paste: surrounding whitespace/quotes and a leading
+    "Bearer " (the prod API answers 500, not 401, to "Bearer Bearer x")."""
+    token = token.strip().strip("'\"").strip()
+    if token.lower().startswith("bearer "):
+        token = token[len("bearer "):].strip()
+    return token
+
+
 def normalize_base(base: str) -> str:
     base = base.strip().rstrip("/")
     if not base.startswith(("http://", "https://")):
@@ -115,7 +126,7 @@ def fetch_json(base: str, path: str, token: str) -> tuple[int, Any, str]:
         if 400 <= status < 500:
             break
         if attempt < RETRIES:
-            time.sleep(RETRY_SLEEP_S)
+            time.sleep(RETRY_SLEEP_S * attempt)
     return status, None, preview
 
 
@@ -124,6 +135,7 @@ def probe_task(base: str, task_id: int, token: str) -> dict[str, Any]:
     HTTP status so callers can tell a bad token (401) from a wrong id (404)
     from an unreachable host (0)."""
     base = normalize_base(base)
+    token = normalize_token(token)
     status, data, preview = fetch_json(base, f"/api/tasks/{task_id}", token)
     if status == 200 and isinstance(data, dict):
         return data
@@ -165,6 +177,7 @@ def dump_task(task_id: int, out_dir: Path, *, base: str, token: str,
     logged and reported in the returned dict, not fatal (run_from_dump.py
     degrades per missing file)."""
     base = normalize_base(base)
+    token = normalize_token(token)
     out_dir.mkdir(parents=True, exist_ok=True)
     task = probe_task(base, task_id, token)
     write_csv(task, out_dir / "task.csv")

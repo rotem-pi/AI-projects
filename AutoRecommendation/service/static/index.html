@@ -277,7 +277,7 @@ dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
           </div>
           <div class="row">
             <div class="field"><label for="r-task">Task id</label><input id="r-task" type="number" min="1" step="1" placeholder="5453"></div>
-            <div class="field"><label for="r-token">Bearer token</label><input id="r-token" type="password" placeholder="eyJ…" autocomplete="off"></div>
+            <div class="field"><label for="r-token">Bearer token</label><input id="r-token" type="password" placeholder="eyJ… (the raw token, without the word Bearer)" autocomplete="off"></div>
           </div>
           <div class="row"><button class="btn primary" id="r-go">Analyze</button><span class="hint">Checks the task is readable with this token, then queues the job.</span></div>
           <div class="err" id="r-err"></div>
@@ -437,7 +437,7 @@ document.querySelectorAll('.seg [data-src]').forEach(b=>b.addEventListener('clic
 ['#r-base','#r-task','#r-token'].forEach(sel=>$(sel).addEventListener('keydown', e=>{ if(e.key==='Enter') startRestJob(); }));
 $('#r-go').addEventListener('click', startRestJob);
 async function startRestJob(){
-  const api_base = $('#r-base').value.trim(), task_id = Number($('#r-task').value), api_token = $('#r-token').value.trim();
+  const api_base = $('#r-base').value.trim(), task_id = Number($('#r-task').value), api_token = $('#r-token').value.trim().replace(/^["']|["']$/g,'').replace(/^bearer\s+/i,'').trim();
   $('#r-err').textContent = '';
   if (!api_base || !Number.isInteger(task_id) || task_id < 1 || !api_token){ $('#r-err').textContent = 'API base URL, a numeric task id and a token are all required.'; return; }
   $('#r-go').disabled = true;
