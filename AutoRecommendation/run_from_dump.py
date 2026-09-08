@@ -410,9 +410,10 @@ def fill_missing_annual_costs(
             # applies on the definity-app side.
             entries = [payload]
         priced = [
-            priced_by_key[config_key]
+            cost
             for entry in entries
             if (config_key := entry.get(PAYLOAD_CONFIG_KEY)) in priced_by_key
+            and (cost := priced_by_key[config_key]) is not None
         ]
         if not priced:
             return insight
