@@ -69,6 +69,13 @@ input:focus-visible,.btn:focus-visible,.step:focus-visible,.sug:focus-visible{ou
 .suggest{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:26px}
 .sug{font:inherit;font-family:var(--mono);font-size:12.5px;padding:3px 8px;border:1px solid var(--line-soft);border-radius:4px;color:var(--ink);background:var(--ground);cursor:pointer}
 .sug .meta{color:var(--muted);margin-left:4px}
+input[type=password],input[type=number]{font:inherit;font-family:var(--mono);padding:9px 12px;border:1px solid var(--line);border-radius:6px;background:var(--ground);color:var(--ink)}
+input[type=password]{min-width:320px}input[type=number]{width:160px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-weight:500;padding:7px 14px;border:0;background:var(--paper);color:var(--muted);cursor:pointer}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent-soft);color:var(--accent-strong)}
+.field{display:grid;gap:6px}
 .didyoumean{display:grid;gap:8px;padding:12px 14px;border:1px solid var(--accent);border-radius:6px;background:var(--accent-soft)}
 .didyoumean .lead{font-size:13px;color:var(--ink)}
 .dym-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -215,10 +222,15 @@ dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
     from training data.</p>
 
     <h3>Data & limits</h3>
-    <p>Task data comes from an Athena export of definity's production tables, which lags
-    live production — the freshest run visible here may be a few hours or a day old (see
-    the "Athena export" indicator above). Every job's dump, working files and results are
-    deleted a few hours after it finishes; download the JSON if you need to keep it.</p>
+    <p>Task data comes from one of two sources. <b>Athena export</b>: definity's production
+    tables mirrored to Athena, which lags live production — the freshest run visible here may
+    be a few hours or a day old (see the "Athena export" indicator above); this is the only
+    source with earlier runs, so the only one with trend analysis. <b>REST API</b>: one task id
+    read live from any definity deployment's REST API with a bearer token you paste (the same
+    endpoints the app's own UI uses; the token is used for that job only and never stored) —
+    this works for deployments the Athena export does not cover, at the price of no run
+    history. Every job's dump, working files and results are deleted a few hours after it
+    finishes; download the JSON if you need to keep it.</p>
   </div>
 </dialog>
 
@@ -244,18 +256,37 @@ dialog#how::backdrop{background:oklch(0 0 0 / 0.5)}
       </div>
       <div class="card stack">
         <div>
-          <label for="q">Task name</label>
-          <div class="row"><input id="q" type="text" placeholder="e.g. compute" autocomplete="off" spellcheck="false"><button class="btn primary" id="find">Find runs</button></div>
-          <div class="suggest" id="suggest"></div>
-          <p class="hint">Exact task name as it appears in definity; suggestions appear after two characters.</p>
-          <div class="err" id="s1-err"></div>
-          <div id="s1-dym"></div>
+          <label>Data source</label>
+          <div class="seg" role="tablist"><button type="button" class="on" data-src="athena" role="tab">Athena export</button><button type="button" data-src="rest" role="tab">REST API</button></div>
         </div>
-        <div class="note"><span>ⓘ</span><div><b>Data comes from the Athena export, not live production.</b> Runs newer than the export (<span id="fresh2">unknown</span>) are not visible yet. The analysis uses the latest <em>completed</em> exported run.</div></div>
+        <div id="src-athena" class="stack">
+          <div>
+            <label for="q">Task name</label>
+            <div class="row"><input id="q" type="text" placeholder="e.g. compute" autocomplete="off" spellcheck="false"><button class="btn primary" id="find">Find runs</button></div>
+            <div class="suggest" id="suggest"></div>
+            <p class="hint">Exact task name as it appears in definity; suggestions appear after two characters.</p>
+            <div class="err" id="s1-err"></div>
+            <div id="s1-dym"></div>
+          </div>
+          <div class="note"><span>ⓘ</span><div><b>Data comes from the Athena export, not live production.</b> Runs newer than the export (<span id="fresh2">unknown</span>) are not visible yet. The analysis uses the latest <em>completed</em> exported run.</div></div>
+        </div>
+        <div id="src-rest" class="stack" hidden>
+          <div class="field">
+            <label for="r-base">definity API base URL</label>
+            <input id="r-base" type="text" placeholder="https://definity.example.net" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="row">
+            <div class="field"><label for="r-task">Task id</label><input id="r-task" type="number" min="1" step="1" placeholder="5453"></div>
+            <div class="field"><label for="r-token">Bearer token</label><input id="r-token" type="password" placeholder="eyJ…" autocomplete="off"></div>
+          </div>
+          <div class="row"><button class="btn primary" id="r-go">Analyze</button><span class="hint">Checks the task is readable with this token, then queues the job.</span></div>
+          <div class="err" id="r-err"></div>
+          <div class="note"><span>ⓘ</span><div><b>Reads this one run live from that deployment</b> (task detail, params, metrics, TFs, events, time series, physical plans). The token is used for this job only — sent to the server once, never stored. No earlier runs are available over REST, so there is no trend analysis. The pod must be able to reach the URL.</div></div>
+        </div>
       </div>
       <div class="card" id="recent-card" hidden>
         <label>Recent jobs</label>
-        <div class="tablewrap"><table class="recent"><thead><tr><th>Job</th><th>Task</th><th>App</th><th>Status</th><th>Started</th><th>Expires</th></tr></thead><tbody id="recent"></tbody></table></div>
+        <div class="tablewrap"><table class="recent"><thead><tr><th>Job</th><th>Source</th><th>Task</th><th>App</th><th>Status</th><th>Started</th><th>Expires</th></tr></thead><tbody id="recent"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -342,6 +373,7 @@ async function refreshStatus(){
   $('#c-ttl').hidden=false; $('#c-ttl').querySelector('b').textContent = STATUS.ttl_hours+' h';
   document.querySelectorAll('.ttl').forEach(e=>e.textContent = STATUS.ttl_hours);
   if (STATUS.llm_model) $('#how-model').textContent = ` (currently ${STATUS.llm_model})`;
+  if (STATUS.rest_api_base && !$('#r-base').value) $('#r-base').value = STATUS.rest_api_base;
   const build = STATUS.build || {};
   if (build.backend_commit) {
     const sha = build.backend_commit;
@@ -394,6 +426,27 @@ async function startJob(c, btn){
   catch(e){ $('#s2-err').textContent = e.message; btn.disabled=false; }
 }
 
+// ── screen 1: REST source ───────────────────────────────────────────────
+let SRC = 'athena';
+document.querySelectorAll('.seg [data-src]').forEach(b=>b.addEventListener('click', ()=>{
+  SRC = b.dataset.src;
+  document.querySelectorAll('.seg [data-src]').forEach(x=>x.classList.toggle('on', x===b));
+  $('#src-athena').hidden = SRC !== 'athena'; $('#src-rest').hidden = SRC !== 'rest';
+  const s2 = document.querySelector('.step[data-s="2"] .s'); if (s2) s2.textContent = SRC==='rest' ? 'not needed for REST' : 'same name, many apps';
+}));
+['#r-base','#r-task','#r-token'].forEach(sel=>$(sel).addEventListener('keydown', e=>{ if(e.key==='Enter') startRestJob(); }));
+$('#r-go').addEventListener('click', startRestJob);
+async function startRestJob(){
+  const api_base = $('#r-base').value.trim(), task_id = Number($('#r-task').value), api_token = $('#r-token').value.trim();
+  $('#r-err').textContent = '';
+  if (!api_base || !Number.isInteger(task_id) || task_id < 1 || !api_token){ $('#r-err').textContent = 'API base URL, a numeric task id and a token are all required.'; return; }
+  $('#r-go').disabled = true;
+  try { const j = await api('/api/jobs',{method:'POST', body: JSON.stringify({source:'rest', api_base, task_id, api_token})}); $('#r-token').value = ''; history.pushState({}, '', '/jobs/'+j.id); openJob(j.id); }
+  catch(e){ $('#r-err').textContent = e.message; } finally { $('#r-go').disabled = false; }
+}
+const srcLabel = j => j.source === 'rest' ? `REST · ${esc((j.api_base||'').replace(/^https?:\/\//,''))}` : 'Athena export';
+const taskLabel = j => j.task_name ? `<code>${esc(j.task_name)}</code>` : `task_id ${esc(j.task_id)}`;
+
 // ── screen 3/4: job ─────────────────────────────────────────────────────
 let JOB = null, pollTimer = null, tick = null;
 function openJob(id){ go(3); clearInterval(pollTimer); pollTimer = setInterval(()=>poll(id), 3000); poll(id); }
@@ -401,8 +454,8 @@ function elapsed(j){ const a = new Date(j.started_at||j.created_at), b = j.finis
 async function poll(id){
   try { JOB = await api('/api/jobs/'+id); } catch(e){ clearInterval(pollTimer); $('#j-title').textContent='Job not found'; $('#j-sub').textContent = 'It may have expired and been deleted.'; $('#j-err').textContent=''; $('#log').textContent=''; return; }
   const j = JOB;
-  $('#j-title').innerHTML = `${j.status==='done'?'Analyzed':j.status==='failed'?'Failed:':'Analyzing'} <code>${esc(j.task_name)}</code>${j.app_name?' · '+esc(j.app_name):j.app_id?' · app '+j.app_id:''}`;
-  $('#j-sub').innerHTML = `Job <span class="mono">${esc(j.id)}</span> · ${j.status} · ${j.started_at?'started '+esc(short(j.started_at))+' UTC · ':''}<b class="num">${elapsed(j)}</b>${j.status==='queued'?' · waiting for a free slot':''}`;
+  $('#j-title').innerHTML = `${j.status==='done'?'Analyzed':j.status==='failed'?'Failed:':'Analyzing'} ${taskLabel(j)}${j.app_name?' · '+esc(j.app_name):j.app_id?' · app '+j.app_id:''}`;
+  $('#j-sub').innerHTML = `Job <span class="mono">${esc(j.id)}</span> · ${srcLabel(j)} · ${j.status} · ${j.started_at?'started '+esc(short(j.started_at))+' UTC · ':''}<b class="num">${elapsed(j)}</b>${j.status==='queued'?' · waiting for a free slot':''}`;
   $('#log').innerHTML = (j.progress||[]).map(l=>`<div class="${l.startsWith('✓')?'ok':/Traceback|Error/.test(l)?'bad':''}">${esc(l)}</div>`).join('');
   $('#log').scrollTop = $('#log').scrollHeight;
   $('#j-bar').classList.toggle('done', j.status==='done' || j.status==='failed');
@@ -423,7 +476,8 @@ async function showResults(j){
   let R; try { R = await (await fetch(`/api/jobs/${j.id}/result.json`)).json(); } catch(e){ toast('Could not load result'); return; }
   const row = R.input||{}, plan = R.plan, cp = R.cost_profile||{}, rm = R.run_metrics||{}, ch = (R.service||{}).chosen||{}, fr = (R.service||{}).athena_freshness||{}, tr = R.trace||{};
   $('#r-title').innerHTML = `<code>${esc(R.task_name)}</code> · ${esc(ch.app_name||j.app_name||('app '+row.app_id))}`;
-  $('#r-sub').innerHTML = `Latest completed run <span class="mono">task_id ${R.task_id}</span> at ${esc(short(row.app_pit))} UTC · env ${esc(ch.env_name||row.env_id)} · ${tr.historical_runs_count??0} earlier runs used for trends`;
+  const ds = (R.service||{}).data_source||{}, isRest = ds.kind === 'rest';
+  $('#r-sub').innerHTML = `${isRest?'Run':'Latest completed run'} <span class="mono">task_id ${R.task_id}</span> at ${esc(short(row.app_pit))} UTC · env ${esc(ch.env_name||j.env_name||row.env_id||'?')} · ${isRest?'no run history over REST (no trends)':(tr.historical_runs_count??0)+' earlier runs used for trends'}`;
   const mets = [['Cost per run', cp.cost_per_run_usd!=null?'$'+Number(cp.cost_per_run_usd).toFixed(2):null],['Idle',pct(rm.idle_ratio)],['vCPU util',pct(rm.vcore_utilization)],['Heap headroom',pct(rm.memory_headroom)],['GC pressure',pct(rm.gc_pressure)],['Skew',pct(rm.skew_ratio)],['Duration', row.task__duration? Math.round(row.task__duration/60)+' min':null]];
   $('#r-metrics').innerHTML = mets.filter(m=>m[1]).map(m=>`<div class="metric">${m[0]}<b class="num">${m[1]}</b></div>`).join('');
   $('#dl').href = `/api/jobs/${j.id}/result.json`;
@@ -431,7 +485,7 @@ async function showResults(j){
     const reasons = (tr.gate_reasons||[]).map(r=>`<li>${esc(r)}</li>`).join('');
     $('#r-summary').innerHTML = `Not evaluated<small>The entry gate stopped the run before any recommendation was produced.</small>`;
     $('#r-counts').innerHTML = '';
-    $('#r-body').innerHTML = `<section class="disp skip"><h3>Why the agent did not run</h3><ul>${reasons||'<li>no reason recorded</li>'}</ul><p class="lead">Typical fixes: pick a run that completed, or wait for the Athena export to catch up.</p></section>`;
+    $('#r-body').innerHTML = `<section class="disp skip"><h3>Why the agent did not run</h3><ul>${reasons||'<li>no reason recorded</li>'}</ul><p class="lead">${isRest?'Typical fix: pick the task id of a run that completed.':'Typical fixes: pick a run that completed, or wait for the Athena export to catch up.'}</p></section>`;
   } else {
     const total = plan.recommendations.reduce((a,r)=>a+(typeof r.usd_cost_annual==='number'?r.usd_cost_annual:0),0);
     $('#r-summary').innerHTML = `${esc(plan.summary)}<small>${total?`Estimated annual saving if all recommended changes land: <b>${usd(total)}</b> (per-change estimates may overlap).`:'No priced saving estimate for this run.'}${plan.plan_degraded?' <b>Plan degraded:</b> treat figures as indicative.':''}${plan.health_breach_unactioned?' <b>Health breach not actioned.</b>':''}</small>`;
@@ -443,7 +497,10 @@ async function showResults(j){
       <section class="disp skip"><h3>Not actioned</h3><p class="lead">Insights the agent saw but did not turn into a change, and why.</p>${plan.unactioned_insights.map(u=>`<article class="rec"><div class="title"><span class="pill skip">${esc(u.source)}</span><span class="key" style="font-family:var(--sans)">${esc(u.title)}</span></div><dl><dt>Why not</dt><dd>${esc(u.reason)}</dd></dl></article>`).join('') || '<p class="hint">Every active insight was actioned or blocked.</p>'}</section>
       </div>`;
   }
-  $('#r-prov').innerHTML = `<b>Athena export, not live production.</b> Newest exported run ${esc(fr.latest_enrichment_pit||'unknown')}; insights snapshot ${esc(fr.latest_insights_snapshot||'unknown')}. ${(R.service||{}).candidates?`<code>${esc(R.task_name)}</code> runs under ${(R.service.candidates||[]).length} apps; app ${row.app_id} was analyzed. `:''}Model ${esc((R.run_config||{}).llm_model||'')}. Generated ${esc(short(R.saved_at))} UTC. This job and its files are deleted ${esc(short(j.expires_at))} UTC.`;
+  const prov = isRest
+    ? `<b>Live read from the definity REST API at ${esc(ds.api_base)}.</b> ${(ds.failed_endpoints||[]).length?`${ds.failed_endpoints.length} endpoint(s) could not be fetched (${esc(ds.failed_endpoints.join(', '))}); the analysis degraded accordingly. `:''}No earlier runs are available over REST, so nothing here is trend-based. `
+    : `<b>Athena export, not live production.</b> Newest exported run ${esc(fr.latest_enrichment_pit||'unknown')}; insights snapshot ${esc(fr.latest_insights_snapshot||'unknown')}. ${(R.service||{}).candidates?`<code>${esc(R.task_name)}</code> runs under ${(R.service.candidates||[]).length} apps; app ${row.app_id} was analyzed. `:''}`;
+  $('#r-prov').innerHTML = `${prov}Model ${esc((R.run_config||{}).llm_model||'')}. Generated ${esc(short(R.saved_at))} UTC. This job and its files are deleted ${esc(short(j.expires_at))} UTC.`;
   $('#raw').textContent = JSON.stringify(R, null, 2);
   $('#cp').onclick = async()=>{ try{ const md = await (await fetch(`/api/jobs/${j.id}/tldr.md`)).text(); await navigator.clipboard.writeText(md); toast('TL;DR copied as Markdown'); }catch(e){ toast('Clipboard unavailable'); } };
   $('#del').onclick = ()=>delJob(j.id);
@@ -452,7 +509,7 @@ async function showResults(j){
 
 // ── recent jobs ─────────────────────────────────────────────────────────
 async function loadRecent(){
-  try { const r = await api('/api/jobs'); $('#recent-card').hidden = !r.jobs.length; $('#recent').innerHTML = r.jobs.map(j=>`<tr><td><a href="/jobs/${esc(j.id)}">${esc(j.id)}</a></td><td><code>${esc(j.task_name)}</code></td><td>${esc(j.app_name||j.app_id||'')}</td><td><span class="pill status-${esc(j.status)}">${esc(j.status)}</span>${j.result?` <span class="hint">${j.result.recommendations} change · ${j.result.blocked} blocked</span>`:''}</td><td class="mono num">${esc(short(j.started_at||j.created_at))}</td><td class="mono num">${esc(short(j.expires_at))}</td></tr>`).join(''); }
+  try { const r = await api('/api/jobs'); $('#recent-card').hidden = !r.jobs.length; $('#recent').innerHTML = r.jobs.map(j=>`<tr><td><a href="/jobs/${esc(j.id)}">${esc(j.id)}</a></td><td class="hint">${srcLabel(j)}</td><td>${taskLabel(j)}</td><td>${esc(j.app_name||j.app_id||'')}</td><td><span class="pill status-${esc(j.status)}">${esc(j.status)}</span>${j.result?` <span class="hint">${j.result.recommendations} change · ${j.result.blocked} blocked</span>`:''}</td><td class="mono num">${esc(short(j.started_at||j.created_at))}</td><td class="mono num">${esc(short(j.expires_at))}</td></tr>`).join(''); }
   catch(e){ /* recent list is optional */ }
 }
 document.addEventListener('click', e=>{ const a = e.target.closest('#recent a'); if(a){ e.preventDefault(); const id=a.getAttribute('href').split('/').pop(); history.pushState({}, '', '/jobs/'+id); openJob(id); } });

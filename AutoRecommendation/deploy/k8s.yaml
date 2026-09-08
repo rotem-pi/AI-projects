@@ -36,6 +36,8 @@ data:
   REC_AGENT_TTL_HOURS: "4"
   REC_AGENT_MAX_CONCURRENT: "2"
   REC_AGENT_JOB_TIMEOUT_MIN: "30"
+  # Pre-fills the REST-source URL field on the page (users may change it).
+  DEFINITY_API_BASE: https://definity-ai.infra.aks.prod.akamaicsi.net
 ---
 apiVersion: apps/v1
 kind: Deployment

@@ -1,14 +1,19 @@
-"""Convert JSON on stdin to CSV at argv[1].
+"""Convert JSON to CSV.
+
+    python tools/json2csv.py out.csv < response.json
 
 - list of objects  -> one row per object, columns = union of keys
 - single object    -> two columns: key,value (nested values JSON-encoded)
 - other JSON       -> single "value" column
 Nested/complex cell values are serialized back to compact JSON.
+
+write_csv() is the library form used by tools/dump_rest_api.py.
 """
 
 import csv
 import json
 import sys
+from pathlib import Path
 
 
 def cell(value: object) -> str:
@@ -21,13 +26,7 @@ def cell(value: object) -> str:
     return str(value)
 
 
-def main() -> int:
-    out_path = sys.argv[1]
-    try:
-        data = json.load(sys.stdin)
-    except (json.JSONDecodeError, UnicodeDecodeError):
-        return 1
-
+def write_csv(data: object, out_path: Path | str) -> None:
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         if isinstance(data, list) and all(isinstance(item, dict) for item in data):
@@ -52,6 +51,15 @@ def main() -> int:
                     writer.writerow([cell(item)])
             else:
                 writer.writerow([cell(data)])
+
+
+def main() -> int:
+    out_path = sys.argv[1]
+    try:
+        data = json.load(sys.stdin)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return 1
+    write_csv(data, out_path)
     return 0
 
 

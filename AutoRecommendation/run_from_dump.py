@@ -151,7 +151,7 @@ def _line_name_to_metric_type() -> dict[tuple[str, str], str]:
     different metric_types. Comment/blank lines in the CSV are skipped;
     pattern rows (is_pattern=true, streaming-only in this file) have no
     line_name and are irrelevant here."""
-    path = resolved_backend_path() / "app" / "metrics" / "timeseries_metric_types.csv"
+    path = resolved_backend_path() / "app" / "shared_metadata" / "timeseries_metric_types.csv"
     with path.open(newline="", encoding="utf-8") as f:
         lines = [line for line in f if line.strip() and not line.lstrip().startswith("#")]
     mapping: dict[tuple[str, str], str] = {}
@@ -620,7 +620,24 @@ def _fetch_historical_runs_best_effort(
     return history
 
 
-async def _run(dump: Path, as_json: bool, save_results: bool) -> None:
+async def run_dump(
+    dump: Path,
+    *,
+    output_dir: Path,
+    save_results: bool = True,
+    source: str = "rest-dump",
+    env_name: str = "rest-dump",
+    athena_history: bool = True,
+) -> tuple[object, dict, list[dict], dict, Path | None]:
+    """Run the agent on a dump-rest-api directory and persist the result.
+
+    Returns (plan, enrichment row, insights, graph trace, saved result path),
+    the same shape as run_from_pg_dump.run_dump so service/run_job.py can
+    drive either. athena_history=False skips the best-effort Athena lookup of
+    earlier runs: a REST dump from a deployment other than the one the Athena
+    export mirrors shares no task_name/app_id space with it, so a "match"
+    there would be another customer's data.
+    """
     from agent.inference_graph import run_analysis
     from agent.nodes.fetch_context import set_row_override
     from agent.nodes.sql_stream import set_insights_override
@@ -630,6 +647,8 @@ async def _run(dump: Path, as_json: bool, save_results: bool) -> None:
     row = build_enrichment_row(dump, insights, spark_params)
     sandbox_tables = build_sandbox_tables(dump, row, spark_params)
 
+    print(f"  Task {row.get('task_id')} ({row.get('task_name')}, app_id={row.get('app_id')})",
+          file=sys.stderr)
     print(f"  Enrichment columns recovered: "
           f"{sum(v is not None for v in row.values())}/{len(row)}", file=sys.stderr)
     print(f"  Sandbox tables: {', '.join(sandbox_tables)}", file=sys.stderr)
@@ -637,20 +656,30 @@ async def _run(dump: Path, as_json: bool, save_results: bool) -> None:
           f"(aqe_enabled={row.get('task__aqe_enabled__param')!r})", file=sys.stderr)
     print(f"  Insights from dump: {[i.get('type') for i in insights]}", file=sys.stderr)
 
-    history = _fetch_historical_runs_best_effort(row)
+    if athena_history:
+        history = _fetch_historical_runs_best_effort(row)
+    else:
+        history = []
+        print("  Historical runs: skipped (REST source) — no trend analysis.", file=sys.stderr)
 
     set_row_override(row, history, sandbox_tables)
     set_insights_override(insights)
     try:
-        plan, trace = await run_analysis(int(row["task_id"]), env_name="rest-dump")
+        plan, trace = await run_analysis(int(row["task_id"]), env_name=env_name)
     finally:
         set_row_override(None)
         set_insights_override(None)
 
     plan = fill_missing_annual_costs(plan, row, insights, history)
+    saved = _persist_result(plan, row=row, source=source, output_dir=output_dir,
+                            summary_csv=None, save_results=save_results, trace=trace)
+    return plan, row, insights, trace, saved
 
-    _persist_result(plan, row=row, source="rest-dump", output_dir=_results_dir(),
-                    summary_csv=None, save_results=save_results, trace=trace)
+
+async def _run(dump: Path, as_json: bool, save_results: bool) -> None:
+    plan, row, _insights, _trace, _saved = await run_dump(
+        dump, output_dir=_results_dir(), save_results=save_results,
+    )
     _print_plan(plan, as_json, row)
     if not as_json:
         _print_assembled_output(_build_assembled_output(plan))

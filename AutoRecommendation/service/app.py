@@ -27,7 +27,14 @@ reports when the CLI finishes. The resulting token is cached by the CLI in
 ~/.aws/sso/cache and shared by every user of this site — acceptable behind
 the team's own SSO on the ingress, which is the deployment this targets.
 
+Data sources: "athena" (task name -> latest completed run in the Athena
+export) and "rest" (task id + bearer token against any definity REST API,
+e.g. a customer's own deployment — tools/dump_rest_api.py). REST tokens are
+held in memory only until the job's subprocess starts and are handed to it
+through its environment; they are never written to job.json or logs.
+
 Environment (all optional):
+    DEFINITY_API_BASE         default REST API base URL offered by the page
     REC_AGENT_JOBS_DIR        default <repo>/data/jobs
     REC_AGENT_TTL_HOURS       default 4
     REC_AGENT_MAX_CONCURRENT  default 2 concurrent analyses
@@ -43,15 +50,15 @@ import os
 import re
 import secrets
 import shutil
-import subprocess
 import sys
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "tools"))
 os.environ.setdefault("AWS_SSO_AUTO_LOGIN", "0")
 
 from fastapi import FastAPI, HTTPException  # noqa: E402
@@ -59,6 +66,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTex
 from pydantic import BaseModel, Field  # noqa: E402
 
 import main as _main  # noqa: E402 — .env, sys.path to the backend, Athena helpers
+from dump_rest_api import RestDumpError, normalize_base, probe_task  # noqa: E402
 
 STATIC = Path(__file__).parent / "static"
 JOBS_DIR = Path(os.getenv("REC_AGENT_JOBS_DIR") or ROOT / "data" / "jobs").resolve()
@@ -66,6 +74,12 @@ TTL = timedelta(hours=float(os.getenv("REC_AGENT_TTL_HOURS", "4")))
 MAX_CONCURRENT = int(os.getenv("REC_AGENT_MAX_CONCURRENT", "2"))
 JOB_TIMEOUT = timedelta(minutes=float(os.getenv("REC_AGENT_JOB_TIMEOUT_MIN", "30")))
 AWS_PROFILE = os.getenv("AWS_PROFILE", "dev-admin")
+REST_API_BASE = os.getenv("DEFINITY_API_BASE", "")
+TOKEN_ENV = "DEFINITY_API_TOKEN"
+SOURCE_ATHENA = "athena"
+SOURCE_REST = "rest"
+# RestDumpError.status -> HTTP status the probe failure is reported with.
+_REST_PROBE_HTTP = {0: 502, 401: 401, 403: 401, 404: 404}
 SWEEP_EVERY_S = 300
 FRESHNESS_CACHE_S = 600
 AWS_CHECK_CACHE_S = 60
@@ -76,7 +90,7 @@ AWS_CHECK_CACHE_S = 60
 _PROGRESS_RE = re.compile(
     r"^\s*(→|✓|Checking|Resolving|->|Dumping|Running the agent|Wrote|sandbox table|"
     r"Historical runs|Insights:|Sandbox tables|Task \d|AWS SSO|Traceback|\w+Error\b|"
-    r"No analyzable|Task '.*' has no)"
+    r"No analyzable|Task '.*' has no|###|\[\s*\d+\] (HTTP-ERR|CONV-FAIL))"
 )
 _JOB_ID_RE = re.compile(r"^[a-z0-9]{10}$")
 
@@ -214,14 +228,21 @@ async def freshness() -> dict[str, Any]:
 # ── Jobs ─────────────────────────────────────────────────────────────────────
 
 class JobRequest(BaseModel):
-    task_name: str = Field(min_length=1, max_length=500)
+    source: Literal["athena", "rest"] = SOURCE_ATHENA
+    # athena: a task name (+ app_id once disambiguated)
+    task_name: str | None = Field(default=None, min_length=1, max_length=500)
     app_id: int | None = None
     app_name: str | None = None
     env_name: str | None = None
+    # rest: one task id on one definity deployment, read with the caller's token
+    task_id: int | None = None
+    api_base: str | None = Field(default=None, max_length=500)
+    api_token: str | None = Field(default=None, min_length=1, max_length=8000)
 
 
 _sem = asyncio.Semaphore(MAX_CONCURRENT)
 _running: dict[str, asyncio.subprocess.Process] = {}
+_tokens: dict[str, str] = {}  # job_id -> REST bearer token, until the subprocess starts
 
 
 def _job_dir(job_id: str) -> Path:
@@ -284,8 +305,9 @@ def _summary(d: Path) -> dict[str, Any] | None:
 
 def _public(d: Path, meta: dict[str, Any], *, detail: bool) -> dict[str, Any]:
     out = {
-        **{k: meta.get(k) for k in ("id", "status", "task_name", "app_id", "app_name", "env_name",
-                                    "created_at", "started_at", "finished_at", "exit_code", "error")},
+        **{k: meta.get(k) for k in ("id", "status", "source", "task_name", "task_id", "app_id",
+                                    "app_name", "env_name", "api_base", "created_at", "started_at",
+                                    "finished_at", "exit_code", "error")},
         "expires_at": _iso(_expires_at(meta)),
     }
     if meta.get("status") == "done":
@@ -303,11 +325,17 @@ async def _run(job_id: str) -> None:
     async with _sem:
         meta.update(status="running", started_at=_iso(_now()))
         _write_meta(d, meta)
-        cmd = [sys.executable, str(ROOT / "service" / "run_job.py"),
-               "--task-name", meta["task_name"], "--workdir", str(d)]
-        if meta.get("app_id") is not None:
-            cmd += ["--app-id", str(meta["app_id"])]
+        cmd = [sys.executable, str(ROOT / "service" / "run_job.py"), "--workdir", str(d)]
         env = {**os.environ, "AWS_SSO_AUTO_LOGIN": "0", "PYTHONUNBUFFERED": "1"}
+        if meta.get("source") == SOURCE_REST:
+            cmd += ["--source", SOURCE_REST, "--task-id", str(meta["task_id"]),
+                    "--api-base", meta["api_base"]]
+            env[TOKEN_ENV] = _tokens.pop(job_id, "")
+        else:
+            env.pop(TOKEN_ENV, None)
+            cmd += ["--task-name", meta["task_name"]]
+            if meta.get("app_id") is not None:
+                cmd += ["--app-id", str(meta["app_id"])]
         with (d / "log.txt").open("ab") as log:
             proc = await asyncio.create_subprocess_exec(
                 *cmd, cwd=str(ROOT), env=env, stdout=asyncio.subprocess.PIPE, stderr=log,
@@ -341,7 +369,7 @@ def _failure_message(rc: int, stdout: bytes) -> str:
                 payload = json.loads(line)
                 if payload.get("error") == "ambiguous":
                     return "ambiguous task name — choose an app first"
-                if payload.get("error") == "not_found":
+                if payload.get("error") in ("not_found", "rest"):
                     return payload.get("message", "task not found")
             except ValueError:
                 pass
@@ -428,6 +456,7 @@ async def status() -> dict[str, Any]:
         "max_concurrent": MAX_CONCURRENT,
         "running": len(_running),
         "athena_db": _main._ATHENA_DB,
+        "rest_api_base": REST_API_BASE,
         "llm_model": os.environ.get("LLM_MODEL", "eu.anthropic.claude-sonnet-4-6"),
         "build": _build_info(),
     }
@@ -474,18 +503,44 @@ async def list_jobs() -> dict[str, Any]:
     return {"jobs": jobs[:50]}
 
 
+def _probe_rest(req: JobRequest) -> dict[str, Any]:
+    """Fail fast on a bad base URL / token / task id before queuing, and learn
+    the task's name and app for the job list."""
+    if req.task_id is None or not req.api_base or not req.api_token:
+        raise HTTPException(422, "REST source needs task_id, api_base and api_token")
+    try:
+        task = probe_task(req.api_base, req.task_id, req.api_token)
+    except RestDumpError as exc:
+        raise HTTPException(_REST_PROBE_HTTP.get(exc.status or 0, 502), str(exc))
+    return task
+
+
 @app.post("/api/jobs", status_code=202)
 async def create_job(req: JobRequest) -> dict[str, Any]:
+    # Bedrock runs the LLM steps for both sources, so the AWS session is
+    # always required; Athena is only queried for the athena source.
     if (await AWS.check())["state"] != "ok":
         raise HTTPException(401, "AWS session expired — sign in first")
+    meta: dict[str, Any] = {"source": req.source, "task_name": None, "task_id": None,
+                            "app_id": req.app_id, "app_name": req.app_name,
+                            "env_name": req.env_name, "api_base": None}
+    if req.source == SOURCE_REST:
+        task = await asyncio.to_thread(_probe_rest, req)
+        meta.update(task_id=req.task_id, api_base=normalize_base(str(req.api_base)),
+                    task_name=task.get("task_name"), app_id=task.get("app_id"),
+                    app_name=task.get("app_name"), env_name=task.get("env_name"))
+    else:
+        if not req.task_name:
+            raise HTTPException(422, "task_name is required")
+        meta["task_name"] = req.task_name.strip()
     job_id = secrets.token_hex(5)
     d = JOBS_DIR / job_id
     d.mkdir(parents=True)
-    meta = {"id": job_id, "status": "queued", "task_name": req.task_name.strip(),
-            "app_id": req.app_id, "app_name": req.app_name, "env_name": req.env_name,
-            "created_at": _iso(_now()), "started_at": None, "finished_at": None,
-            "exit_code": None, "error": None}
+    meta.update(id=job_id, status="queued", created_at=_iso(_now()), started_at=None,
+                finished_at=None, exit_code=None, error=None)
     _write_meta(d, meta)
+    if req.source == SOURCE_REST:
+        _tokens[job_id] = str(req.api_token)
     asyncio.create_task(_run(job_id))
     return _public(d, meta, detail=True)
 
@@ -503,7 +558,8 @@ async def get_result(job_id: str) -> FileResponse:
     if not f.exists():
         raise HTTPException(404, "no result yet")
     meta = _read_meta(d)
-    name = f"recommendation-agent_{meta.get('task_name','task')}_{meta.get('app_id') or ''}_{job_id}.json"
+    name = (f"recommendation-agent_{meta.get('task_name') or meta.get('task_id') or 'task'}"
+            f"_{meta.get('app_id') or ''}_{job_id}.json")
     return FileResponse(f, media_type="application/json", filename=re.sub(r"[^\w.-]+", "_", name))
 
 
@@ -521,5 +577,6 @@ async def delete_job(job_id: str) -> JSONResponse:
     proc = _running.get(job_id)
     if proc is not None:
         proc.kill()
+    _tokens.pop(job_id, None)
     shutil.rmtree(d, ignore_errors=True)
     return JSONResponse({"deleted": job_id})

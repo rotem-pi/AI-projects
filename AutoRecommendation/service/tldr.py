@@ -217,15 +217,7 @@ def _data_section(payload: dict[str, Any]) -> list[str]:
     if trace.get("historical_runs_count") is not None:
         out.append(f"- **Trend evidence:** {trace['historical_runs_count']} earlier run(s) of this task")
 
-    freshness = service.get("athena_freshness") or {}
-    note = ("- **Data source: Athena export, not live production.** "
-            "The export lags the app; runs newer than the export are not visible here")
-    if freshness.get("latest_enrichment_pit"):
-        note += f" (newest exported run: {freshness['latest_enrichment_pit']}"
-        if freshness.get("latest_insights_snapshot"):
-            note += f"; insights snapshot: {freshness['latest_insights_snapshot']}"
-        note += ")"
-    out.append(note + ".")
+    out.append(_data_source_note(service))
 
     if service.get("requested_task_name") and service.get("candidates"):
         n = len(service["candidates"])
@@ -240,6 +232,27 @@ def _data_section(payload: dict[str, Any]) -> list[str]:
     return out
 
 
+def _data_source_note(service: dict[str, Any]) -> str:
+    source = service.get("data_source") or {}
+    if source.get("kind") == "rest":
+        note = (f"- **Data source: definity REST API at {source.get('api_base')}** — this one "
+                "run's live records; no earlier runs are available over REST, so there is no "
+                "trend analysis")
+        failed = source.get("failed_endpoints") or []
+        if failed:
+            note += f" ({len(failed)} endpoint(s) could not be fetched: {', '.join(failed)})"
+        return note + "."
+    freshness = service.get("athena_freshness") or {}
+    note = ("- **Data source: Athena export, not live production.** "
+            "The export lags the app; runs newer than the export are not visible here")
+    if freshness.get("latest_enrichment_pit"):
+        note += f" (newest exported run: {freshness['latest_enrichment_pit']}"
+        if freshness.get("latest_insights_snapshot"):
+            note += f"; insights snapshot: {freshness['latest_insights_snapshot']}"
+        note += ")"
+    return note + "."
+
+
 def _no_plan_section(payload: dict[str, Any]) -> list[str]:
     """When the entry gate stops the run there is no plan at all — say so
     once instead of rendering three empty sections that read as 'all clear'."""
@@ -249,8 +262,13 @@ def _no_plan_section(payload: dict[str, Any]) -> list[str]:
            "The agent did not analyze this run, so there is nothing to change, block, or skip yet. "
            "The entry gate stopped it because:", ""]
     out += [f"- {r}" for r in reasons]
-    out += ["", "Typical fixes: pick a run that completed, or wait for the Athena export to "
-                "catch up if the latest run finished after the export.", ""]
+    source = (payload.get("service") or {}).get("data_source") or {}
+    if source.get("kind") == "rest":
+        fix = "Typical fix: pick the task id of a run that completed."
+    else:
+        fix = ("Typical fixes: pick a run that completed, or wait for the Athena export to "
+               "catch up if the latest run finished after the export.")
+    out += ["", fix, ""]
     return out
 
 

@@ -31,7 +31,7 @@ data/
   ```
 
 - **[run_from_dump.py](run_from_dump.py)** — run the same inference graph on a directory made
-  by `tools/dump-rest-api.sh`. No Athena/AWS needed; known gaps (no historical runs → no trend
+  by `tools/dump_rest_api.py`. No Athena/AWS needed; known gaps (no historical runs → no trend
   analysis) are printed at startup.
 
   ```bash
@@ -78,19 +78,23 @@ batch runs also get a `batch_summary.csv`.
 
 ## ③ Data acquisition
 
-- **[tools/dump-rest-api.sh](tools/dump-rest-api.sh)** — dump everything the definity REST API
+- **[tools/dump_rest_api.py](tools/dump_rest_api.py)** — dump everything the definity REST API
   knows about one task into `data/dumps/dump_<task_id>/` (task detail, params, metrics, TFs,
   lineage, events, time-series, plus per-TF detail/events/physical-plan/lineage/stages, all as
-  CSV). Needs `DEFINITY_API_TOKEN` in `.env`. Endpoints are retried 3× — the prod API 500s
-  intermittently.
+  CSV). Standard library only. Token from `DEFINITY_API_TOKEN` (environment or `.env`), base URL
+  from `--base` / `DEFINITY_API_BASE`. Endpoints are retried 3× — the prod API 500s
+  intermittently; 4xx are not retried. `dump_task()` / `probe_task()` are the library form the
+  web service uses for REST-sourced jobs. [tools/dump-rest-api.sh](tools/dump-rest-api.sh) is
+  kept as a thin wrapper for the old invocation.
 
   ```bash
-  ./tools/dump-rest-api.sh 5453
-  python run_from_dump.py data/dumps/dump_5453
+  ./tools/dump-rest-api.sh 5453                              # same as: python tools/dump_rest_api.py 5453
+  python tools/dump_rest_api.py 5453 --base https://definity.example.net --out /tmp/d
+  ./run.sh run_from_dump.py data/dumps/dump_5453
   ```
 
-- **[tools/json2csv.py](tools/json2csv.py)** — stdin JSON → CSV converter used by the dump
-  script.
+- **[tools/json2csv.py](tools/json2csv.py)** — JSON → CSV converter (`write_csv()` library +
+  stdin CLI) used by the dump module.
 
 - **[run_tuning_preview.py](run_tuning_preview.py)** — build the *production* tuning-preview
   plan (the exact `GET /api/envs/{env}/tuning/preview` payload) for one `(app_id, task_name)`
@@ -110,16 +114,24 @@ name, e.g. "Job Cluster - \<job\> - \<cluster\>"), with `app_id` / `app_name` / 
 Building blocks for a task-name-in, recommendations-out web service (one subprocess per job —
 the harness injects data through module globals, so jobs must never share a process):
 
-- **[service/run_job.py](service/run_job.py)** — task name → Athena dump → agent run →
-  `result.json` + `tldr.md`, all under one `--workdir` (delete the directory to remove the dump,
-  the local run-sandbox folders and the outputs). Task names are not unique (`compute` runs under
-  hundreds of apps): without `--app-id` an ambiguous name exits 3 and prints the candidates
-  (app/env names included) as JSON for a UI to offer as choices; an unknown name exits 2. The
-  analyzed run is the latest **COMPLETED** run of that (task_name, app_id) in the Athena export.
+- **[service/run_job.py](service/run_job.py)** — task → dump → agent run → `result.json` +
+  `tldr.md`, all under one `--workdir` (delete the directory to remove the dump, the local
+  run-sandbox folders and the outputs). Two sources:
+  - `--source athena` (default): task name → latest **COMPLETED** run of that (task_name, app_id)
+    in the Athena export. Task names are not unique (`compute` runs under hundreds of apps):
+    without `--app-id` an ambiguous name exits 3 and prints the candidates (app/env names
+    included) as JSON for a UI to offer as choices; an unknown name exits 2.
+  - `--source rest`: one `--task-id` read live from a definity REST API (`--api-base`, bearer
+    token in `DEFINITY_API_TOKEN` — an environment variable, never argv) via
+    `tools/dump_rest_api.py` + `run_from_dump.run_dump`. Works against any deployment, including
+    ones the Athena export does not mirror; for that reason no Athena history is pulled (no
+    trend analysis). A rejected token / unreachable host exits 4, an unknown task id exits 2.
 
   ```bash
   ./run.sh service/run_job.py --task-name compute --app-id 21447 --workdir /tmp/job1 --print-tldr
   ./run.sh service/run_job.py --task-id 3136527 --workdir /tmp/job2
+  DEFINITY_API_TOKEN=… ./run.sh service/run_job.py --source rest --task-id 5453 \
+      --api-base https://definity.example.net --workdir /tmp/job3
   ```
 
 - **[service/tldr.py](service/tldr.py)** — deterministic Markdown TL;DR of a saved result JSON
@@ -137,7 +149,13 @@ the harness injects data through module globals, so jobs must never share a proc
   lookups (task-name type-ahead, per-app candidates, export freshness), runs each analysis as a
   `run_job.py` subprocess (`REC_AGENT_MAX_CONCURRENT`, default 2), streams progress from its
   stderr, serves `result.json` / `tldr.md`, and sweeps job directories `REC_AGENT_TTL_HOURS`
-  (default 4) after they finish. AWS sign-in is the SSO device-code flow: the page shows the URL +
+  (default 4) after they finish. The page offers both sources: **Athena export** (task name →
+  app → latest run) and **REST API** (API base URL + task id + bearer token; `DEFINITY_API_BASE`
+  pre-fills the URL). A REST job is probed (`GET /api/tasks/{id}`) before it is queued so a bad
+  token or id fails immediately; the token lives in process memory only until the job
+  subprocess starts and is passed to it through its environment — never written to `job.json`
+  or logs. Both sources need the AWS session, because the LLM steps run on Bedrock. The pod
+  must have network egress to the API base URL. AWS sign-in is the SSO device-code flow: the page shows the URL +
   code, the CLI caches the token, and the session is shared by every user of the site (intended
   for deployment behind the team's own SSO). Jobs live under `data/jobs/<id>/` (gitignored).
 
@@ -169,6 +187,10 @@ Supporting Athena helpers in [main.py](main.py): `_fetch_athena_task_candidates(
 exported run / insights snapshot). All enrichment queries now LEFT JOIN the `tasks` mirror for
 `status` (the export's `task_enrichments` has none, and the entry gate requires COMPLETED), and
 the sandbox dump includes the run's `tasks` row (`kb/analysis/store.py` reads it unconditionally).
+
+`run_from_dump.run_dump(dump, output_dir=…, athena_history=…)` is the library form of
+[run_from_dump.py](run_from_dump.py) (same return shape as `run_from_pg_dump.run_dump`), used by
+the REST source above.
 
 Service-mode env flags (see [.env.example](.env.example)): `AWS_SSO_AUTO_LOGIN=0` (raise instead
 of shelling out to `aws sso login`), `AWS_SSO_USE_DEVICE_CODE=1` (headless login prints a URL +
